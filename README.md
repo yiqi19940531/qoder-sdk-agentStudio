@@ -2,7 +2,7 @@
 
 一个基于 **Qoder Agent SDK** 的本地多 Agent 工作台。项目内提供 6 个 Agent、3 个 Skill、无需 API Key 的浏览器与示例仓库 MCP，以及 34 条经过脱敏的历史对话和已生成的图片、视频。克隆仓库或下载演示 ZIP 后，只需使用自己的 Qoder 账号登录，即可在本机体验。
 
-**工程复建：** [按阶段重建 Agent Hub](docs/rebuild/README.md)，包含架构约束、逐文件职责、可复制提示词与验收方法。
+**Spec Coding 复建指南：** [按阶段重建 Agent Hub](docs/rebuild/README.md)，逐章说明目标、技术栈、模块文件架构、需求与接口、实现任务、可复制提示词及验收逻辑。
 
 **快速入口：** [直接下载完整演示 ZIP](https://raw.githubusercontent.com/yiqi19940531/qoder-sdk-agentStudio/main/downloads/qoder-agent-workbench-demo.zip) · [中文详细指南](QUICKSTART.zh-CN.md) · [English guide](QUICKSTART.en.md) · [实际验证记录](VALIDATION.md)
 
