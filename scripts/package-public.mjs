@@ -94,6 +94,8 @@ try {
   catch (error) { if (error.code !== 'ENOENT') throw error; demoReadme = await readFile(path.join(root, 'README.md')); }
   await add('README.md', demoReadme);
   for (const tree of ['src', 'server', 'shared', 'scripts', 'public', 'plugins/workbench']) await copyTree(tree, (name, entry) => !entry.name.startsWith('.') && !/\.(log|tmp)$/.test(name));
+  await copy('plugins/workbench/.qoder-plugin/plugin.json');
+  await copyTree('docs/rebuild');
   const agents = JSON.parse(await readFile(path.join(root, 'data/agents.json'), 'utf8'));
   if (agents.length !== 6) throw new Error(`Expected 6 Agents, found ${agents.length}`);
   for (const agent of agents) {
