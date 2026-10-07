@@ -1,0 +1,1421 @@
+{
+  "id": "6bcc0348-1c9f-403c-aa5a-c802d9f46702",
+  "sdkSessionId": "6bcc0348-1c9f-403c-aa5a-c802d9f46702",
+  "sdkEstablished": false,
+  "agentId": "aigc-director",
+  "agentName": "AIGC 任务编排 Agent",
+  "status": "idle",
+  "createdAt": "2026-10-06T07:10:20.689Z",
+  "updatedAt": "2026-10-06T07:12:56.102Z",
+  "config": {
+    "agent": {
+      "id": "aigc-director",
+      "kind": "main",
+      "name": "AIGC 任务编排 Agent",
+      "description": "识别文生图、文生视频需求，拆解创意简报并委派对应子 Agent。",
+      "model": "auto",
+      "maxTurns": 24,
+      "tools": [
+        "Read",
+        "Agent"
+      ],
+      "skills": [],
+      "mcpServers": [],
+      "subAgentIds": [
+        "aigc-image",
+        "aigc-video"
+      ],
+      "memoryEnabled": false,
+      "permissions": {
+        "toolApproval": "ask",
+        "pathAccess": "workspace",
+        "additionalDirectories": []
+      },
+      "persona": "# AIGC 任务编排 Agent\n\n你负责客户的文字生成图片或视频任务。先判断媒介：只要图片就委派 aigc-image，只要视频就委派 aigc-video，明确两者都要就分别委派。意图不明确时用 AskUserQuestion 让用户选择。主 Agent 不直接生成媒体，不读取凭据。向子 Agent 传递完整的创意简报；只根据真实工具结果报告成功、失败或等待。"
+    },
+    "children": [
+      {
+        "id": "aigc-image",
+        "kind": "subagent",
+        "name": "图片生成 Agent",
+        "description": "当用户要求生成图片、插画、海报、照片时调用；只负责文生图。",
+        "model": "auto",
+        "maxTurns": 12,
+        "tools": [],
+        "skills": [
+          "workbench:bailian-image"
+        ],
+        "mcpServers": [
+          "bailian-image"
+        ],
+        "subAgentIds": [],
+        "memoryEnabled": false,
+        "permissions": {
+          "toolApproval": "allow_all",
+          "pathAccess": "workspace",
+          "additionalDirectories": []
+        },
+        "persona": "# 图片生成 Agent\n\n你只负责生成一张图片。先使用已预载的 bailian-image Skill，然后调用 mcp__bailian-image__generate_image 一次。不要调用视频工具，不要读取凭据。返回真实产物 ID、状态与简短说明。"
+      },
+      {
+        "id": "aigc-video",
+        "kind": "subagent",
+        "name": "视频生成 Agent",
+        "description": "当用户要求生成视频、动画、短片时调用；只负责文生视频。",
+        "model": "auto",
+        "maxTurns": 20,
+        "tools": [],
+        "skills": [
+          "workbench:bailian-video"
+        ],
+        "mcpServers": [
+          "bailian-video"
+        ],
+        "subAgentIds": [],
+        "memoryEnabled": false,
+        "permissions": {
+          "toolApproval": "allow_all",
+          "pathAccess": "workspace",
+          "additionalDirectories": []
+        },
+        "persona": "# 视频生成 Agent\n\n你只负责生成一段短视频。先使用已预载的 bailian-video Skill，然后调用 mcp__bailian-video__generate_video 一次。不要调用图片工具，不要读取凭据。返回真实产物 ID、状态与简短说明。"
+      }
+    ],
+    "instructions": {
+      "aigc-director": "# AIGC 任务编排 Agent · 规则\n\n- 判断用户要图片、视频，或两者都要；不明确时使用 AskUserQuestion。\n- 把可执行的具体创意简报分别交给图片或视频子 Agent。\n- 只根据工具返回的状态报告结果，不虚构已生成的媒体。\n",
+      "aigc-image": "# 图片生成 Agent · 规则\n\n- 仅处理文生图。提炼主体、场景、风格、构图和光线，调用一次图片生成工具。\n- 只在成功返回产物 ID 后报告图片完成。\n",
+      "aigc-video": "# 视频生成 Agent · 规则\n\n- 仅处理文生视频。提炼主体、动作、场景、镜头运动，调用一次视频生成工具。\n- 等待工具结果；失败时说明状态和错误，不虚构视频。\n"
+    }
+  },
+  "turns": [
+    {
+      "id": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "status": "done",
+      "startedAt": "2026-10-06T07:10:20.689Z",
+      "endedAt": "2026-10-06T07:12:56.102Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "6fa3ff8b-f993-4dd7-b4f9-dfb4367e75ea",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "role": "user",
+      "content": "生成一个帅哥的视频",
+      "at": "2026-10-06T07:10:20.689Z"
+    },
+    {
+      "id": "assistant-f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "role": "assistant",
+      "content": "我来把视频生成任务委派给 aigc-video 子 Agent 处理。视频生成成功 ✅\n\n- **内容**：一位年轻英俊的亚洲男性，白色衬衫、城市街头、夕阳暖光下微微一笑，镜头缓慢推近\n- **风格**：写实电影感、暖色调、横屏 16:9\n- **模型**：wan3.0-video\n- **产物 ID**：`ce4e7461-e2dd-49d3-87d1-3a113416bb01`（已保存为本地 MP4，可通过该 ID 查看）\n\n如果想换场景、风格或画幅，告诉我即可重新生成。",
+      "at": "2026-10-06T07:10:30.490Z"
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "at": "2026-10-06T07:10:20.690Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "status",
+      "label": "正在初始化 Qoder SDK"
+    },
+    {
+      "id": 2,
+      "at": "2026-10-06T07:10:20.691Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "diagnostic",
+      "label": "SDK 最大轮数",
+      "detail": "24"
+    },
+    {
+      "id": 3,
+      "at": "2026-10-06T07:10:23.669Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "diagnostic",
+      "label": "SDK 已初始化",
+      "detail": "{\"agents\":[\"general-purpose\",\"Explore\",\"Plan\",\"aigc-image\",\"aigc-video\"],\"skills\":[]}"
+    },
+    {
+      "id": 4,
+      "at": "2026-10-06T07:10:30.490Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "我来",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 5,
+      "at": "2026-10-06T07:10:30.490Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "把",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 6,
+      "at": "2026-10-06T07:10:30.509Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "视频",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 7,
+      "at": "2026-10-06T07:10:30.509Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "生成",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 8,
+      "at": "2026-10-06T07:10:30.509Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "任务",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 9,
+      "at": "2026-10-06T07:10:30.510Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "委",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 10,
+      "at": "2026-10-06T07:10:30.536Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "派",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 11,
+      "at": "2026-10-06T07:10:30.539Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "给",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 12,
+      "at": "2026-10-06T07:10:30.539Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": " a",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 13,
+      "at": "2026-10-06T07:10:30.539Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "ig",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 14,
+      "at": "2026-10-06T07:10:30.539Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "c",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 15,
+      "at": "2026-10-06T07:10:30.539Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "-video",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 16,
+      "at": "2026-10-06T07:10:30.556Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": " 子",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 17,
+      "at": "2026-10-06T07:10:30.563Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": " Agent",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 18,
+      "at": "2026-10-06T07:10:30.587Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": " ",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 19,
+      "at": "2026-10-06T07:10:30.608Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "处",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 20,
+      "at": "2026-10-06T07:10:30.609Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "理",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 21,
+      "at": "2026-10-06T07:10:30.609Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "。",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 22,
+      "at": "2026-10-06T07:10:32.368Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "tool",
+      "label": "Agent",
+      "detail": "{\"description\":\"生成帅哥视频\",\"prompt\":\"请生成一个文生视频。创意简报如下：\\n\\n主题：一位帅哥的视频\\n画面描述：一位年轻英俊的亚洲男性，五官立体、发型整洁，身穿简约时尚的白色衬衫，站在城市街头，夕阳的暖光洒在脸上，他微微一笑，发丝被微风轻轻吹动，镜头缓慢推近，呈现电影感浅景深效果。\\n风格：写实电影感，暖色调，柔和自然光，高质量、细节丰富\\n时长/节奏：短镜头，慢速运镜（缓慢推近）\\n画幅：横屏 16:9\\n\\n请调用文生视频工具完成生成，并根据工具的真实返回结果报告成功或失败。\",\"subagent_type\":\"aigc-video\"}",
+      "toolName": "Agent",
+      "agentId": "aigc-director",
+      "targetAgentId": "aigc-video",
+      "toolUseId": "call_da76b5aee1d6415ab473b916"
+    },
+    {
+      "id": 23,
+      "at": "2026-10-06T07:10:32.493Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "status",
+      "label": "子 Agent 已启动",
+      "detail": "{\"description\":\"生成帅哥视频\"}",
+      "agentId": "aigc-video",
+      "parentToolUseId": "call_da76b5aee1d6415ab473b916",
+      "taskId": "a6b35e5f78d271028"
+    },
+    {
+      "id": 24,
+      "at": "2026-10-06T07:10:38.147Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "interaction_resolved",
+      "label": "Agent「视频生成 Agent」默认允许工具",
+      "toolName": "mcp__bailian-video__generate_video",
+      "detail": "{\"prompt\":\"写实电影感短片：一位年轻英俊的亚洲男性，五官立体、发型整洁，身穿简约时尚的白色衬衫，站在城市街头。夕阳的暖橙色光芒洒在他的脸上，他微微一笑，发丝被微风轻轻吹动。镜头缓慢推近（慢速推镜头），呈现电影感浅景深效果，背景城市街景虚化。暖色调，柔和自然光，高质量、细节丰富，横屏16:9，photorealistic cinematic style, warm color grading, golden hour lighting, slow dolly-in camera movement, shallow depth of field, high detail.\"}",
+      "agentId": "aigc-video",
+      "toolUseId": "call_6660965e5cec474a9957e483"
+    },
+    {
+      "id": 25,
+      "at": "2026-10-06T07:10:38.154Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "tool",
+      "label": "mcp__bailian-video__generate_video",
+      "detail": "{\"prompt\":\"写实电影感短片：一位年轻英俊的亚洲男性，五官立体、发型整洁，身穿简约时尚的白色衬衫，站在城市街头。夕阳的暖橙色光芒洒在他的脸上，他微微一笑，发丝被微风轻轻吹动。镜头缓慢推近（慢速推镜头），呈现电影感浅景深效果，背景城市街景虚化。暖色调，柔和自然光，高质量、细节丰富，横屏16:9，photorealistic cinematic style, warm color grading, golden hour lighting, slow dolly-in camera movement, shallow depth of field, high detail.\"}",
+      "toolName": "mcp__bailian-video__generate_video",
+      "agentId": "aigc-video",
+      "toolUseId": "call_6660965e5cec474a9957e483",
+      "parentToolUseId": "call_da76b5aee1d6415ab473b916"
+    },
+    {
+      "id": 26,
+      "at": "2026-10-06T07:10:38.154Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "status",
+      "label": "子 Agent 执行中",
+      "detail": "{\"description\":\"{\\\"prompt\\\":\\\"写实电影感短片：一位年轻英俊的亚洲男性，五官立体、发型整洁，身穿简约时尚的白色衬衫，站在城市街头。夕阳的暖橙色光芒洒在他的脸上，他微微一笑，发丝被微风轻轻吹动。镜头缓慢推近（慢速推镜头），呈现电影感浅景深效果，背景城市街景虚化。暖色调，柔和自然光，高质量、细节丰富，横屏16:9，photorealistic cinematic style, warm color grading, golden hour lighting, slow dolly-in camera movement, shallow depth of field, high detail.\\\"}\",\"lastTool\":\"mcp__bailian-video__generate_video\"}",
+      "agentId": "aigc-video",
+      "parentToolUseId": "call_da76b5aee1d6415ab473b916",
+      "taskId": "a6b35e5f78d271028"
+    },
+    {
+      "id": 27,
+      "at": "2026-10-06T07:10:38.161Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "status",
+      "label": "媒体视频：queued",
+      "detail": "ce4e7461-e2dd-49d3-87d1-3a113416bb01",
+      "agentId": "aigc-video"
+    },
+    {
+      "id": 28,
+      "at": "2026-10-06T07:10:38.161Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "status",
+      "label": "媒体视频：running",
+      "detail": "ce4e7461-e2dd-49d3-87d1-3a113416bb01",
+      "agentId": "aigc-video"
+    },
+    {
+      "id": 29,
+      "at": "2026-10-06T07:10:38.549Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "status",
+      "label": "媒体视频：running",
+      "detail": "ce4e7461-e2dd-49d3-87d1-3a113416bb01",
+      "agentId": "aigc-video"
+    },
+    {
+      "id": 30,
+      "at": "2026-10-06T07:12:45.547Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "status",
+      "label": "媒体视频：succeeded",
+      "detail": "ce4e7461-e2dd-49d3-87d1-3a113416bb01",
+      "agentId": "aigc-video"
+    },
+    {
+      "id": 31,
+      "at": "2026-10-06T07:12:45.566Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "tool",
+      "label": "工具结果",
+      "detail": "{\"artifactId\":\"ce4e7461-e2dd-49d3-87d1-3a113416bb01\",\"status\":\"succeeded\",\"model\":\"wan3.0-video\",\"taskId\":\"3ca3e388-2398-4165-bdb3-7f0b919e0083\"}",
+      "agentId": "aigc-video",
+      "toolUseId": "call_6660965e5cec474a9957e483",
+      "parentToolUseId": "call_da76b5aee1d6415ab473b916"
+    },
+    {
+      "id": 32,
+      "at": "2026-10-06T07:12:50.692Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "status",
+      "label": "子 Agent 已完成",
+      "detail": "{\"summary\":\"生成帅哥视频\",\"status\":\"completed\"}",
+      "agentId": "aigc-video",
+      "parentToolUseId": "call_da76b5aee1d6415ab473b916",
+      "taskId": "a6b35e5f78d271028"
+    },
+    {
+      "id": 33,
+      "at": "2026-10-06T07:12:50.698Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "tool",
+      "label": "工具结果",
+      "detail": "视频生成成功。\n\n- 产物 ID（artifactId）：`ce4e7461-e2dd-49d3-87d1-3a113416bb01`\n- 状态：`succeeded`\n- 云端任务 ID：`3ca3e388-2398-4165-bdb3-7f0b919e0083`\n- 模型：wan3.0-video\n\n简报内容：一位年轻英俊的亚洲男性身穿白色衬衫站在城市街头，夕阳暖光洒在脸上，微微一笑，发丝随风轻动，镜头缓慢推近，呈现电影感浅景深效果；写实电影感风格、暖色调、横屏 16:9。视频已由宿主保存为本地 MP4 产物，可通过上述 artifactId 查看或下载。",
+      "agentId": "aigc-director",
+      "toolUseId": "call_da76b5aee1d6415ab473b916",
+      "targetAgentId": "aigc-video"
+    },
+    {
+      "id": 34,
+      "at": "2026-10-06T07:12:54.834Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "视频",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 35,
+      "at": "2026-10-06T07:12:54.834Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "生成",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 36,
+      "at": "2026-10-06T07:12:54.855Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "成功",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 37,
+      "at": "2026-10-06T07:12:54.857Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": " ",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 38,
+      "at": "2026-10-06T07:12:54.857Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "✅",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 39,
+      "at": "2026-10-06T07:12:54.857Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "\n\n",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 40,
+      "at": "2026-10-06T07:12:54.857Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "-",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 41,
+      "at": "2026-10-06T07:12:54.872Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": " **",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 42,
+      "at": "2026-10-06T07:12:54.889Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "内容",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 43,
+      "at": "2026-10-06T07:12:54.891Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "**",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 44,
+      "at": "2026-10-06T07:12:54.891Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "：",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 45,
+      "at": "2026-10-06T07:12:54.891Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "一位",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 46,
+      "at": "2026-10-06T07:12:54.891Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "年轻",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 47,
+      "at": "2026-10-06T07:12:54.891Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "英俊",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 48,
+      "at": "2026-10-06T07:12:54.902Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "的",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 49,
+      "at": "2026-10-06T07:12:54.902Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "亚洲",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 50,
+      "at": "2026-10-06T07:12:54.904Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "男性",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 51,
+      "at": "2026-10-06T07:12:54.925Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "，",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 52,
+      "at": "2026-10-06T07:12:54.929Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "白色",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 53,
+      "at": "2026-10-06T07:12:54.952Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "衬衫",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 54,
+      "at": "2026-10-06T07:12:54.952Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "、",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 55,
+      "at": "2026-10-06T07:12:54.988Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "城市",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 56,
+      "at": "2026-10-06T07:12:54.989Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "街头",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 57,
+      "at": "2026-10-06T07:12:54.989Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "、",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 58,
+      "at": "2026-10-06T07:12:55.004Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "夕阳",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 59,
+      "at": "2026-10-06T07:12:55.005Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "暖",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 60,
+      "at": "2026-10-06T07:12:55.005Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "光",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 61,
+      "at": "2026-10-06T07:12:55.006Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "下",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 62,
+      "at": "2026-10-06T07:12:55.030Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "微微",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 63,
+      "at": "2026-10-06T07:12:55.057Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "一笑",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 64,
+      "at": "2026-10-06T07:12:55.057Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "，",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 65,
+      "at": "2026-10-06T07:12:55.057Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "镜头",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 66,
+      "at": "2026-10-06T07:12:55.074Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "缓慢",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 67,
+      "at": "2026-10-06T07:12:55.075Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "推",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 68,
+      "at": "2026-10-06T07:12:55.075Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "近",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 69,
+      "at": "2026-10-06T07:12:55.075Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "\n",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 70,
+      "at": "2026-10-06T07:12:55.101Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "-",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 71,
+      "at": "2026-10-06T07:12:55.101Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": " **",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 72,
+      "at": "2026-10-06T07:12:55.101Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "风格",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 73,
+      "at": "2026-10-06T07:12:55.123Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "**",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 74,
+      "at": "2026-10-06T07:12:55.125Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "：",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 75,
+      "at": "2026-10-06T07:12:55.125Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "写实",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 76,
+      "at": "2026-10-06T07:12:55.125Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "电影",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 77,
+      "at": "2026-10-06T07:12:55.125Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "感",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 78,
+      "at": "2026-10-06T07:12:55.125Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "、",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 79,
+      "at": "2026-10-06T07:12:55.148Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "暖",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 80,
+      "at": "2026-10-06T07:12:55.149Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "色调",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 81,
+      "at": "2026-10-06T07:12:55.149Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "、",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 82,
+      "at": "2026-10-06T07:12:55.150Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "横",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 83,
+      "at": "2026-10-06T07:12:55.180Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "屏",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 84,
+      "at": "2026-10-06T07:12:55.182Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": " ",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 85,
+      "at": "2026-10-06T07:12:55.182Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "16",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 86,
+      "at": "2026-10-06T07:12:55.182Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": ":",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 87,
+      "at": "2026-10-06T07:12:55.182Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "9",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 88,
+      "at": "2026-10-06T07:12:55.182Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "\n",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 89,
+      "at": "2026-10-06T07:12:55.197Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "-",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 90,
+      "at": "2026-10-06T07:12:55.199Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": " **",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 91,
+      "at": "2026-10-06T07:12:55.199Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "模型",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 92,
+      "at": "2026-10-06T07:12:55.199Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "**",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 93,
+      "at": "2026-10-06T07:12:55.200Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "：",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 94,
+      "at": "2026-10-06T07:12:55.200Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "wan",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 95,
+      "at": "2026-10-06T07:12:55.220Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "3",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 96,
+      "at": "2026-10-06T07:12:55.222Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": ".",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 97,
+      "at": "2026-10-06T07:12:55.223Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "0",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 98,
+      "at": "2026-10-06T07:12:55.223Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "-video",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 99,
+      "at": "2026-10-06T07:12:55.223Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "\n",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 100,
+      "at": "2026-10-06T07:12:55.223Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "-",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 101,
+      "at": "2026-10-06T07:12:55.252Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": " **",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 102,
+      "at": "2026-10-06T07:12:55.253Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "产物",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 103,
+      "at": "2026-10-06T07:12:55.253Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": " ID",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 104,
+      "at": "2026-10-06T07:12:55.253Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "**",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 105,
+      "at": "2026-10-06T07:12:55.253Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "：",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 106,
+      "at": "2026-10-06T07:12:55.253Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "`",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 107,
+      "at": "2026-10-06T07:12:55.274Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "ce",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 108,
+      "at": "2026-10-06T07:12:55.275Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "4",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 109,
+      "at": "2026-10-06T07:12:55.275Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "e",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 110,
+      "at": "2026-10-06T07:12:55.275Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "7",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 111,
+      "at": "2026-10-06T07:12:55.276Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "46",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 112,
+      "at": "2026-10-06T07:12:55.276Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "1",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 113,
+      "at": "2026-10-06T07:12:55.298Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "-e",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 114,
+      "at": "2026-10-06T07:12:55.300Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "2",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 115,
+      "at": "2026-10-06T07:12:55.300Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "dd",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 116,
+      "at": "2026-10-06T07:12:55.300Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "-",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 117,
+      "at": "2026-10-06T07:12:55.300Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "49",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 118,
+      "at": "2026-10-06T07:12:55.300Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "d",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 119,
+      "at": "2026-10-06T07:12:55.324Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "3",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 120,
+      "at": "2026-10-06T07:12:55.325Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "-",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 121,
+      "at": "2026-10-06T07:12:55.326Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "87",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 122,
+      "at": "2026-10-06T07:12:55.326Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "d",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 123,
+      "at": "2026-10-06T07:12:55.326Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "1",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 124,
+      "at": "2026-10-06T07:12:55.346Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "-",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 125,
+      "at": "2026-10-06T07:12:55.349Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "3",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 126,
+      "at": "2026-10-06T07:12:55.349Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "a",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 127,
+      "at": "2026-10-06T07:12:55.349Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "113",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 128,
+      "at": "2026-10-06T07:12:55.349Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "4",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 129,
+      "at": "2026-10-06T07:12:55.349Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "16",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 130,
+      "at": "2026-10-06T07:12:55.380Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "bb",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 131,
+      "at": "2026-10-06T07:12:55.382Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "01",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 132,
+      "at": "2026-10-06T07:12:55.382Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "`",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 133,
+      "at": "2026-10-06T07:12:55.400Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "（",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 134,
+      "at": "2026-10-06T07:12:55.401Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "已",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 135,
+      "at": "2026-10-06T07:12:55.401Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "保存",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 136,
+      "at": "2026-10-06T07:12:55.401Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "为",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 137,
+      "at": "2026-10-06T07:12:55.401Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "本地",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 138,
+      "at": "2026-10-06T07:12:55.401Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": " MP",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 139,
+      "at": "2026-10-06T07:12:55.418Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "4",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 140,
+      "at": "2026-10-06T07:12:55.419Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "，",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 141,
+      "at": "2026-10-06T07:12:55.419Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "可通过",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 142,
+      "at": "2026-10-06T07:12:55.419Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "该",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 143,
+      "at": "2026-10-06T07:12:55.444Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": " ID",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 144,
+      "at": "2026-10-06T07:12:55.444Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": " 查看",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 145,
+      "at": "2026-10-06T07:12:55.466Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "）\n\n",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 146,
+      "at": "2026-10-06T07:12:55.568Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "如果想",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 147,
+      "at": "2026-10-06T07:12:55.569Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "换",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 148,
+      "at": "2026-10-06T07:12:55.569Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "场景",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 149,
+      "at": "2026-10-06T07:12:55.569Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "、",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 150,
+      "at": "2026-10-06T07:12:55.569Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "风格",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 151,
+      "at": "2026-10-06T07:12:55.569Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "或",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 152,
+      "at": "2026-10-06T07:12:55.569Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "画",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 153,
+      "at": "2026-10-06T07:12:55.589Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "幅",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 154,
+      "at": "2026-10-06T07:12:55.589Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "，",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 155,
+      "at": "2026-10-06T07:12:55.620Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "告诉我",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 156,
+      "at": "2026-10-06T07:12:55.622Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "text",
+      "detail": "即可重新生成。",
+      "agentId": "aigc-director"
+    },
+    {
+      "id": 157,
+      "at": "2026-10-06T07:12:56.102Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "usage",
+      "label": "本次会话累计 Credits",
+      "credits": 0.35897185245714286
+    },
+    {
+      "id": 158,
+      "at": "2026-10-06T07:12:56.102Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "diagnostic",
+      "label": "实际使用模型",
+      "detail": "auto"
+    },
+    {
+      "id": 159,
+      "at": "2026-10-06T07:12:56.102Z",
+      "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+      "type": "turn_end",
+      "label": "本轮完成，可继续对话"
+    }
+  ],
+  "pending": [],
+  "sessionAllowedTools": [],
+  "sessionAllowedCategories": [],
+  "lastEventId": 159,
+  "demoArchive": true
+}

@@ -1,0 +1,1104 @@
+{
+  "id": "68220bae-995f-4e03-a54e-3303bc93b742",
+  "sdkSessionId": "68220bae-995f-4e03-a54e-3303bc93b742",
+  "sdkEstablished": false,
+  "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9",
+  "agentName": "网页效果探索 Agent",
+  "status": "idle",
+  "createdAt": "2026-10-06T13:43:31.458Z",
+  "updatedAt": "2026-10-06T13:44:12.992Z",
+  "config": {
+    "agent": {
+      "kind": "main",
+      "name": "网页效果探索 Agent",
+      "description": "网页效果探索",
+      "model": "bailian/qwen3.8-flash-tp",
+      "maxTurns": 100,
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Agent"
+      ],
+      "skills": [],
+      "mcpServers": [
+        "playwright",
+        "chrome-devtools",
+        "apify"
+      ],
+      "subAgentIds": [],
+      "memoryEnabled": true,
+      "permissions": {
+        "toolApproval": "allow_all",
+        "pathAccess": "all",
+        "additionalDirectories": []
+      },
+      "id": "42dd9f43-12b7-4570-af13-609ad26a24a9",
+      "persona": "输入一个网页，可以查看相关网页具体的样式效果并且给出说明"
+    },
+    "children": [],
+    "instructions": {
+      "42dd9f43-12b7-4570-af13-609ad26a24a9": "# 网页效果探索 Agent · 项目规则\n\n- 给定网页时，使用已装配的浏览器工具查看实际渲染结果。\n- 说明可见内容、布局、样式和交互；区分观察结果与推断。\n- 页面加载失败或受到反爬限制时，如实说明。\n\n## 之前的共享规则\n\n输入一个网页，可以查看相关网页具体的样式效果并且给出说明\n"
+    },
+    "mcpToolNames": {
+      "playwright": [
+        "browser_click",
+        "browser_close",
+        "browser_console_messages",
+        "browser_drag",
+        "browser_drop",
+        "browser_emulate_media",
+        "browser_evaluate",
+        "browser_file_upload",
+        "browser_fill_form",
+        "browser_find",
+        "browser_handle_dialog",
+        "browser_hover",
+        "browser_navigate",
+        "browser_navigate_back",
+        "browser_network_request",
+        "browser_network_requests",
+        "browser_press_key",
+        "browser_resize",
+        "browser_run_code_unsafe",
+        "browser_select_option",
+        "browser_snapshot",
+        "browser_tabs",
+        "browser_take_screenshot",
+        "browser_type",
+        "browser_wait_for"
+      ],
+      "chrome-devtools": [
+        "click",
+        "close_page",
+        "drag",
+        "emulate",
+        "evaluate_script",
+        "fill",
+        "fill_form",
+        "get_console_message",
+        "get_css_styles",
+        "get_network_request",
+        "handle_dialog",
+        "hover",
+        "lighthouse_audit",
+        "list_console_messages",
+        "list_network_requests",
+        "list_pages",
+        "navigate_page",
+        "new_page",
+        "performance_analyze_insight",
+        "performance_start_trace",
+        "performance_stop_trace",
+        "press_key",
+        "resize_page",
+        "select_page",
+        "take_heapsnapshot",
+        "take_screenshot",
+        "take_snapshot",
+        "type_text",
+        "upload_file",
+        "wait_for"
+      ],
+      "apify": [
+        "abort-actor-run",
+        "apify--web-fetch",
+        "call-actor",
+        "fetch-actor-details",
+        "get-actor-run",
+        "get-dataset-items",
+        "get-key-value-store-record",
+        "search-actors"
+      ]
+    }
+  },
+  "turns": [
+    {
+      "id": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "status": "done",
+      "startedAt": "2026-10-06T13:43:31.458Z",
+      "endedAt": "2026-10-06T13:44:12.992Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "90926558-3606-4203-b915-5a1a108705ec",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "role": "user",
+      "content": "请使用已装配的 Apify MCP 的 search-actors 工具，搜索 Google 相关的 Actor，只做只读搜索，列出两个结果及其名称。不要运行 Actor，也不要使用浏览器工具。",
+      "at": "2026-10-06T13:43:31.458Z"
+    },
+    {
+      "id": "assistant-1926287c-308e-40da-8536-7e12a260b1fe",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "role": "assistant",
+      "content": "I'll search the Apify Store for Google-related Actors (read-only).\n\n已完成两次只读搜索（`search-actors`），未运行任何 Actor，也未使用浏览器工具。两个结果：\n\n1. **Google Search Results Scraper** — `apify/google-search-scraper`\n   - 抓取 Google SERP（自然结果、广告、People Also Ask、AI Overview 等），可按国家/语言配置\n   - Apify 官方，4.62★（218 条评价），月活用户约 2.1 万，总计约 19.8 万用户\n   - 按事件计费：约 $0.0045 / 抓取页；必需输入 `queries`\n\n2. **Google Maps Scraper** — `compass/crawler-google-places`\n   - 抓取 Google Maps 商户/地点数据（评论、图片、联系方式、营业时间、价格等）\n   - Compass 出品（Apify 认证开发者），4.7★（1817 条评价），月活用户约 3.9 万，总计约 63.6 万用户（本次搜索结果中用量最大）\n   - 按事件计费：约 $0.004 / 地点；主要输入 `searchStringsArray`、`locationQuery`\n\n补充：第二次更精确的检索还返回了 `scraperlink/google-search-results-serp-scraper`（主打低价，约 $0.0005/SERP 页）和 `apidojo/google-search-scraper`，可作为 SERP 场景的备选。",
+      "at": "2026-10-06T13:43:49.661Z"
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "at": "2026-10-06T13:43:31.459Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "status",
+      "label": "正在初始化 Qoder SDK"
+    },
+    {
+      "id": 2,
+      "at": "2026-10-06T13:43:31.460Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "diagnostic",
+      "label": "SDK 最大轮数",
+      "detail": "100"
+    },
+    {
+      "id": 3,
+      "at": "2026-10-06T13:43:38.267Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "memory",
+      "label": "记忆加载",
+      "detail": "{\"status\":\"success\",\"files\":[{\"id\":\"agent-memory\",\"path\":\"demo-workspace/data/profiles/42dd9f43-12b7-4570-af13-609ad26a24a9/memory/INDEX.md\",\"status\":\"loaded\"}]}"
+    },
+    {
+      "id": 4,
+      "at": "2026-10-06T13:43:39.138Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "diagnostic",
+      "label": "SDK 已初始化",
+      "detail": "{\"agents\":[\"general-purpose\",\"Explore\",\"Plan\"],\"skills\":[]}"
+    },
+    {
+      "id": 5,
+      "at": "2026-10-06T13:43:49.661Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "I'll search the",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 6,
+      "at": "2026-10-06T13:43:49.774Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " Apify Store for",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 7,
+      "at": "2026-10-06T13:43:49.818Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " Google-related",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 8,
+      "at": "2026-10-06T13:43:49.885Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " Actors (read-only",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 9,
+      "at": "2026-10-06T13:43:49.886Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": ").",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 10,
+      "at": "2026-10-06T13:43:49.900Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "\n\n",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 11,
+      "at": "2026-10-06T13:43:50.610Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "tool",
+      "label": "mcp__apify__search-actors",
+      "detail": "{\"keywords\":\"Google\",\"limit\":5}",
+      "toolName": "mcp__apify__search-actors",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9",
+      "toolUseId": "call_11973d9144e7446cbaceddc9"
+    },
+    {
+      "id": 12,
+      "at": "2026-10-06T13:43:50.611Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "interaction_resolved",
+      "label": "Agent「网页效果探索 Agent」默认允许工具",
+      "toolName": "mcp__apify__search-actors",
+      "detail": "{\"keywords\":\"Google\",\"limit\":5}",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9",
+      "toolUseId": "call_11973d9144e7446cbaceddc9"
+    },
+    {
+      "id": 13,
+      "at": "2026-10-06T13:43:54.159Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "tool",
+      "label": "工具结果",
+      "detail": "{\"actors\":[{\"title\":\"Google Search Results Scraper\",\"url\":\"https://apify.com/apify/google-search-scraper\",\"id\":\"nFJndFXA5zjCTuudP\",\"fullName\":\"apify/google-search-scraper\",\"pictureUrl\":\"https://images.apifyusercontent.com/WDqfivA56A1tjsyv6O-i0sDrGSnDNqsaU-u4dEthsFE/rs:fill:76:76/cb:1/aHR0cHM6Ly9hcGlmeS1pbWFnZS11cGxvYWRzLXByb2QuczMuYW1hem9uYXdzLmNvbS9uRkpuZEZYQTV6akNUdXVkUC85S2pMeFlnRTRyS3ZLYnIzTS1Hb29nbGVfU2VhcmNoX1Jlc3VsdHNfU2NyYXBlci5wbmc.webp\",\"developer\":{\"username\":\"apify\",\"isOfficialApify\":true,\"url\":\"https://apify.com/apify\"},\"description\":\"Scrape Google Search Engine Results Pages (SERPs). Select the country or language and extract organic and paid results, AI Mode, AI overviews, ads…",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9",
+      "toolUseId": "call_11973d9144e7446cbaceddc9"
+    },
+    {
+      "id": 14,
+      "at": "2026-10-06T13:44:02.259Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "tool",
+      "label": "mcp__apify__search-actors",
+      "detail": "{\"keywords\":\"Google search results\",\"limit\":3}",
+      "toolName": "mcp__apify__search-actors",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9",
+      "toolUseId": "call_e3b8cf5d9ad64d8190481c3b"
+    },
+    {
+      "id": 15,
+      "at": "2026-10-06T13:44:02.260Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "interaction_resolved",
+      "label": "Agent「网页效果探索 Agent」默认允许工具",
+      "toolName": "mcp__apify__search-actors",
+      "detail": "{\"keywords\":\"Google search results\",\"limit\":3}",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9",
+      "toolUseId": "call_e3b8cf5d9ad64d8190481c3b"
+    },
+    {
+      "id": 16,
+      "at": "2026-10-06T13:44:03.038Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "tool",
+      "label": "工具结果",
+      "detail": "{\"actors\":[{\"title\":\"Google Search Results Scraper\",\"url\":\"https://apify.com/apify/google-search-scraper\",\"id\":\"nFJndFXA5zjCTuudP\",\"fullName\":\"apify/google-search-scraper\",\"pictureUrl\":\"https://images.apifyusercontent.com/WDqfivA56A1tjsyv6O-i0sDrGSnDNqsaU-u4dEthsFE/rs:fill:76:76/cb:1/aHR0cHM6Ly9hcGlmeS1pbWFnZS11cGxvYWRzLXByb2QuczMuYW1hem9uYXdzLmNvbS9uRkpuZEZYQTV6akNUdXVkUC85S2pMeFlnRTRyS3ZLYnIzTS1Hb29nbGVfU2VhcmNoX1Jlc3VsdHNfU2NyYXBlci5wbmc.webp\",\"developer\":{\"username\":\"apify\",\"isOfficialApify\":true,\"url\":\"https://apify.com/apify\"},\"description\":\"Scrape Google Search Engine Results Pages (SERPs). Select the country or language and extract organic and paid results, AI Mode, AI overviews, ads…",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9",
+      "toolUseId": "call_e3b8cf5d9ad64d8190481c3b"
+    },
+    {
+      "id": 17,
+      "at": "2026-10-06T13:44:07.386Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "已完成两次只读",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 18,
+      "at": "2026-10-06T13:44:07.388Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "搜索（",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 19,
+      "at": "2026-10-06T13:44:07.453Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "`search-actors",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 20,
+      "at": "2026-10-06T13:44:07.537Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "`），未运行",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 21,
+      "at": "2026-10-06T13:44:07.539Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "任何 Actor",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 22,
+      "at": "2026-10-06T13:44:07.638Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "，也未使用浏览器",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 23,
+      "at": "2026-10-06T13:44:07.638Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "工具。",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 24,
+      "at": "2026-10-06T13:44:07.719Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "两个结果：\n\n",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 25,
+      "at": "2026-10-06T13:44:07.720Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "1",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 26,
+      "at": "2026-10-06T13:44:07.842Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": ". **Google Search",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 27,
+      "at": "2026-10-06T13:44:07.889Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " Results Scraper**",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 28,
+      "at": "2026-10-06T13:44:07.967Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " — `apify",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 29,
+      "at": "2026-10-06T13:44:07.997Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "/google-search",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 30,
+      "at": "2026-10-06T13:44:08.051Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "-scraper`\n",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 31,
+      "at": "2026-10-06T13:44:08.055Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "   - ",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 32,
+      "at": "2026-10-06T13:44:08.142Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "抓取 Google SERP",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 33,
+      "at": "2026-10-06T13:44:08.143Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "（",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 34,
+      "at": "2026-10-06T13:44:08.182Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "自然结果、广告",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 35,
+      "at": "2026-10-06T13:44:08.261Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "、People Also Ask",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 36,
+      "at": "2026-10-06T13:44:08.262Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "、AI",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 37,
+      "at": "2026-10-06T13:44:08.315Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " Overview 等），",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 38,
+      "at": "2026-10-06T13:44:08.399Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "可按国家/语言",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 39,
+      "at": "2026-10-06T13:44:08.399Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "配置",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 40,
+      "at": "2026-10-06T13:44:08.483Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "\n   - Ap",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 41,
+      "at": "2026-10-06T13:44:08.525Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "ify 官方，",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 42,
+      "at": "2026-10-06T13:44:08.680Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "4.62",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 43,
+      "at": "2026-10-06T13:44:08.681Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "★",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 44,
+      "at": "2026-10-06T13:44:08.699Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "（218",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 45,
+      "at": "2026-10-06T13:44:08.791Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " 条评价），月",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 46,
+      "at": "2026-10-06T13:44:08.914Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "活用户约 ",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 47,
+      "at": "2026-10-06T13:44:08.915Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "2.",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 48,
+      "at": "2026-10-06T13:44:08.920Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "1 万，",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 49,
+      "at": "2026-10-06T13:44:09.062Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "总计约 1",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 50,
+      "at": "2026-10-06T13:44:09.063Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "9",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 51,
+      "at": "2026-10-06T13:44:09.063Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": ".8 万",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 52,
+      "at": "2026-10-06T13:44:09.102Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "用户\n   -",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 53,
+      "at": "2026-10-06T13:44:09.219Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " 按事件计费",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 54,
+      "at": "2026-10-06T13:44:09.220Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "：约",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 55,
+      "at": "2026-10-06T13:44:09.223Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " $0.0",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 56,
+      "at": "2026-10-06T13:44:09.345Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "045 /",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 57,
+      "at": "2026-10-06T13:44:09.403Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " 抓取页；",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 58,
+      "at": "2026-10-06T13:44:09.522Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "必需输入 `queries",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 59,
+      "at": "2026-10-06T13:44:09.528Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "`\n\n2.",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 60,
+      "at": "2026-10-06T13:44:09.612Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " **Google Maps Scr",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 61,
+      "at": "2026-10-06T13:44:09.658Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "aper** — `",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 62,
+      "at": "2026-10-06T13:44:09.754Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "compass/crawler-google",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 63,
+      "at": "2026-10-06T13:44:09.786Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "-places",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 64,
+      "at": "2026-10-06T13:44:09.787Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "`\n   -",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 65,
+      "at": "2026-10-06T13:44:09.841Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " 抓取 Google Maps",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 66,
+      "at": "2026-10-06T13:44:09.905Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " 商户/地点",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 67,
+      "at": "2026-10-06T13:44:09.905Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "数据",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 68,
+      "at": "2026-10-06T13:44:09.950Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "（评论、图片",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 69,
+      "at": "2026-10-06T13:44:10.031Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "、联系方式、营业时间",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 70,
+      "at": "2026-10-06T13:44:10.080Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "、价格等）",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 71,
+      "at": "2026-10-06T13:44:10.081Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "\n",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 72,
+      "at": "2026-10-06T13:44:10.231Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "   - Compass ",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 73,
+      "at": "2026-10-06T13:44:10.231Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "出品",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 74,
+      "at": "2026-10-06T13:44:10.288Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "（Apify ",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 75,
+      "at": "2026-10-06T13:44:10.289Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "认证",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 76,
+      "at": "2026-10-06T13:44:10.343Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "开发者），4.",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 77,
+      "at": "2026-10-06T13:44:10.350Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "7",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 78,
+      "at": "2026-10-06T13:44:10.416Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "★（18",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 79,
+      "at": "2026-10-06T13:44:10.425Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "17 条评价",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 80,
+      "at": "2026-10-06T13:44:10.515Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "），月活用户",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 81,
+      "at": "2026-10-06T13:44:10.545Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "约 ",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 82,
+      "at": "2026-10-06T13:44:10.585Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "3.9 ",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 83,
+      "at": "2026-10-06T13:44:10.605Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "万，总计约",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 84,
+      "at": "2026-10-06T13:44:10.693Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " 63.",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 85,
+      "at": "2026-10-06T13:44:10.727Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "6 万",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 86,
+      "at": "2026-10-06T13:44:10.827Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "用户（本次搜索结果",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 87,
+      "at": "2026-10-06T13:44:10.916Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "中用量最大）",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 88,
+      "at": "2026-10-06T13:44:10.917Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "\n   - ",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 89,
+      "at": "2026-10-06T13:44:10.962Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "按事件计费：",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 90,
+      "at": "2026-10-06T13:44:11.038Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "约 $0.",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 91,
+      "at": "2026-10-06T13:44:11.097Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "004 /",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 92,
+      "at": "2026-10-06T13:44:11.097Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " 地点",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 93,
+      "at": "2026-10-06T13:44:11.182Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "；主要输入 `",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 94,
+      "at": "2026-10-06T13:44:11.271Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "searchStringsArray`",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 95,
+      "at": "2026-10-06T13:44:11.272Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "、`",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 96,
+      "at": "2026-10-06T13:44:11.306Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "locationQuery`\n\n",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 97,
+      "at": "2026-10-06T13:44:11.426Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "补充：第二次更",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 98,
+      "at": "2026-10-06T13:44:11.475Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "精确的检索还",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 99,
+      "at": "2026-10-06T13:44:11.614Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "返回了 `scr",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 100,
+      "at": "2026-10-06T13:44:11.614Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "aper",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 101,
+      "at": "2026-10-06T13:44:11.718Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "link/google-search-results",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 102,
+      "at": "2026-10-06T13:44:11.806Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "-serp-scraper",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 103,
+      "at": "2026-10-06T13:44:11.841Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "`（主打",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 104,
+      "at": "2026-10-06T13:44:11.851Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "低价，约 $",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 105,
+      "at": "2026-10-06T13:44:11.851Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "0",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 106,
+      "at": "2026-10-06T13:44:11.927Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": ".000",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 107,
+      "at": "2026-10-06T13:44:12.010Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "5/SERP ",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 108,
+      "at": "2026-10-06T13:44:12.010Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "页）和",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 109,
+      "at": "2026-10-06T13:44:12.113Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " `apidojo",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 110,
+      "at": "2026-10-06T13:44:12.245Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "/google-search-scraper",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 111,
+      "at": "2026-10-06T13:44:12.246Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "`",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 112,
+      "at": "2026-10-06T13:44:12.370Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "，可作为 SERP",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 113,
+      "at": "2026-10-06T13:44:12.371Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": " 场景",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 114,
+      "at": "2026-10-06T13:44:12.409Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "text",
+      "detail": "的备选。",
+      "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+    },
+    {
+      "id": 115,
+      "at": "2026-10-06T13:44:12.602Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "memory",
+      "label": "自动记忆写入",
+      "detail": "{\"status\":\"skipped\",\"attemptId\":\"7c0ce1ba-0290-4e31-80a2-90cc238afd3f\",\"reason\":\"turn_interval_gate\",\"origin\":\"turn_complete\",\"sourceRequestIds\":[\"7d4907d7-7077-4405-87bf-fd5dd2699f84\"],\"writtenFiles\":[],\"failedFiles\":[],\"indexUpdated\":false,\"contentUpdated\":false,\"durationMs\":7}"
+    },
+    {
+      "id": 116,
+      "at": "2026-10-06T13:44:12.992Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "usage",
+      "label": "本次会话累计 Credits",
+      "credits": 0
+    },
+    {
+      "id": 117,
+      "at": "2026-10-06T13:44:12.992Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "diagnostic",
+      "label": "实际使用模型",
+      "detail": "bailian/qwen3.8-flash-tp"
+    },
+    {
+      "id": 118,
+      "at": "2026-10-06T13:44:12.992Z",
+      "turnId": "1926287c-308e-40da-8536-7e12a260b1fe",
+      "type": "turn_end",
+      "label": "本轮完成，可继续对话"
+    }
+  ],
+  "pending": [],
+  "sessionAllowedTools": [],
+  "sessionAllowedCategories": [],
+  "lastEventId": 118,
+  "demoArchive": true
+}

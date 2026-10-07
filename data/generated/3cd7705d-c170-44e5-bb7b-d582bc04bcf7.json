@@ -1,0 +1,12 @@
+{
+  "id": "3cd7705d-c170-44e5-bb7b-d582bc04bcf7",
+  "conversationId": "cc21a849-fe86-46e6-9680-98dea8e689a8",
+  "turnId": "9d33f0bf-e60f-4fd3-810e-fb02415e891f",
+  "kind": "image",
+  "status": "failed",
+  "prompt": "A single elegant white flower, minimalist style, centered on a pure solid blue background with no other elements, clean and simple composition with generous negative space, modern and pure aesthetic, soft even studio lighting, crisp petal details, flat uncluttered design, high-end minimalist photography",
+  "model": "qwen-image-3.0",
+  "createdAt": "2026-10-05T14:15:32.304Z",
+  "updatedAt": "2026-10-05T14:15:32.586Z",
+  "error": "HTTP 401: InvalidApiKey Invalid API-key provided. For details, see: https://www.alibabacloud.com/help/en/model-studio/error-code#apikey-error"
+}

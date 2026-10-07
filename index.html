@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Qoder Agent Workbench</title>
+    <script>
+      try {
+        const theme = localStorage.getItem('qoder-theme');
+        const language = localStorage.getItem('qoder-language');
+        document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+        document.documentElement.lang = language === 'en' ? 'en' : 'zh-CN';
+      } catch { document.documentElement.dataset.theme = 'dark'; }
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

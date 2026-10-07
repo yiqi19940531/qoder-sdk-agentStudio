@@ -1,0 +1,14 @@
+{
+  "id": "1b3b3934-c181-40ab-b81c-94c83dc40ef8",
+  "conversationId": "cc21a849-fe86-46e6-9680-98dea8e689a8",
+  "turnId": "583c6a6e-774f-4624-83b9-fcf1799133de",
+  "kind": "image",
+  "status": "succeeded",
+  "prompt": "A single white flower centered in minimalist composition, pure solid blue background with no other elements, generous negative space, clean and modern aesthetic, soft diffused studio lighting, high purity tones, elegant simplicity, photorealistic detail on petals",
+  "model": "qwen-image-3.0",
+  "createdAt": "2026-10-05T14:17:08.657Z",
+  "updatedAt": "2026-10-05T14:18:05.149Z",
+  "requestId": "dd1ba41e-5848-97ed-84c4-022f238f7fd4",
+  "mimeType": "image/png",
+  "bytes": 643808
+}

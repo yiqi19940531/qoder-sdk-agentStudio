@@ -1,0 +1,233 @@
+{
+  "id": "c7d8a361-782e-41f9-a072-8e20f83863c9",
+  "sdkSessionId": "c7d8a361-782e-41f9-a072-8e20f83863c9",
+  "sdkEstablished": false,
+  "agentId": "code-reviewer",
+  "agentName": "代码审查 Agent",
+  "status": "idle",
+  "createdAt": "2026-10-05T05:29:22.885Z",
+  "updatedAt": "2026-10-05T05:29:32.708Z",
+  "config": {
+    "agent": {
+      "kind": "subagent",
+      "name": "代码审查 Agent",
+      "description": "审查示例仓库的正确性问题，返回文件证据和建议。",
+      "model": "efficient",
+      "maxTurns": 6,
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ],
+      "skills": [
+        "workbench:repo-review"
+      ],
+      "mcpServers": [
+        "repo-facts"
+      ],
+      "subAgentIds": [],
+      "memoryEnabled": true,
+      "permissions": {
+        "toolApproval": "ask",
+        "pathAccess": "workspace",
+        "additionalDirectories": []
+      },
+      "id": "code-reviewer",
+      "persona": "# 代码审查 Agent\n\n你只做代码审查。列出可复现的问题、证据位置和修复建议，不修改文件。"
+    },
+    "children": [],
+    "instructions": {
+      "code-reviewer": "# 代码审查 Agent · 项目规则\n\n- 审查示例仓库代码的正确性与边界情况，并标注具体文件和复现条件。\n- 不自行修改文件；把发现与建议交回主 Agent。\n"
+    }
+  },
+  "turns": [
+    {
+      "id": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "status": "done",
+      "startedAt": "2026-10-05T05:29:22.885Z",
+      "endedAt": "2026-10-05T05:29:32.708Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "4b38bfc5-41c7-488a-a549-b9d6eaa0fa7a",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "role": "user",
+      "content": "请只根据已注入的项目规则和长期记忆回答：你的 AGENTS.md 第一条项目规则是什么？你的 INDEX.md 一级标题是什么？不要调用工具，也不要读取文件。",
+      "at": "2026-10-05T05:29:22.885Z"
+    },
+    {
+      "id": "assistant-d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "role": "assistant",
+      "content": "根据已注入的内容：\n\n1. **AGENTS.md 第一条项目规则**：审查示例仓库代码的正确性与边界情况，并标注具体文件和复现条件。\n\n2. **INDEX.md 一级标题**：`# 代码审查 Agent · 长期记忆`",
+      "at": "2026-10-05T05:29:31.692Z"
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "at": "2026-10-05T05:29:22.887Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "status",
+      "label": "正在初始化 Qoder SDK"
+    },
+    {
+      "id": 2,
+      "at": "2026-10-05T05:29:25.462Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "memory",
+      "label": "记忆加载",
+      "detail": "{\"status\":\"success\",\"files\":[{\"id\":\"agent-memory\",\"path\":\"demo-workspace/data/profiles/code-reviewer/memory/INDEX.md\",\"status\":\"loaded\"}]}"
+    },
+    {
+      "id": 3,
+      "at": "2026-10-05T05:29:25.848Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "diagnostic",
+      "label": "SDK 已初始化",
+      "detail": "{\"agents\":[\"general-purpose\",\"Explore\",\"Plan\"],\"skills\":[\"workbench:repo-review\"]}"
+    },
+    {
+      "id": 4,
+      "at": "2026-10-05T05:29:31.692Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "text",
+      "detail": "根据已注入的内容"
+    },
+    {
+      "id": 5,
+      "at": "2026-10-05T05:29:31.692Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "text",
+      "detail": "：\n\n1."
+    },
+    {
+      "id": 6,
+      "at": "2026-10-05T05:29:31.710Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "text",
+      "detail": " **AGENTS.md"
+    },
+    {
+      "id": 7,
+      "at": "2026-10-05T05:29:31.790Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "text",
+      "detail": " 第一条项目规则"
+    },
+    {
+      "id": 8,
+      "at": "2026-10-05T05:29:31.842Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "text",
+      "detail": "**：审查示例"
+    },
+    {
+      "id": 9,
+      "at": "2026-10-05T05:29:31.843Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "text",
+      "detail": "仓库代码"
+    },
+    {
+      "id": 10,
+      "at": "2026-10-05T05:29:31.880Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "text",
+      "detail": "的正确性与边界情况"
+    },
+    {
+      "id": 11,
+      "at": "2026-10-05T05:29:31.921Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "text",
+      "detail": "，并标注具体"
+    },
+    {
+      "id": 12,
+      "at": "2026-10-05T05:29:31.972Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "text",
+      "detail": "文件和复现条件"
+    },
+    {
+      "id": 13,
+      "at": "2026-10-05T05:29:32.012Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "text",
+      "detail": "。\n\n2."
+    },
+    {
+      "id": 14,
+      "at": "2026-10-05T05:29:32.053Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "text",
+      "detail": " **INDEX.md "
+    },
+    {
+      "id": 15,
+      "at": "2026-10-05T05:29:32.104Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "text",
+      "detail": "一级标题**："
+    },
+    {
+      "id": 16,
+      "at": "2026-10-05T05:29:32.152Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "text",
+      "detail": "`# 代码"
+    },
+    {
+      "id": 17,
+      "at": "2026-10-05T05:29:32.201Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "text",
+      "detail": "审查 Agent · "
+    },
+    {
+      "id": 18,
+      "at": "2026-10-05T05:29:32.251Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "text",
+      "detail": "长期记忆`"
+    },
+    {
+      "id": 19,
+      "at": "2026-10-05T05:29:32.397Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "memory",
+      "label": "自动记忆写入",
+      "detail": "{\"status\":\"skipped\",\"attemptId\":\"5533a090-b617-4a5a-904a-8b931422c517\",\"reason\":\"turn_interval_gate\",\"origin\":\"turn_complete\",\"sourceRequestIds\":[\"7c8306b3-9d2e-40a8-b7d5-d99e72b26b8f\"],\"writtenFiles\":[],\"failedFiles\":[],\"indexUpdated\":false,\"contentUpdated\":false,\"durationMs\":5}"
+    },
+    {
+      "id": 20,
+      "at": "2026-10-05T05:29:32.708Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "usage",
+      "label": "本次会话累计 Credits",
+      "credits": 0.09124821428571428
+    },
+    {
+      "id": 21,
+      "at": "2026-10-05T05:29:32.708Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "diagnostic",
+      "label": "实际使用模型",
+      "detail": "efficient"
+    },
+    {
+      "id": 22,
+      "at": "2026-10-05T05:29:32.708Z",
+      "turnId": "d3981881-426f-4ef2-b088-e26e8bd2f291",
+      "type": "turn_end",
+      "label": "本轮完成，可继续对话"
+    }
+  ],
+  "pending": [],
+  "sessionAllowedTools": [],
+  "sessionAllowedCategories": [],
+  "lastEventId": 22,
+  "demoArchive": true
+}

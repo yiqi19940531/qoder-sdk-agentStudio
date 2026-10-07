@@ -1,0 +1,20 @@
+node_modules/
+dist/
+dist-server/
+release/
+.DS_Store
+.env
+.env.*
+api-key.md
+data/mcp-secrets.json
+data/mcp-session-config/
+data/config-catalog.json
+data/apify-verification.json
+# Published demo fixtures are tracked explicitly; new local sessions and media stay private.
+data/conversations/
+data/generated/
+data/skill-drafts/
+data/memory-probe/
+data/example-repo/.playwright-mcp/
+data/example-repo/.tmp*
+*.log

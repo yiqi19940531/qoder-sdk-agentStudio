@@ -1,0 +1,15 @@
+{
+  "id": "ce4e7461-e2dd-49d3-87d1-3a113416bb01",
+  "conversationId": "6bcc0348-1c9f-403c-aa5a-c802d9f46702",
+  "turnId": "f13d0429-f4b1-4ae1-a24b-85ebd636646c",
+  "kind": "video",
+  "status": "succeeded",
+  "prompt": "写实电影感短片：一位年轻英俊的亚洲男性，五官立体、发型整洁，身穿简约时尚的白色衬衫，站在城市街头。夕阳的暖橙色光芒洒在他的脸上，他微微一笑，发丝被微风轻轻吹动。镜头缓慢推近（慢速推镜头），呈现电影感浅景深效果，背景城市街景虚化。暖色调，柔和自然光，高质量、细节丰富，横屏16:9，photorealistic cinematic style, warm color grading, golden hour lighting, slow dolly-in camera movement, shallow depth of field, high detail.",
+  "model": "wan3.0-video",
+  "createdAt": "2026-10-06T07:10:38.160Z",
+  "updatedAt": "2026-10-06T07:12:45.545Z",
+  "taskId": "3ca3e388-2398-4165-bdb3-7f0b919e0083",
+  "requestId": "e96c3cda-680e-997b-b79a-2d15d986465e",
+  "mimeType": "video/mp4",
+  "bytes": 2105521
+}

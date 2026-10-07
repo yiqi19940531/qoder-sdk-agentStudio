@@ -1,0 +1,15 @@
+{
+  "id": "5d899064-f169-4aa8-b312-ff3cda1b7267",
+  "conversationId": "cc21a849-fe86-46e6-9680-98dea8e689a8",
+  "turnId": "583c6a6e-774f-4624-83b9-fcf1799133de",
+  "kind": "video",
+  "status": "succeeded",
+  "prompt": "极简现代风格短片，时长5秒：纯净的纯蓝色背景前，一朵白色花朵作为唯一主体，画面简洁干净。花朵在微风中轻轻摇曳，摆动轻微柔和、优雅克制，没有剧烈动作。镜头缓慢推进（slow dolly in / 缓慢变焦推近），运动平滑稳定。柔和的棚拍光，细节清晰，整体极简、干净、具现代感。",
+  "model": "wan3.0-video",
+  "createdAt": "2026-10-05T14:17:10.931Z",
+  "updatedAt": "2026-10-05T14:19:01.419Z",
+  "taskId": "c962c800-ef87-4a2f-a765-71cf231c54df",
+  "requestId": "374cae1b-fb7c-9938-a1e9-4403687590c7",
+  "mimeType": "video/mp4",
+  "bytes": 2118622
+}

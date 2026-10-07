@@ -1,0 +1,200 @@
+{
+  "id": "5c4acf42-db0a-42bc-86d2-25a91e64d4bd",
+  "sdkSessionId": "5c4acf42-db0a-42bc-86d2-25a91e64d4bd",
+  "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9",
+  "agentName": "网页效果探索 Agent",
+  "status": "idle",
+  "createdAt": "2026-10-05T03:53:43.908Z",
+  "updatedAt": "2026-10-05T03:53:57.866Z",
+  "config": {
+    "agent": {
+      "kind": "main",
+      "name": "网页效果探索 Agent",
+      "description": "网页效果探索",
+      "model": "bailian/qwen3.8-flash-tp",
+      "maxTurns": 20,
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Agent"
+      ],
+      "skills": [],
+      "mcpServers": [
+        "playwright",
+        "chrome-devtools"
+      ],
+      "subAgentIds": [],
+      "memoryEnabled": true,
+      "id": "42dd9f43-12b7-4570-af13-609ad26a24a9",
+      "persona": "输入一个网页，可以查看相关网页具体的样式效果并且给出说明"
+    },
+    "children": []
+  },
+  "turns": [
+    {
+      "id": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "status": "interrupted",
+      "startedAt": "2026-10-05T03:53:43.908Z",
+      "endedAt": "2026-10-05T03:53:57.866Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "e5ed8bd9-91e1-4671-843c-78e224f17a56",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "role": "user",
+      "content": "请用 Chrome DevTools 打开 http://127.0.0.1:5173/ 并告诉我标题。",
+      "at": "2026-10-05T03:53:43.908Z"
+    },
+    {
+      "id": "assistant-7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "role": "assistant",
+      "content": "我先看看当前浏览器里有哪些页面。\n\n",
+      "at": "2026-10-05T03:53:52.218Z"
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "at": "2026-10-05T03:53:43.909Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "status",
+      "label": "正在初始化 Qoder SDK"
+    },
+    {
+      "id": 2,
+      "at": "2026-10-05T03:53:47.209Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "memory",
+      "label": "记忆加载",
+      "detail": "{\"status\":\"success\",\"files\":[{\"id\":\"agent-memory\",\"path\":\"demo-workspace/data/profiles/42dd9f43-12b7-4570-af13-609ad26a24a9/memory/INDEX.md\",\"status\":\"loaded\"}]}"
+    },
+    {
+      "id": 3,
+      "at": "2026-10-05T03:53:47.398Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "diagnostic",
+      "label": "SDK 已初始化",
+      "detail": "{\"agents\":[\"general-purpose\",\"Explore\",\"Plan\"],\"skills\":[]}"
+    },
+    {
+      "id": 4,
+      "at": "2026-10-05T03:53:52.218Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "text",
+      "detail": "我先看看当前"
+    },
+    {
+      "id": 5,
+      "at": "2026-10-05T03:53:52.435Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "text",
+      "detail": "浏览器里有哪些页面"
+    },
+    {
+      "id": 6,
+      "at": "2026-10-05T03:53:52.435Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "text",
+      "detail": "。\n\n"
+    },
+    {
+      "id": 7,
+      "at": "2026-10-05T03:53:52.672Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "tool",
+      "label": "mcp__chrome-devtools__list_pages",
+      "detail": "{}",
+      "toolName": "mcp__chrome-devtools__list_pages"
+    },
+    {
+      "id": 8,
+      "at": "2026-10-05T03:53:53.142Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "tool",
+      "label": "工具结果",
+      "detail": "## Pages\n1: about:blank [selected]"
+    },
+    {
+      "id": 9,
+      "at": "2026-10-05T03:53:56.649Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "tool",
+      "label": "mcp__chrome-devtools__navigate_page",
+      "detail": "{\"pageId\":1,\"type\":\"url\",\"url\":\"http://127.0.0.1:5173/\"}",
+      "toolName": "mcp__chrome-devtools__navigate_page"
+    },
+    {
+      "id": 10,
+      "at": "2026-10-05T03:53:56.649Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "interaction",
+      "label": "navigate_page (chrome-devtools)",
+      "detail": "http://127.0.0.1:5173\nhttp://127.0.0.1:5173/",
+      "toolName": "mcp__chrome-devtools__navigate_page",
+      "interactionId": "2f00a1fe-0838-4ae0-8561-97225fc258ec"
+    },
+    {
+      "id": 11,
+      "at": "2026-10-05T03:53:56.981Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "status",
+      "label": "正在中断当前轮"
+    },
+    {
+      "id": 12,
+      "at": "2026-10-05T03:53:56.981Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "interaction_resolved",
+      "label": "请求已取消",
+      "interactionId": "2f00a1fe-0838-4ae0-8561-97225fc258ec"
+    },
+    {
+      "id": 13,
+      "at": "2026-10-05T03:53:56.994Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "tool",
+      "label": "工具结果",
+      "detail": "The user doesn't want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). Do not repeat this call; take a different approach, or if you cannot proceed without it, tell the user what you were trying to do and why you need it."
+    },
+    {
+      "id": 14,
+      "at": "2026-10-05T03:53:57.866Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "usage",
+      "label": "本次会话累计 Credits",
+      "credits": 0
+    },
+    {
+      "id": 15,
+      "at": "2026-10-05T03:53:57.866Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "diagnostic",
+      "label": "实际使用模型",
+      "detail": "bailian/qwen3.8-flash-tp"
+    },
+    {
+      "id": 16,
+      "at": "2026-10-05T03:53:57.866Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "error",
+      "label": "本轮失败",
+      "detail": "[\"Operation aborted\"]"
+    },
+    {
+      "id": 17,
+      "at": "2026-10-05T03:53:57.866Z",
+      "turnId": "7b2206ad-34c9-44ca-9090-bf6083b8e1c7",
+      "type": "turn_end",
+      "label": "本轮已中断，可继续对话"
+    }
+  ],
+  "pending": [],
+  "lastEventId": 17,
+  "demoArchive": true,
+  "sdkEstablished": false,
+  "sessionAllowedTools": [],
+  "sessionAllowedCategories": []
+}

@@ -1,0 +1,125 @@
+{
+  "id": "c36675b2-9570-4326-9fe9-a4ceb8efd07a",
+  "sdkSessionId": "c36675b2-9570-4326-9fe9-a4ceb8efd07a",
+  "agentId": "repo-coordinator",
+  "agentName": "仓库协调 Agent",
+  "status": "idle",
+  "createdAt": "2026-10-05T04:01:58.060Z",
+  "updatedAt": "2026-10-05T04:02:17.279Z",
+  "config": {
+    "agent": {
+      "kind": "main",
+      "name": "仓库协调 Agent",
+      "description": "读取示例仓库，按需委派代码审查，并汇总结果。",
+      "model": "auto",
+      "maxTurns": 8,
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Agent"
+      ],
+      "skills": [],
+      "mcpServers": [
+        "repo-facts"
+      ],
+      "subAgentIds": [
+        "code-reviewer"
+      ],
+      "memoryEnabled": true,
+      "id": "repo-coordinator",
+      "persona": "# 仓库协调 Agent\n\n你是谨慎的代码分析助手。先读取证据，再给出简明结论。需要详细审查时，委派给代码审查 Agent。默认不修改文件。"
+    },
+    "children": [
+      {
+        "kind": "subagent",
+        "name": "代码审查 Agent",
+        "description": "审查示例仓库的正确性问题，返回文件证据和建议。",
+        "model": "efficient",
+        "maxTurns": 6,
+        "tools": [
+          "Read",
+          "Grep",
+          "Glob"
+        ],
+        "skills": [
+          "workbench:repo-review"
+        ],
+        "mcpServers": [
+          "repo-facts"
+        ],
+        "subAgentIds": [],
+        "memoryEnabled": false,
+        "id": "code-reviewer",
+        "persona": "# 代码审查 Agent\n\n你只做代码审查。列出可复现的问题、证据位置和修复建议，不修改文件。"
+      }
+    ]
+  },
+  "turns": [
+    {
+      "id": "2ae31c25-5fd6-4f94-b894-45f3d855f4de",
+      "status": "interrupted",
+      "startedAt": "2026-10-05T04:01:58.060Z",
+      "endedAt": "2026-10-05T04:01:58.064Z"
+    },
+    {
+      "id": "302bf830-0cbe-46b6-8e60-388de2ad2068",
+      "status": "error",
+      "startedAt": "2026-10-05T04:02:15.064Z",
+      "endedAt": "2026-10-05T04:02:17.279Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "c688e486-0bbd-4dfc-85dc-f9c6d30369f0",
+      "turnId": "2ae31c25-5fd6-4f94-b894-45f3d855f4de",
+      "role": "user",
+      "content": "只回答一加一等于几。",
+      "at": "2026-10-05T04:01:58.060Z"
+    },
+    {
+      "id": "6aa6177a-37be-414a-9e96-8f1b7c420edd",
+      "turnId": "302bf830-0cbe-46b6-8e60-388de2ad2068",
+      "role": "user",
+      "content": "继续，回答一加一等于几。",
+      "at": "2026-10-05T04:02:15.064Z"
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "at": "2026-10-05T04:01:58.062Z",
+      "turnId": "2ae31c25-5fd6-4f94-b894-45f3d855f4de",
+      "type": "status",
+      "label": "正在初始化 Qoder SDK"
+    },
+    {
+      "id": 2,
+      "at": "2026-10-05T04:01:58.064Z",
+      "turnId": "2ae31c25-5fd6-4f94-b894-45f3d855f4de",
+      "type": "turn_end",
+      "label": "本轮已中断，可继续对话"
+    },
+    {
+      "id": 3,
+      "at": "2026-10-05T04:02:17.279Z",
+      "turnId": "302bf830-0cbe-46b6-8e60-388de2ad2068",
+      "type": "error",
+      "label": "会话执行失败",
+      "detail": "Qoder worker runtime exited with code 42"
+    },
+    {
+      "id": 4,
+      "at": "2026-10-05T04:02:17.279Z",
+      "turnId": "302bf830-0cbe-46b6-8e60-388de2ad2068",
+      "type": "turn_end",
+      "label": "本轮结束，可尝试继续对话"
+    }
+  ],
+  "pending": [],
+  "lastEventId": 4,
+  "demoArchive": true,
+  "sdkEstablished": false,
+  "sessionAllowedTools": [],
+  "sessionAllowedCategories": []
+}

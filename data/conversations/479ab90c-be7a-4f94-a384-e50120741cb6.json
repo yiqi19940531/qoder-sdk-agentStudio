@@ -1,0 +1,157 @@
+{
+  "id": "479ab90c-be7a-4f94-a384-e50120741cb6",
+  "sdkSessionId": "479ab90c-be7a-4f94-a384-e50120741cb6",
+  "sdkEstablished": false,
+  "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9",
+  "agentName": "网页效果探索 Agent",
+  "status": "idle",
+  "createdAt": "2026-10-05T06:16:42.073Z",
+  "updatedAt": "2026-10-05T06:16:52.109Z",
+  "config": {
+    "agent": {
+      "kind": "main",
+      "name": "网页效果探索 Agent",
+      "description": "网页效果探索",
+      "model": "bailian/qwen3.8-flash-tp",
+      "maxTurns": 100,
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Agent"
+      ],
+      "skills": [],
+      "mcpServers": [
+        "playwright",
+        "chrome-devtools"
+      ],
+      "subAgentIds": [],
+      "memoryEnabled": true,
+      "permissions": {
+        "toolApproval": "allow_all",
+        "pathAccess": "all",
+        "additionalDirectories": []
+      },
+      "id": "42dd9f43-12b7-4570-af13-609ad26a24a9",
+      "persona": "输入一个网页，可以查看相关网页具体的样式效果并且给出说明"
+    },
+    "children": [],
+    "instructions": {
+      "42dd9f43-12b7-4570-af13-609ad26a24a9": "# 网页效果探索 Agent · 项目规则\n\n- 给定网页时，使用已装配的浏览器工具查看实际渲染结果。\n- 说明可见内容、布局、样式和交互；区分观察结果与推断。\n- 页面加载失败或受到反爬限制时，如实说明。\n\n## 之前的共享规则\n\n输入一个网页，可以查看相关网页具体的样式效果并且给出说明\n"
+    }
+  },
+  "turns": [
+    {
+      "id": "d94b8310-d4fd-4b32-ad50-e08b02a04be1",
+      "status": "done",
+      "startedAt": "2026-10-05T06:16:42.073Z",
+      "endedAt": "2026-10-05T06:16:52.109Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "0ce1f5e6-db9f-4c7b-bbaa-66eb7dabb0ec",
+      "turnId": "d94b8310-d4fd-4b32-ad50-e08b02a04be1",
+      "role": "user",
+      "content": "配置验证：请只回答“最大轮数配置已读取”。不要调用任何工具。",
+      "at": "2026-10-05T06:16:42.073Z"
+    },
+    {
+      "id": "assistant-d94b8310-d4fd-4b32-ad50-e08b02a04be1",
+      "turnId": "d94b8310-d4fd-4b32-ad50-e08b02a04be1",
+      "role": "assistant",
+      "content": "最大轮数配置已读取",
+      "at": "2026-10-05T06:16:51.480Z"
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "at": "2026-10-05T06:16:42.074Z",
+      "turnId": "d94b8310-d4fd-4b32-ad50-e08b02a04be1",
+      "type": "status",
+      "label": "正在初始化 Qoder SDK"
+    },
+    {
+      "id": 2,
+      "at": "2026-10-05T06:16:42.075Z",
+      "turnId": "d94b8310-d4fd-4b32-ad50-e08b02a04be1",
+      "type": "diagnostic",
+      "label": "SDK 最大轮数",
+      "detail": "100"
+    },
+    {
+      "id": 3,
+      "at": "2026-10-05T06:16:45.204Z",
+      "turnId": "d94b8310-d4fd-4b32-ad50-e08b02a04be1",
+      "type": "memory",
+      "label": "记忆加载",
+      "detail": "{\"status\":\"success\",\"files\":[{\"id\":\"agent-memory\",\"path\":\"demo-workspace/data/profiles/42dd9f43-12b7-4570-af13-609ad26a24a9/memory/INDEX.md\",\"status\":\"loaded\"}]}"
+    },
+    {
+      "id": 4,
+      "at": "2026-10-05T06:16:45.839Z",
+      "turnId": "d94b8310-d4fd-4b32-ad50-e08b02a04be1",
+      "type": "diagnostic",
+      "label": "SDK 已初始化",
+      "detail": "{\"agents\":[\"general-purpose\",\"Explore\",\"Plan\"],\"skills\":[]}"
+    },
+    {
+      "id": 5,
+      "at": "2026-10-05T06:16:51.480Z",
+      "turnId": "d94b8310-d4fd-4b32-ad50-e08b02a04be1",
+      "type": "text",
+      "detail": "最大"
+    },
+    {
+      "id": 6,
+      "at": "2026-10-05T06:16:51.630Z",
+      "turnId": "d94b8310-d4fd-4b32-ad50-e08b02a04be1",
+      "type": "text",
+      "detail": "轮数配置已"
+    },
+    {
+      "id": 7,
+      "at": "2026-10-05T06:16:51.633Z",
+      "turnId": "d94b8310-d4fd-4b32-ad50-e08b02a04be1",
+      "type": "text",
+      "detail": "读取"
+    },
+    {
+      "id": 8,
+      "at": "2026-10-05T06:16:51.821Z",
+      "turnId": "d94b8310-d4fd-4b32-ad50-e08b02a04be1",
+      "type": "memory",
+      "label": "自动记忆写入",
+      "detail": "{\"status\":\"skipped\",\"attemptId\":\"c543a951-14f4-4adb-8fdc-abfbe699f5ff\",\"reason\":\"turn_interval_gate\",\"origin\":\"turn_complete\",\"sourceRequestIds\":[\"9419b02c-48e3-40c3-8026-c38d422f3d08\"],\"writtenFiles\":[],\"failedFiles\":[],\"indexUpdated\":false,\"contentUpdated\":false,\"durationMs\":6}"
+    },
+    {
+      "id": 9,
+      "at": "2026-10-05T06:16:52.109Z",
+      "turnId": "d94b8310-d4fd-4b32-ad50-e08b02a04be1",
+      "type": "usage",
+      "label": "本次会话累计 Credits",
+      "credits": 0
+    },
+    {
+      "id": 10,
+      "at": "2026-10-05T06:16:52.109Z",
+      "turnId": "d94b8310-d4fd-4b32-ad50-e08b02a04be1",
+      "type": "diagnostic",
+      "label": "实际使用模型",
+      "detail": "bailian/qwen3.8-flash-tp"
+    },
+    {
+      "id": 11,
+      "at": "2026-10-05T06:16:52.109Z",
+      "turnId": "d94b8310-d4fd-4b32-ad50-e08b02a04be1",
+      "type": "turn_end",
+      "label": "本轮完成，可继续对话"
+    }
+  ],
+  "pending": [],
+  "sessionAllowedTools": [],
+  "sessionAllowedCategories": [],
+  "lastEventId": 11,
+  "demoArchive": true
+}

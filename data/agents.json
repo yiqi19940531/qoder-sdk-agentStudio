@@ -1,0 +1,149 @@
+[
+  {
+    "kind": "main",
+    "name": "仓库协调 Agent",
+    "description": "读取示例仓库，按需委派代码审查，并汇总结果。",
+    "model": "auto",
+    "maxTurns": 8,
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "Agent"
+    ],
+    "skills": [],
+    "mcpServers": [
+      "repo-facts"
+    ],
+    "subAgentIds": [
+      "code-reviewer"
+    ],
+    "memoryEnabled": true,
+    "id": "repo-coordinator",
+    "permissions": {
+      "toolApproval": "ask",
+      "pathAccess": "workspace",
+      "additionalDirectories": []
+    }
+  },
+  {
+    "kind": "subagent",
+    "name": "代码审查 Agent",
+    "description": "审查示例仓库的正确性问题，返回文件证据和建议。",
+    "model": "efficient",
+    "maxTurns": 6,
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob"
+    ],
+    "skills": [
+      "workbench:repo-review"
+    ],
+    "mcpServers": [
+      "repo-facts"
+    ],
+    "subAgentIds": [],
+    "memoryEnabled": true,
+    "permissions": {
+      "toolApproval": "ask",
+      "pathAccess": "workspace",
+      "additionalDirectories": []
+    },
+    "id": "code-reviewer"
+  },
+  {
+    "kind": "main",
+    "name": "网页效果探索 Agent",
+    "description": "网页效果探索",
+    "model": "auto",
+    "maxTurns": 100,
+    "tools": [
+      "Read",
+      "Grep",
+      "Glob",
+      "Agent"
+    ],
+    "skills": [],
+    "mcpServers": [
+      "playwright",
+      "chrome-devtools"
+    ],
+    "subAgentIds": [],
+    "memoryEnabled": true,
+    "permissions": {
+      "toolApproval": "ask",
+      "pathAccess": "workspace",
+      "additionalDirectories": []
+    },
+    "id": "42dd9f43-12b7-4570-af13-609ad26a24a9"
+  },
+  {
+    "id": "aigc-director",
+    "kind": "main",
+    "name": "AIGC 任务编排 Agent",
+    "description": "识别文生图、文生视频需求，拆解创意简报并委派对应子 Agent。",
+    "model": "auto",
+    "maxTurns": 24,
+    "tools": [
+      "Read",
+      "Agent"
+    ],
+    "skills": [],
+    "mcpServers": [],
+    "subAgentIds": [
+      "aigc-image",
+      "aigc-video"
+    ],
+    "memoryEnabled": false,
+    "permissions": {
+      "toolApproval": "ask",
+      "pathAccess": "workspace",
+      "additionalDirectories": []
+    }
+  },
+  {
+    "id": "aigc-image",
+    "kind": "subagent",
+    "name": "图片生成 Agent",
+    "description": "当用户要求生成图片、插画、海报、照片时调用；只负责文生图。",
+    "model": "auto",
+    "maxTurns": 12,
+    "tools": [],
+    "skills": [
+      "workbench:bailian-image"
+    ],
+    "mcpServers": [
+      "bailian-image"
+    ],
+    "subAgentIds": [],
+    "memoryEnabled": false,
+    "permissions": {
+      "toolApproval": "ask",
+      "pathAccess": "workspace",
+      "additionalDirectories": []
+    }
+  },
+  {
+    "id": "aigc-video",
+    "kind": "subagent",
+    "name": "视频生成 Agent",
+    "description": "当用户要求生成视频、动画、短片时调用；只负责文生视频。",
+    "model": "auto",
+    "maxTurns": 20,
+    "tools": [],
+    "skills": [
+      "workbench:bailian-video"
+    ],
+    "mcpServers": [
+      "bailian-video"
+    ],
+    "subAgentIds": [],
+    "memoryEnabled": false,
+    "permissions": {
+      "toolApproval": "ask",
+      "pathAccess": "workspace",
+      "additionalDirectories": []
+    }
+  }
+]

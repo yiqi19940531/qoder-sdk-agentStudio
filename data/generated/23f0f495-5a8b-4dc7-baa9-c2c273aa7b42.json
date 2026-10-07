@@ -1,0 +1,12 @@
+{
+  "id": "23f0f495-5a8b-4dc7-baa9-c2c273aa7b42",
+  "conversationId": "cc21a849-fe86-46e6-9680-98dea8e689a8",
+  "turnId": "9d33f0bf-e60f-4fd3-810e-fb02415e891f",
+  "kind": "video",
+  "status": "failed",
+  "prompt": "A single elegant white flower centered against a clean solid blue background, minimalist modern aesthetic. The flower sways very gently and softly, with subtle delicate petal movement, light and calm motion, not intense. Camera performs a slow dolly-in, gradual slow zoom in toward the flower over 5 seconds. Pure, simple, uncluttered composition, soft even studio lighting, smooth cinematic motion, clean and contemporary visual style.",
+  "model": "wan3.0-video",
+  "createdAt": "2026-10-05T14:15:34.518Z",
+  "updatedAt": "2026-10-05T14:15:34.746Z",
+  "error": "HTTP 401: InvalidApiKey Invalid API-key provided. For details, see: https://www.alibabacloud.com/help/en/model-studio/error-code#apikey-error"
+}

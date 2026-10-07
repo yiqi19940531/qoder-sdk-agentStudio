@@ -1,0 +1,655 @@
+{
+  "id": "5f1f31be-6f9e-4aa4-a349-47025265f298",
+  "sdkSessionId": "5f1f31be-6f9e-4aa4-a349-47025265f298",
+  "agentId": "42dd9f43-12b7-4570-af13-609ad26a24a9",
+  "agentName": "网页效果探索 Agent",
+  "status": "idle",
+  "createdAt": "2026-10-05T03:51:46.780Z",
+  "updatedAt": "2026-10-05T03:52:12.066Z",
+  "config": {
+    "agent": {
+      "kind": "main",
+      "name": "网页效果探索 Agent",
+      "description": "网页效果探索",
+      "model": "bailian/qwen3.8-flash-tp",
+      "maxTurns": 20,
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Agent"
+      ],
+      "skills": [],
+      "mcpServers": [
+        "playwright",
+        "chrome-devtools"
+      ],
+      "subAgentIds": [],
+      "memoryEnabled": true,
+      "id": "42dd9f43-12b7-4570-af13-609ad26a24a9",
+      "persona": "输入一个网页，可以查看相关网页具体的样式效果并且给出说明"
+    },
+    "children": []
+  },
+  "turns": [
+    {
+      "id": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "status": "done",
+      "startedAt": "2026-10-05T03:51:46.780Z",
+      "endedAt": "2026-10-05T03:52:12.066Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "cec96ef1-b5d6-444b-bf8e-619739c8e34b",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "role": "user",
+      "content": "请使用 Playwright browser_navigate 依次打开 http://127.0.0.1:5173/、再次打开 http://127.0.0.1:5173/、再打开 http://127.0.0.1:8787/，记录每次页面标题，最后报告。",
+      "at": "2026-10-05T03:51:46.780Z"
+    },
+    {
+      "id": "assistant-cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "role": "assistant",
+      "content": "I'll open each URL in sequence and record the page title.\n\n三次导航全部完成，页面标题记录如下：\n\n| 次序 | URL | Page Title |\n|---|---|---|\n| 1 | http://127.0.0.1:5173/ | Qoder Agent Workbench |\n| 2 | http://127.0.0.1:5173/ | Qoder Agent Workbench |\n| 3 | http://127.0.0.1:8787/ | Qoder Agent Workbench |\n\n三个标题完全一致，说明 5173（dev）和 8787 两个服务当前输出的是同一个应用（同一份 `index.html` 的 `<title>`）。浏览器目前停在 http://127.0.0.1:8787/ 上，需要我接着抓取某一页的快照或截图来看具体样式效果，告诉我即可。",
+      "at": "2026-10-05T03:51:54.783Z"
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "at": "2026-10-05T03:51:46.781Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "status",
+      "label": "正在初始化 Qoder SDK"
+    },
+    {
+      "id": 2,
+      "at": "2026-10-05T03:51:49.813Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "memory",
+      "label": "记忆加载",
+      "detail": "{\"status\":\"success\",\"files\":[{\"id\":\"agent-memory\",\"path\":\"demo-workspace/data/profiles/42dd9f43-12b7-4570-af13-609ad26a24a9/memory/INDEX.md\",\"status\":\"loaded\"}]}"
+    },
+    {
+      "id": 3,
+      "at": "2026-10-05T03:51:50.223Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "diagnostic",
+      "label": "SDK 已初始化",
+      "detail": "{\"agents\":[\"general-purpose\",\"Explore\",\"Plan\"],\"skills\":[]}"
+    },
+    {
+      "id": 4,
+      "at": "2026-10-05T03:51:54.783Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "I'll"
+    },
+    {
+      "id": 5,
+      "at": "2026-10-05T03:51:54.939Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": " open each URL in"
+    },
+    {
+      "id": 6,
+      "at": "2026-10-05T03:51:55.087Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": " sequence and record the"
+    },
+    {
+      "id": 7,
+      "at": "2026-10-05T03:51:55.112Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": " page title."
+    },
+    {
+      "id": 8,
+      "at": "2026-10-05T03:51:55.115Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "\n\n"
+    },
+    {
+      "id": 9,
+      "at": "2026-10-05T03:51:55.747Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "tool",
+      "label": "mcp__playwright__browser_navigate",
+      "detail": "{\"url\":\"http://127.0.0.1:5173/\"}",
+      "toolName": "mcp__playwright__browser_navigate"
+    },
+    {
+      "id": 10,
+      "at": "2026-10-05T03:51:55.747Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "interaction",
+      "label": "browser_navigate (playwright)",
+      "detail": "http://127.0.0.1:5173\nhttp://127.0.0.1:5173/",
+      "toolName": "mcp__playwright__browser_navigate",
+      "interactionId": "4817ace0-f34e-4efa-9715-801e14b92489"
+    },
+    {
+      "id": 11,
+      "at": "2026-10-05T03:51:55.815Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "interaction_resolved",
+      "label": "用户允许一次",
+      "interactionId": "4817ace0-f34e-4efa-9715-801e14b92489"
+    },
+    {
+      "id": 12,
+      "at": "2026-10-05T03:51:56.910Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "tool",
+      "label": "工具结果",
+      "detail": "### Ran Playwright code\n```js\nawait page.goto('http://127.0.0.1:5173/');\n```\n### Page\n- Page URL: http://127.0.0.1:5173/\n- Page Title: Qoder Agent Workbench\n### Snapshot\n- [Snapshot](.playwright-mcp/page-2026-10-05T03-51-56-904Z.yml)\n### Events\n- New console entries: .playwright-mcp/console-2026-10-05T03-51-56-748Z.log#L1"
+    },
+    {
+      "id": 13,
+      "at": "2026-10-05T03:52:00.169Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "tool",
+      "label": "mcp__playwright__browser_navigate",
+      "detail": "{\"url\":\"http://127.0.0.1:5173/\"}",
+      "toolName": "mcp__playwright__browser_navigate"
+    },
+    {
+      "id": 14,
+      "at": "2026-10-05T03:52:00.225Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "tool",
+      "label": "工具结果",
+      "detail": "### Ran Playwright code\n```js\nawait page.goto('http://127.0.0.1:5173/');\n```\n### Page\n- Page URL: http://127.0.0.1:5173/\n- Page Title: Qoder Agent Workbench\n### Snapshot\n- [Snapshot](.playwright-mcp/page-2026-10-05T03-52-00-222Z.yml)\n### Events\n- New console entries: .playwright-mcp/console-2026-10-05T03-52-00-171Z.log#L1"
+    },
+    {
+      "id": 15,
+      "at": "2026-10-05T03:52:04.108Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "tool",
+      "label": "mcp__playwright__browser_navigate",
+      "detail": "{\"url\":\"http://127.0.0.1:8787/\"}",
+      "toolName": "mcp__playwright__browser_navigate"
+    },
+    {
+      "id": 16,
+      "at": "2026-10-05T03:52:04.108Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "interaction",
+      "label": "browser_navigate (playwright)",
+      "detail": "http://127.0.0.1:8787\nhttp://127.0.0.1:8787/",
+      "toolName": "mcp__playwright__browser_navigate",
+      "interactionId": "17c6aa0d-0808-46d7-b876-662b171a1cf9"
+    },
+    {
+      "id": 17,
+      "at": "2026-10-05T03:52:04.847Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "interaction_resolved",
+      "label": "用户允许一次",
+      "interactionId": "17c6aa0d-0808-46d7-b876-662b171a1cf9"
+    },
+    {
+      "id": 18,
+      "at": "2026-10-05T03:52:04.915Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "tool",
+      "label": "工具结果",
+      "detail": "### Ran Playwright code\n```js\nawait page.goto('http://127.0.0.1:8787/');\n```\n### Page\n- Page URL: http://127.0.0.1:8787/\n- Page Title: Qoder Agent Workbench\n### Snapshot\n- [Snapshot](.playwright-mcp/page-2026-10-05T03-52-04-912Z.yml)"
+    },
+    {
+      "id": 19,
+      "at": "2026-10-05T03:52:08.715Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "三次导航全部完成"
+    },
+    {
+      "id": 20,
+      "at": "2026-10-05T03:52:08.715Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "，页面标题"
+    },
+    {
+      "id": 21,
+      "at": "2026-10-05T03:52:08.827Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "记录如下：\n\n"
+    },
+    {
+      "id": 22,
+      "at": "2026-10-05T03:52:08.828Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "|"
+    },
+    {
+      "id": 23,
+      "at": "2026-10-05T03:52:08.893Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": " 次序 | URL"
+    },
+    {
+      "id": 24,
+      "at": "2026-10-05T03:52:08.966Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": " | Page Title |"
+    },
+    {
+      "id": 25,
+      "at": "2026-10-05T03:52:08.967Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "\n|"
+    },
+    {
+      "id": 26,
+      "at": "2026-10-05T03:52:08.967Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "---|---|"
+    },
+    {
+      "id": 27,
+      "at": "2026-10-05T03:52:09.069Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "---|\n|"
+    },
+    {
+      "id": 28,
+      "at": "2026-10-05T03:52:09.070Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": " 1 |"
+    },
+    {
+      "id": 29,
+      "at": "2026-10-05T03:52:09.115Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": " http://12"
+    },
+    {
+      "id": 30,
+      "at": "2026-10-05T03:52:09.142Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "7.0."
+    },
+    {
+      "id": 31,
+      "at": "2026-10-05T03:52:09.142Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "0."
+    },
+    {
+      "id": 32,
+      "at": "2026-10-05T03:52:09.210Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "1:51"
+    },
+    {
+      "id": 33,
+      "at": "2026-10-05T03:52:09.211Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "7"
+    },
+    {
+      "id": 34,
+      "at": "2026-10-05T03:52:09.289Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "3/ | Q"
+    },
+    {
+      "id": 35,
+      "at": "2026-10-05T03:52:09.333Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "oder Agent Workbench"
+    },
+    {
+      "id": 36,
+      "at": "2026-10-05T03:52:09.333Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": " |\n| "
+    },
+    {
+      "id": 37,
+      "at": "2026-10-05T03:52:09.393Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "2 | http://"
+    },
+    {
+      "id": 38,
+      "at": "2026-10-05T03:52:09.394Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "127."
+    },
+    {
+      "id": 39,
+      "at": "2026-10-05T03:52:09.449Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "0.0."
+    },
+    {
+      "id": 40,
+      "at": "2026-10-05T03:52:09.465Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "1:51"
+    },
+    {
+      "id": 41,
+      "at": "2026-10-05T03:52:09.497Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "73/ |"
+    },
+    {
+      "id": 42,
+      "at": "2026-10-05T03:52:09.601Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": " Qoder Agent Work"
+    },
+    {
+      "id": 43,
+      "at": "2026-10-05T03:52:09.646Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "bench |"
+    },
+    {
+      "id": 44,
+      "at": "2026-10-05T03:52:09.646Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "\n| 3"
+    },
+    {
+      "id": 45,
+      "at": "2026-10-05T03:52:09.678Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": " | http://"
+    },
+    {
+      "id": 46,
+      "at": "2026-10-05T03:52:09.679Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "127."
+    },
+    {
+      "id": 47,
+      "at": "2026-10-05T03:52:09.712Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "0.0."
+    },
+    {
+      "id": 48,
+      "at": "2026-10-05T03:52:09.778Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "1:87"
+    },
+    {
+      "id": 49,
+      "at": "2026-10-05T03:52:09.783Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "87/ |"
+    },
+    {
+      "id": 50,
+      "at": "2026-10-05T03:52:09.860Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": " Qoder Agent Work"
+    },
+    {
+      "id": 51,
+      "at": "2026-10-05T03:52:09.891Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "bench |\n\n三个"
+    },
+    {
+      "id": 52,
+      "at": "2026-10-05T03:52:09.961Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "标题完全一致，"
+    },
+    {
+      "id": 53,
+      "at": "2026-10-05T03:52:09.963Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "说明 "
+    },
+    {
+      "id": 54,
+      "at": "2026-10-05T03:52:10.152Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "5173"
+    },
+    {
+      "id": 55,
+      "at": "2026-10-05T03:52:10.154Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "（"
+    },
+    {
+      "id": 56,
+      "at": "2026-10-05T03:52:10.198Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "dev）和 "
+    },
+    {
+      "id": 57,
+      "at": "2026-10-05T03:52:10.198Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "87"
+    },
+    {
+      "id": 58,
+      "at": "2026-10-05T03:52:10.242Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "87 两个"
+    },
+    {
+      "id": 59,
+      "at": "2026-10-05T03:52:10.242Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "服务"
+    },
+    {
+      "id": 60,
+      "at": "2026-10-05T03:52:10.315Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "当前输出的是同一个"
+    },
+    {
+      "id": 61,
+      "at": "2026-10-05T03:52:10.459Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "应用（同一份"
+    },
+    {
+      "id": 62,
+      "at": "2026-10-05T03:52:10.489Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": " `index.html`"
+    },
+    {
+      "id": 63,
+      "at": "2026-10-05T03:52:10.572Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": " 的 `<title"
+    },
+    {
+      "id": 64,
+      "at": "2026-10-05T03:52:10.614Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": ">`）。浏览器目前"
+    },
+    {
+      "id": 65,
+      "at": "2026-10-05T03:52:10.692Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "停在 http://1"
+    },
+    {
+      "id": 66,
+      "at": "2026-10-05T03:52:10.692Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "27"
+    },
+    {
+      "id": 67,
+      "at": "2026-10-05T03:52:10.692Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": ".0.0"
+    },
+    {
+      "id": 68,
+      "at": "2026-10-05T03:52:10.747Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": ".1:8"
+    },
+    {
+      "id": 69,
+      "at": "2026-10-05T03:52:10.748Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "7"
+    },
+    {
+      "id": 70,
+      "at": "2026-10-05T03:52:10.858Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "87/ "
+    },
+    {
+      "id": 71,
+      "at": "2026-10-05T03:52:10.860Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "上"
+    },
+    {
+      "id": 72,
+      "at": "2026-10-05T03:52:10.860Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "，需要我接着"
+    },
+    {
+      "id": 73,
+      "at": "2026-10-05T03:52:10.996Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "抓取某一页的"
+    },
+    {
+      "id": 74,
+      "at": "2026-10-05T03:52:11.032Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "快照"
+    },
+    {
+      "id": 75,
+      "at": "2026-10-05T03:52:11.067Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "或截图来看具体"
+    },
+    {
+      "id": 76,
+      "at": "2026-10-05T03:52:11.167Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "样式效果，告诉我"
+    },
+    {
+      "id": 77,
+      "at": "2026-10-05T03:52:11.216Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "text",
+      "detail": "即可。"
+    },
+    {
+      "id": 78,
+      "at": "2026-10-05T03:52:11.404Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "memory",
+      "label": "自动记忆写入",
+      "detail": "{\"status\":\"skipped\",\"attemptId\":\"1b43e3b7-f3d7-49c7-9df5-41614cdc6c1e\",\"reason\":\"turn_interval_gate\",\"origin\":\"turn_complete\",\"sourceRequestIds\":[\"a471eacd-383c-4380-8397-28edc135f2bc\"],\"writtenFiles\":[],\"failedFiles\":[],\"indexUpdated\":false,\"contentUpdated\":false,\"durationMs\":7}"
+    },
+    {
+      "id": 79,
+      "at": "2026-10-05T03:52:12.066Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "usage",
+      "label": "本次会话累计 Credits",
+      "credits": 0
+    },
+    {
+      "id": 80,
+      "at": "2026-10-05T03:52:12.066Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "diagnostic",
+      "label": "实际使用模型",
+      "detail": "bailian/qwen3.8-flash-tp"
+    },
+    {
+      "id": 81,
+      "at": "2026-10-05T03:52:12.066Z",
+      "turnId": "cf0f08d7-e5a2-40c2-b083-04fb6e9e482d",
+      "type": "turn_end",
+      "label": "本轮完成，可继续对话"
+    }
+  ],
+  "pending": [],
+  "lastEventId": 81,
+  "demoArchive": true,
+  "sdkEstablished": false,
+  "sessionAllowedTools": [],
+  "sessionAllowedCategories": []
+}

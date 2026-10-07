@@ -1,0 +1,171 @@
+{
+  "id": "b0d32abc-0f71-4420-8cb9-5ea31f1f1d91",
+  "sdkSessionId": "b0d32abc-0f71-4420-8cb9-5ea31f1f1d91",
+  "sdkEstablished": false,
+  "agentId": "repo-coordinator",
+  "agentName": "仓库协调 Agent",
+  "status": "idle",
+  "createdAt": "2026-10-05T04:02:53.818Z",
+  "updatedAt": "2026-10-05T04:03:00.326Z",
+  "config": {
+    "agent": {
+      "kind": "main",
+      "name": "仓库协调 Agent",
+      "description": "读取示例仓库，按需委派代码审查，并汇总结果。",
+      "model": "auto",
+      "maxTurns": 8,
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Agent"
+      ],
+      "skills": [],
+      "mcpServers": [
+        "repo-facts"
+      ],
+      "subAgentIds": [
+        "code-reviewer"
+      ],
+      "memoryEnabled": true,
+      "id": "repo-coordinator",
+      "persona": "# 仓库协调 Agent\n\n你是谨慎的代码分析助手。先读取证据，再给出简明结论。需要详细审查时，委派给代码审查 Agent。默认不修改文件。"
+    },
+    "children": [
+      {
+        "kind": "subagent",
+        "name": "代码审查 Agent",
+        "description": "审查示例仓库的正确性问题，返回文件证据和建议。",
+        "model": "efficient",
+        "maxTurns": 6,
+        "tools": [
+          "Read",
+          "Grep",
+          "Glob"
+        ],
+        "skills": [
+          "workbench:repo-review"
+        ],
+        "mcpServers": [
+          "repo-facts"
+        ],
+        "subAgentIds": [],
+        "memoryEnabled": false,
+        "id": "code-reviewer",
+        "persona": "# 代码审查 Agent\n\n你只做代码审查。列出可复现的问题、证据位置和修复建议，不修改文件。"
+      }
+    ]
+  },
+  "turns": [
+    {
+      "id": "5c563a9e-fbad-43bd-9a55-e76dc31e03ce",
+      "status": "interrupted",
+      "startedAt": "2026-10-05T04:02:53.818Z",
+      "endedAt": "2026-10-05T04:02:53.822Z"
+    },
+    {
+      "id": "f94856bc-78da-4740-949b-0a2827f05729",
+      "status": "done",
+      "startedAt": "2026-10-05T04:02:53.824Z",
+      "endedAt": "2026-10-05T04:03:00.326Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "3a74c3a3-2015-48ad-a92c-b66043fc3470",
+      "turnId": "5c563a9e-fbad-43bd-9a55-e76dc31e03ce",
+      "role": "user",
+      "content": "只回答一加一等于几。",
+      "at": "2026-10-05T04:02:53.818Z"
+    },
+    {
+      "id": "678e23ee-0615-4cff-824a-de9d209af99f",
+      "turnId": "f94856bc-78da-4740-949b-0a2827f05729",
+      "role": "user",
+      "content": "继续，回答一加一等于几。只给数字。",
+      "at": "2026-10-05T04:02:53.824Z"
+    },
+    {
+      "id": "assistant-f94856bc-78da-4740-949b-0a2827f05729",
+      "turnId": "f94856bc-78da-4740-949b-0a2827f05729",
+      "role": "assistant",
+      "content": "2",
+      "at": "2026-10-05T04:02:59.850Z"
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "at": "2026-10-05T04:02:53.819Z",
+      "turnId": "5c563a9e-fbad-43bd-9a55-e76dc31e03ce",
+      "type": "status",
+      "label": "正在初始化 Qoder SDK"
+    },
+    {
+      "id": 2,
+      "at": "2026-10-05T04:02:53.822Z",
+      "turnId": "5c563a9e-fbad-43bd-9a55-e76dc31e03ce",
+      "type": "turn_end",
+      "label": "本轮已中断，可继续对话"
+    },
+    {
+      "id": 3,
+      "at": "2026-10-05T04:02:56.430Z",
+      "turnId": "f94856bc-78da-4740-949b-0a2827f05729",
+      "type": "memory",
+      "label": "记忆加载",
+      "detail": "{\"status\":\"success\",\"files\":[{\"id\":\"agent-memory\",\"path\":\"demo-workspace/data/profiles/repo-coordinator/memory/INDEX.md\",\"status\":\"loaded\"}]}"
+    },
+    {
+      "id": 4,
+      "at": "2026-10-05T04:02:56.889Z",
+      "turnId": "f94856bc-78da-4740-949b-0a2827f05729",
+      "type": "diagnostic",
+      "label": "SDK 已初始化",
+      "detail": "{\"agents\":[\"general-purpose\",\"Explore\",\"Plan\",\"code-reviewer\"],\"skills\":[]}"
+    },
+    {
+      "id": 5,
+      "at": "2026-10-05T04:02:59.850Z",
+      "turnId": "f94856bc-78da-4740-949b-0a2827f05729",
+      "type": "text",
+      "detail": "2"
+    },
+    {
+      "id": 6,
+      "at": "2026-10-05T04:03:00.005Z",
+      "turnId": "f94856bc-78da-4740-949b-0a2827f05729",
+      "type": "memory",
+      "label": "自动记忆写入",
+      "detail": "{\"status\":\"skipped\",\"attemptId\":\"e2be0007-62aa-4dee-97c6-a73f074b2d75\",\"reason\":\"turn_interval_gate\",\"origin\":\"turn_complete\",\"sourceRequestIds\":[\"11e3d8d1-70cd-4008-80a9-156314f01d45\"],\"writtenFiles\":[],\"failedFiles\":[],\"indexUpdated\":false,\"contentUpdated\":false,\"durationMs\":5}"
+    },
+    {
+      "id": 7,
+      "at": "2026-10-05T04:03:00.326Z",
+      "turnId": "f94856bc-78da-4740-949b-0a2827f05729",
+      "type": "usage",
+      "label": "本次会话累计 Credits",
+      "credits": 0.0071275944571428575
+    },
+    {
+      "id": 8,
+      "at": "2026-10-05T04:03:00.326Z",
+      "turnId": "f94856bc-78da-4740-949b-0a2827f05729",
+      "type": "diagnostic",
+      "label": "实际使用模型",
+      "detail": "auto"
+    },
+    {
+      "id": 9,
+      "at": "2026-10-05T04:03:00.326Z",
+      "turnId": "f94856bc-78da-4740-949b-0a2827f05729",
+      "type": "turn_end",
+      "label": "本轮完成，可继续对话"
+    }
+  ],
+  "pending": [],
+  "lastEventId": 9,
+  "demoArchive": true,
+  "sessionAllowedTools": [],
+  "sessionAllowedCategories": []
+}

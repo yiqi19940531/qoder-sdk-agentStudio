@@ -1,0 +1,82 @@
+[
+  {
+    "id": "repo-facts",
+    "name": "repo-facts",
+    "source": "builtin",
+    "transport": "sdk",
+    "auth": "none",
+    "envNames": [],
+    "headerNames": [],
+    "check": {
+      "status": "untested",
+      "tools": []
+    }
+  },
+  {
+    "id": "playwright",
+    "name": "playwright",
+    "source": "builtin",
+    "transport": "stdio",
+    "auth": "none",
+    "envNames": [],
+    "headerNames": [],
+    "check": {
+      "status": "untested",
+      "tools": []
+    }
+  },
+  {
+    "id": "chrome-devtools",
+    "name": "chrome-devtools",
+    "source": "builtin",
+    "transport": "stdio",
+    "auth": "none",
+    "envNames": [],
+    "headerNames": [],
+    "check": {
+      "status": "untested",
+      "tools": []
+    }
+  },
+  {
+    "id": "bailian-image",
+    "name": "bailian-image",
+    "source": "builtin",
+    "transport": "sdk",
+    "auth": "none",
+    "envNames": [],
+    "headerNames": [],
+    "check": {
+      "status": "untested",
+      "tools": []
+    }
+  },
+  {
+    "id": "bailian-video",
+    "name": "bailian-video",
+    "source": "builtin",
+    "transport": "sdk",
+    "auth": "none",
+    "envNames": [],
+    "headerNames": [],
+    "check": {
+      "status": "untested",
+      "tools": []
+    }
+  },
+  {
+    "id": "apify",
+    "name": "Apify",
+    "source": "custom",
+    "transport": "http",
+    "auth": "bearer",
+    "url": "https://mcp.apify.com?tools=actors,apify/web-fetch",
+    "timeoutMs": 30000,
+    "envNames": [],
+    "headerNames": [],
+    "check": {
+      "status": "untested",
+      "tools": []
+    }
+  }
+]

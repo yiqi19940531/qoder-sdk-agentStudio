@@ -1,0 +1,7 @@
+{
+  "imageModel": "qwen-image-3.0",
+  "imageSize": "1024*1024",
+  "videoModel": "wan3.0-video",
+  "videoDuration": 5,
+  "videoResolution": "480P"
+}

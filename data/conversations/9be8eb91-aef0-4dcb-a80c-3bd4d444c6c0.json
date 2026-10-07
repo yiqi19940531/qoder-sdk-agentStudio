@@ -1,0 +1,274 @@
+{
+  "id": "9be8eb91-aef0-4dcb-a80c-3bd4d444c6c0",
+  "sdkSessionId": "9be8eb91-aef0-4dcb-a80c-3bd4d444c6c0",
+  "agentId": "repo-coordinator",
+  "agentName": "仓库协调 Agent",
+  "status": "idle",
+  "createdAt": "2026-10-05T03:56:27.203Z",
+  "updatedAt": "2026-10-05T04:01:40.303Z",
+  "config": {
+    "agent": {
+      "kind": "main",
+      "name": "仓库协调 Agent",
+      "description": "读取示例仓库，按需委派代码审查，并汇总结果。",
+      "model": "auto",
+      "maxTurns": 8,
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Agent"
+      ],
+      "skills": [],
+      "mcpServers": [
+        "repo-facts"
+      ],
+      "subAgentIds": [
+        "code-reviewer"
+      ],
+      "memoryEnabled": true,
+      "id": "repo-coordinator",
+      "persona": "# 仓库协调 Agent\n\n你是谨慎的代码分析助手。先读取证据，再给出简明结论。需要详细审查时，委派给代码审查 Agent。默认不修改文件。"
+    },
+    "children": [
+      {
+        "kind": "subagent",
+        "name": "代码审查 Agent",
+        "description": "审查示例仓库的正确性问题，返回文件证据和建议。",
+        "model": "efficient",
+        "maxTurns": 6,
+        "tools": [
+          "Read",
+          "Grep",
+          "Glob"
+        ],
+        "skills": [
+          "workbench:repo-review"
+        ],
+        "mcpServers": [
+          "repo-facts"
+        ],
+        "subAgentIds": [],
+        "memoryEnabled": false,
+        "id": "code-reviewer",
+        "persona": "# 代码审查 Agent\n\n你只做代码审查。列出可复现的问题、证据位置和修复建议，不修改文件。"
+      }
+    ]
+  },
+  "turns": [
+    {
+      "id": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "status": "done",
+      "startedAt": "2026-10-05T03:56:27.203Z",
+      "endedAt": "2026-10-05T03:58:39.899Z"
+    },
+    {
+      "id": "2c2d9dec-3423-45e2-8aae-9b8fcc8f5946",
+      "status": "done",
+      "startedAt": "2026-10-05T04:01:02.691Z",
+      "endedAt": "2026-10-05T04:01:10.559Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "48d17d63-8586-4a29-b13f-61ef660cde03",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "role": "user",
+      "content": "请先调用 AskUserQuestion，问我单选题：“报告要简短还是详细？”选项“简短”和“详细”。收到答案后回复“收到：”加选项。不要调用其他工具。",
+      "at": "2026-10-05T03:56:27.203Z"
+    },
+    {
+      "id": "assistant-664937b2-5c24-4536-acce-05cbdee55bb3",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "role": "assistant",
+      "content": "收到：简短",
+      "at": "2026-10-05T03:58:39.278Z"
+    },
+    {
+      "id": "47fe0a2f-c43c-4bae-b302-072d8680e827",
+      "turnId": "2c2d9dec-3423-45e2-8aae-9b8fcc8f5946",
+      "role": "user",
+      "content": "我刚才选了简短还是详细？只回答选项。",
+      "at": "2026-10-05T04:01:02.691Z"
+    },
+    {
+      "id": "assistant-2c2d9dec-3423-45e2-8aae-9b8fcc8f5946",
+      "turnId": "2c2d9dec-3423-45e2-8aae-9b8fcc8f5946",
+      "role": "assistant",
+      "content": "简短",
+      "at": "2026-10-05T04:01:09.964Z"
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "at": "2026-10-05T03:56:27.203Z",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "type": "status",
+      "label": "正在初始化 Qoder SDK"
+    },
+    {
+      "id": 2,
+      "at": "2026-10-05T03:56:30.017Z",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "type": "memory",
+      "label": "记忆加载",
+      "detail": "{\"status\":\"success\",\"files\":[{\"id\":\"agent-memory\",\"path\":\"demo-workspace/data/profiles/repo-coordinator/memory/INDEX.md\",\"status\":\"loaded\"}]}"
+    },
+    {
+      "id": 3,
+      "at": "2026-10-05T03:56:30.417Z",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "type": "diagnostic",
+      "label": "SDK 已初始化",
+      "detail": "{\"agents\":[\"general-purpose\",\"Explore\",\"Plan\",\"code-reviewer\"],\"skills\":[]}"
+    },
+    {
+      "id": 4,
+      "at": "2026-10-05T03:56:36.480Z",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "type": "tool",
+      "label": "AskUserQuestion",
+      "detail": "{\"questions\":[{\"question\":\"报告要简短还是详细？\",\"header\":\"报告长度\",\"options\":[{\"label\":\"简短\",\"description\":\"只给出核心结论和最少必要信息\"},{\"label\":\"详细\",\"description\":\"给出完整分析过程、证据和细节说明\"}]}]}",
+      "toolName": "AskUserQuestion"
+    },
+    {
+      "id": 5,
+      "at": "2026-10-05T03:56:36.530Z",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "type": "interaction",
+      "label": "Answer Questions",
+      "detail": "{\"questions\":[{\"question\":\"报告要简短还是详细？\",\"header\":\"报告长度\",\"options\":[{\"label\":\"简短\",\"description\":\"只给出核心结论和最少必要信息\"},{\"label\":\"详细\",\"description\":\"给出完整分析过程、证据和细节说明\"}],\"multiSelect\":false}]}",
+      "toolName": "AskUserQuestion",
+      "interactionId": "1ac59615-9066-4217-ad51-492f3af56ef4"
+    },
+    {
+      "id": 6,
+      "at": "2026-10-05T03:58:36.234Z",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "type": "interaction_resolved",
+      "label": "用户已回答",
+      "interactionId": "1ac59615-9066-4217-ad51-492f3af56ef4"
+    },
+    {
+      "id": 7,
+      "at": "2026-10-05T03:58:36.256Z",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "type": "tool",
+      "label": "工具结果",
+      "detail": "Your questions have been answered: \"报告要简短还是详细？\"=\"简短\". You can now continue with these answers in mind."
+    },
+    {
+      "id": 8,
+      "at": "2026-10-05T03:58:39.278Z",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "type": "text",
+      "detail": "收到"
+    },
+    {
+      "id": 9,
+      "at": "2026-10-05T03:58:39.278Z",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "type": "text",
+      "detail": "："
+    },
+    {
+      "id": 10,
+      "at": "2026-10-05T03:58:39.278Z",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "type": "text",
+      "detail": "简短"
+    },
+    {
+      "id": 11,
+      "at": "2026-10-05T03:58:39.603Z",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "type": "memory",
+      "label": "自动记忆写入",
+      "detail": "{\"status\":\"skipped\",\"attemptId\":\"8fe7555a-0a2d-46cc-8551-929ba0b26edc\",\"reason\":\"turn_interval_gate\",\"origin\":\"turn_complete\",\"sourceRequestIds\":[\"a9579e0b-bc55-4c3f-b5b6-a96857c5e839\"],\"writtenFiles\":[],\"failedFiles\":[],\"indexUpdated\":false,\"contentUpdated\":false,\"durationMs\":6}"
+    },
+    {
+      "id": 12,
+      "at": "2026-10-05T03:58:39.899Z",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "type": "usage",
+      "label": "本次会话累计 Credits",
+      "credits": 0.7645287007142858
+    },
+    {
+      "id": 13,
+      "at": "2026-10-05T03:58:39.899Z",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "type": "diagnostic",
+      "label": "实际使用模型",
+      "detail": "auto"
+    },
+    {
+      "id": 14,
+      "at": "2026-10-05T03:58:39.899Z",
+      "turnId": "664937b2-5c24-4536-acce-05cbdee55bb3",
+      "type": "turn_end",
+      "label": "本轮完成，可继续对话"
+    },
+    {
+      "id": 15,
+      "at": "2026-10-05T04:01:05.347Z",
+      "turnId": "2c2d9dec-3423-45e2-8aae-9b8fcc8f5946",
+      "type": "memory",
+      "label": "记忆加载",
+      "detail": "{\"status\":\"success\",\"files\":[{\"id\":\"agent-memory\",\"path\":\"demo-workspace/data/profiles/repo-coordinator/memory/INDEX.md\",\"status\":\"loaded\"}]}"
+    },
+    {
+      "id": 16,
+      "at": "2026-10-05T04:01:05.772Z",
+      "turnId": "2c2d9dec-3423-45e2-8aae-9b8fcc8f5946",
+      "type": "diagnostic",
+      "label": "已恢复 SDK 会话",
+      "detail": "{\"agents\":[\"general-purpose\",\"Explore\",\"Plan\",\"code-reviewer\"],\"skills\":[]}"
+    },
+    {
+      "id": 17,
+      "at": "2026-10-05T04:01:09.964Z",
+      "turnId": "2c2d9dec-3423-45e2-8aae-9b8fcc8f5946",
+      "type": "text",
+      "detail": "简短"
+    },
+    {
+      "id": 18,
+      "at": "2026-10-05T04:01:10.559Z",
+      "turnId": "2c2d9dec-3423-45e2-8aae-9b8fcc8f5946",
+      "type": "usage",
+      "label": "本次会话累计 Credits",
+      "credits": 0.9473502222857143
+    },
+    {
+      "id": 19,
+      "at": "2026-10-05T04:01:10.559Z",
+      "turnId": "2c2d9dec-3423-45e2-8aae-9b8fcc8f5946",
+      "type": "diagnostic",
+      "label": "实际使用模型",
+      "detail": "auto"
+    },
+    {
+      "id": 20,
+      "at": "2026-10-05T04:01:10.559Z",
+      "turnId": "2c2d9dec-3423-45e2-8aae-9b8fcc8f5946",
+      "type": "turn_end",
+      "label": "本轮完成，可继续对话"
+    },
+    {
+      "id": 21,
+      "at": "2026-10-05T04:01:40.303Z",
+      "turnId": "2c2d9dec-3423-45e2-8aae-9b8fcc8f5946",
+      "type": "memory",
+      "label": "自动记忆写入",
+      "detail": "{\"status\":\"no_change\",\"attemptId\":\"a1634cb7-1f3e-4adc-804f-353eed2e38d5\",\"reason\":\"no_memory_written\",\"origin\":\"turn_complete\",\"sourceRequestIds\":[\"520c1768-a4e0-49e7-a8ea-5ea4cd51cef5\"],\"modelRequestIds\":[\"9548a4fd-0583-4f74-8e1f-126c6d52eaa5\",\"29b88741-5066-4680-b2bd-26bc9d51a3be\",\"8481408a-df9e-4147-8e57-f3b3ac4bc955\",\"a7448f0b-4109-424b-9836-e3d3f77a7f0f\"],\"writtenFiles\":[],\"failedFiles\":[],\"indexUpdated\":false,\"contentUpdated\":false,\"durationMs\":30121,\"usage\":{\"input_tokens\":53920,\"output_tokens\":1170,\"cache_creation_input_tokens\":0,\"cache_read_input_tokens\":49664,\"server_tool_use\":{\"web_search_requests\":0,\"web_fetch_requests\":0},\"cache_creation\":{\"ephemeral_1h_input_tokens\":0,\"ephemera…"
+    }
+  ],
+  "pending": [],
+  "lastEventId": 21,
+  "demoArchive": true,
+  "sdkEstablished": false,
+  "sessionAllowedTools": [],
+  "sessionAllowedCategories": []
+}

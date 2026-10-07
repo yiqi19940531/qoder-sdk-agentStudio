@@ -1,0 +1,1082 @@
+{
+  "id": "45ab354e-7688-4761-a5c1-688e8df04b83",
+  "sdkSessionId": "45ab354e-7688-4761-a5c1-688e8df04b83",
+  "sdkEstablished": false,
+  "agentId": "aigc-director",
+  "agentName": "AIGC 任务编排 Agent",
+  "status": "idle",
+  "createdAt": "2026-10-05T15:04:26.207Z",
+  "updatedAt": "2026-10-05T15:05:28.154Z",
+  "config": {
+    "agent": {
+      "id": "aigc-director",
+      "kind": "main",
+      "name": "AIGC 任务编排 Agent",
+      "description": "识别文生图、文生视频需求，拆解创意简报并委派对应子 Agent。",
+      "model": "auto",
+      "maxTurns": 24,
+      "tools": [
+        "Read",
+        "Agent"
+      ],
+      "skills": [],
+      "mcpServers": [],
+      "subAgentIds": [
+        "aigc-image",
+        "aigc-video"
+      ],
+      "memoryEnabled": false,
+      "permissions": {
+        "toolApproval": "ask",
+        "pathAccess": "workspace",
+        "additionalDirectories": []
+      },
+      "persona": "# AIGC 任务编排 Agent\n\n你负责客户的文字生成图片或视频任务。先判断媒介：只要图片就委派 aigc-image，只要视频就委派 aigc-video，明确两者都要就分别委派。意图不明确时用 AskUserQuestion 让用户选择。主 Agent 不直接生成媒体，不读取凭据。向子 Agent 传递完整的创意简报；只根据真实工具结果报告成功、失败或等待。"
+    },
+    "children": [
+      {
+        "id": "aigc-image",
+        "kind": "subagent",
+        "name": "图片生成 Agent",
+        "description": "当用户要求生成图片、插画、海报、照片时调用；只负责文生图。",
+        "model": "auto",
+        "maxTurns": 12,
+        "tools": [],
+        "skills": [
+          "workbench:bailian-image"
+        ],
+        "mcpServers": [
+          "bailian-image"
+        ],
+        "subAgentIds": [],
+        "memoryEnabled": false,
+        "permissions": {
+          "toolApproval": "allow_all",
+          "pathAccess": "workspace",
+          "additionalDirectories": []
+        },
+        "persona": "# 图片生成 Agent\n\n你只负责生成一张图片。先使用已预载的 bailian-image Skill，然后调用 mcp__bailian-image__generate_image 一次。不要调用视频工具，不要读取凭据。返回真实产物 ID、状态与简短说明。"
+      },
+      {
+        "id": "aigc-video",
+        "kind": "subagent",
+        "name": "视频生成 Agent",
+        "description": "当用户要求生成视频、动画、短片时调用；只负责文生视频。",
+        "model": "auto",
+        "maxTurns": 20,
+        "tools": [],
+        "skills": [
+          "workbench:bailian-video"
+        ],
+        "mcpServers": [
+          "bailian-video"
+        ],
+        "subAgentIds": [],
+        "memoryEnabled": false,
+        "permissions": {
+          "toolApproval": "allow_all",
+          "pathAccess": "workspace",
+          "additionalDirectories": []
+        },
+        "persona": "# 视频生成 Agent\n\n你只负责生成一段短视频。先使用已预载的 bailian-video Skill，然后调用 mcp__bailian-video__generate_video 一次。不要调用图片工具，不要读取凭据。返回真实产物 ID、状态与简短说明。"
+      }
+    ],
+    "instructions": {
+      "aigc-director": "# AIGC 任务编排 Agent · 规则\n\n- 判断用户要图片、视频，或两者都要；不明确时使用 AskUserQuestion。\n- 把可执行的具体创意简报分别交给图片或视频子 Agent。\n- 只根据工具返回的状态报告结果，不虚构已生成的媒体。\n",
+      "aigc-image": "# 图片生成 Agent · 规则\n\n- 仅处理文生图。提炼主体、场景、风格、构图和光线，调用一次图片生成工具。\n- 只在成功返回产物 ID 后报告图片完成。\n",
+      "aigc-video": "# 视频生成 Agent · 规则\n\n- 仅处理文生视频。提炼主体、动作、场景、镜头运动，调用一次视频生成工具。\n- 等待工具结果；失败时说明状态和错误，不虚构视频。\n"
+    }
+  },
+  "turns": [
+    {
+      "id": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "status": "done",
+      "startedAt": "2026-10-05T15:04:26.207Z",
+      "endedAt": "2026-10-05T15:05:28.154Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "8346d738-8daf-47a9-9cca-18f8ff220525",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "role": "user",
+      "content": "生成一个美女的图片",
+      "at": "2026-10-05T15:04:26.207Z"
+    },
+    {
+      "id": "assistant-240cce2a-4a98-4866-bcea-cf93356e7000",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "role": "assistant",
+      "content": "我来把这个需求转给图片生成子 Agent 处理。图片已生成完成。\n\n- **产物 ID**：`28ee396f-085c-4eec-86b7-526c73c54861`\n- **状态**：成功（模型：qwen-image-3.0）\n- **内容**：写实摄影风格的女性人像，半身特写、柔和黄昏暖光、背景虚化，整体清新唯美\n\n如需调整风格（如古风、纯欲风、职业装等）或改为生成视频，告诉我即可。",
+      "at": "2026-10-05T15:04:36.037Z"
+    }
+  ],
+  "events": [
+    {
+      "id": 1,
+      "at": "2026-10-05T15:04:26.210Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "status",
+      "label": "正在初始化 Qoder SDK"
+    },
+    {
+      "id": 2,
+      "at": "2026-10-05T15:04:26.212Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "diagnostic",
+      "label": "SDK 最大轮数",
+      "detail": "24"
+    },
+    {
+      "id": 3,
+      "at": "2026-10-05T15:04:30.526Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "diagnostic",
+      "label": "SDK 已初始化",
+      "detail": "{\"agents\":[\"general-purpose\",\"Explore\",\"Plan\",\"aigc-image\",\"aigc-video\"],\"skills\":[]}"
+    },
+    {
+      "id": 4,
+      "at": "2026-10-05T15:04:36.037Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "我来"
+    },
+    {
+      "id": 5,
+      "at": "2026-10-05T15:04:36.037Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "把这个"
+    },
+    {
+      "id": 6,
+      "at": "2026-10-05T15:04:36.037Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "需求"
+    },
+    {
+      "id": 7,
+      "at": "2026-10-05T15:04:36.037Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "转"
+    },
+    {
+      "id": 8,
+      "at": "2026-10-05T15:04:36.037Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "给"
+    },
+    {
+      "id": 9,
+      "at": "2026-10-05T15:04:36.037Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "图片"
+    },
+    {
+      "id": 10,
+      "at": "2026-10-05T15:04:36.037Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "生成"
+    },
+    {
+      "id": 11,
+      "at": "2026-10-05T15:04:36.138Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "子"
+    },
+    {
+      "id": 12,
+      "at": "2026-10-05T15:04:36.140Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": " Agent"
+    },
+    {
+      "id": 13,
+      "at": "2026-10-05T15:04:36.140Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": " "
+    },
+    {
+      "id": 14,
+      "at": "2026-10-05T15:04:36.140Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "处理"
+    },
+    {
+      "id": 15,
+      "at": "2026-10-05T15:04:36.162Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "。"
+    },
+    {
+      "id": 16,
+      "at": "2026-10-05T15:04:37.287Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "tool",
+      "label": "Agent",
+      "detail": "{\"description\":\"生成美女人物图片\",\"prompt\":\"请使用你的图像生成工具生成一张图片，需求来自用户：「生成一个美女的图片」。\\n\\n创意简报（可直接作为提示词基础）：\\n- 主体：一位年轻美丽的女性人物肖像，五官精致，气质优雅自然\\n- 构图：半身特写，人物居中，眼神看向镜头，姿态自然放松\\n- 风格：写实摄影风格，类似高质量人像摄影作品\\n- 光线：柔和的自然光（如黄昏窗边暖光或户外柔和侧光），皮肤质感细腻\\n- 背景：简洁虚化的背景，营造浅景深效果，不喧宾夺主\\n- 色调：温暖柔和的色调，整体氛围清新唯美\\n- 画质：高清、细节丰富、无畸变\\n\\n请调用图像生成工具执行，并如实报告结果：成功则说明生成的图片情况（标题/描述和产出信息），失败则说明错误原因。不要虚构生成结果。\",\"subagent_type\":\"aigc-image\"}",
+      "toolName": "Agent"
+    },
+    {
+      "id": 17,
+      "at": "2026-10-05T15:04:39.416Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "interaction_resolved",
+      "label": "Agent「图片生成 Agent」默认允许工具",
+      "toolName": "mcp__bailian-image__generate_image",
+      "detail": "{\"prompt\":\"写实摄影风格的高质量女性人像摄影作品：一位年轻美丽的女性，五官精致，气质优雅自然。半身特写构图，人物居中，眼神自然地看向镜头，姿态放松。柔和的自然光从侧面照入，类似黄昏窗边的暖光，皮肤质感细腻真实。背景简洁且大幅虚化，营造浅景深效果，不喧宾夺主。整体色调温暖柔和，氛围清新唯美。高清画质，细节丰富，无畸变，专业人像镜头拍摄质感。\"}"
+    },
+    {
+      "id": 18,
+      "at": "2026-10-05T15:04:39.416Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "tool",
+      "label": "mcp__bailian-image__generate_image",
+      "detail": "{\"prompt\":\"写实摄影风格的高质量女性人像摄影作品：一位年轻美丽的女性，五官精致，气质优雅自然。半身特写构图，人物居中，眼神自然地看向镜头，姿态放松。柔和的自然光从侧面照入，类似黄昏窗边的暖光，皮肤质感细腻真实。背景简洁且大幅虚化，营造浅景深效果，不喧宾夺主。整体色调温暖柔和，氛围清新唯美。高清画质，细节丰富，无畸变，专业人像镜头拍摄质感。\"}",
+      "toolName": "mcp__bailian-image__generate_image"
+    },
+    {
+      "id": 19,
+      "at": "2026-10-05T15:04:39.422Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "status",
+      "label": "媒体图片：queued",
+      "detail": "28ee396f-085c-4eec-86b7-526c73c54861"
+    },
+    {
+      "id": 20,
+      "at": "2026-10-05T15:04:39.423Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "status",
+      "label": "媒体图片：running",
+      "detail": "28ee396f-085c-4eec-86b7-526c73c54861"
+    },
+    {
+      "id": 21,
+      "at": "2026-10-05T15:05:21.997Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "status",
+      "label": "媒体图片：running",
+      "detail": "28ee396f-085c-4eec-86b7-526c73c54861"
+    },
+    {
+      "id": 22,
+      "at": "2026-10-05T15:05:23.532Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "status",
+      "label": "媒体图片：succeeded",
+      "detail": "28ee396f-085c-4eec-86b7-526c73c54861"
+    },
+    {
+      "id": 23,
+      "at": "2026-10-05T15:05:23.548Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "tool",
+      "label": "工具结果",
+      "detail": "{\"artifactId\":\"28ee396f-085c-4eec-86b7-526c73c54861\",\"status\":\"succeeded\",\"model\":\"qwen-image-3.0\"}"
+    },
+    {
+      "id": 24,
+      "at": "2026-10-05T15:05:25.941Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "tool",
+      "label": "工具结果",
+      "detail": "图片生成完成。\n\n- 产物 ID：`28ee396f-085c-4eec-86b7-526c73c54861`\n- 状态：succeeded\n- 生成模型：qwen-image-3.0\n\n**图片说明**：按创意简报生成了一张写实摄影风格的女性人像——半身特写、人物居中看向镜头，柔和自然侧光（黄昏窗边暖调），背景简洁虚化形成浅景深，整体色调温暖清新，定位为高质量人像摄影质感。\n\n按要求仅调用了一次图像生成工具，未涉及视频工具或凭据读取。"
+    },
+    {
+      "id": 25,
+      "at": "2026-10-05T15:05:27.054Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "图片"
+    },
+    {
+      "id": 26,
+      "at": "2026-10-05T15:05:27.054Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "已"
+    },
+    {
+      "id": 27,
+      "at": "2026-10-05T15:05:27.054Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "生成"
+    },
+    {
+      "id": 28,
+      "at": "2026-10-05T15:05:27.054Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "完成"
+    },
+    {
+      "id": 29,
+      "at": "2026-10-05T15:05:27.054Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "。\n\n"
+    },
+    {
+      "id": 30,
+      "at": "2026-10-05T15:05:27.054Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "-"
+    },
+    {
+      "id": 31,
+      "at": "2026-10-05T15:05:27.102Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": " **"
+    },
+    {
+      "id": 32,
+      "at": "2026-10-05T15:05:27.105Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "产物"
+    },
+    {
+      "id": 33,
+      "at": "2026-10-05T15:05:27.105Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": " ID"
+    },
+    {
+      "id": 34,
+      "at": "2026-10-05T15:05:27.105Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "**"
+    },
+    {
+      "id": 35,
+      "at": "2026-10-05T15:05:27.105Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "："
+    },
+    {
+      "id": 36,
+      "at": "2026-10-05T15:05:27.105Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "`"
+    },
+    {
+      "id": 37,
+      "at": "2026-10-05T15:05:27.105Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "28"
+    },
+    {
+      "id": 38,
+      "at": "2026-10-05T15:05:27.178Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "ee"
+    },
+    {
+      "id": 39,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "396"
+    },
+    {
+      "id": 40,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "f"
+    },
+    {
+      "id": 41,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "-"
+    },
+    {
+      "id": 42,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "085"
+    },
+    {
+      "id": 43,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "c"
+    },
+    {
+      "id": 44,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "-"
+    },
+    {
+      "id": 45,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "4"
+    },
+    {
+      "id": 46,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "e"
+    },
+    {
+      "id": 47,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "ec"
+    },
+    {
+      "id": 48,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "-"
+    },
+    {
+      "id": 49,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "86"
+    },
+    {
+      "id": 50,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "b"
+    },
+    {
+      "id": 51,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "7"
+    },
+    {
+      "id": 52,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "-"
+    },
+    {
+      "id": 53,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "526"
+    },
+    {
+      "id": 54,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "c"
+    },
+    {
+      "id": 55,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "73"
+    },
+    {
+      "id": 56,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "c"
+    },
+    {
+      "id": 57,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "548"
+    },
+    {
+      "id": 58,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "61"
+    },
+    {
+      "id": 59,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "`\n"
+    },
+    {
+      "id": 60,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "-"
+    },
+    {
+      "id": 61,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": " **"
+    },
+    {
+      "id": 62,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "状态"
+    },
+    {
+      "id": 63,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "**"
+    },
+    {
+      "id": 64,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "："
+    },
+    {
+      "id": 65,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "成功"
+    },
+    {
+      "id": 66,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "（"
+    },
+    {
+      "id": 67,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "模型"
+    },
+    {
+      "id": 68,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "："
+    },
+    {
+      "id": 69,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "q"
+    },
+    {
+      "id": 70,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "wen"
+    },
+    {
+      "id": 71,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "-image"
+    },
+    {
+      "id": 72,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "-"
+    },
+    {
+      "id": 73,
+      "at": "2026-10-05T15:05:27.184Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "3"
+    },
+    {
+      "id": 74,
+      "at": "2026-10-05T15:05:27.185Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "."
+    },
+    {
+      "id": 75,
+      "at": "2026-10-05T15:05:27.185Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "0"
+    },
+    {
+      "id": 76,
+      "at": "2026-10-05T15:05:27.193Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "）\n"
+    },
+    {
+      "id": 77,
+      "at": "2026-10-05T15:05:27.195Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "-"
+    },
+    {
+      "id": 78,
+      "at": "2026-10-05T15:05:27.195Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": " **"
+    },
+    {
+      "id": 79,
+      "at": "2026-10-05T15:05:27.195Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "内容"
+    },
+    {
+      "id": 80,
+      "at": "2026-10-05T15:05:27.208Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "**"
+    },
+    {
+      "id": 81,
+      "at": "2026-10-05T15:05:27.210Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "："
+    },
+    {
+      "id": 82,
+      "at": "2026-10-05T15:05:27.210Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "写"
+    },
+    {
+      "id": 83,
+      "at": "2026-10-05T15:05:27.210Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "实"
+    },
+    {
+      "id": 84,
+      "at": "2026-10-05T15:05:27.210Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "摄影"
+    },
+    {
+      "id": 85,
+      "at": "2026-10-05T15:05:27.210Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "风格的"
+    },
+    {
+      "id": 86,
+      "at": "2026-10-05T15:05:27.210Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "女性"
+    },
+    {
+      "id": 87,
+      "at": "2026-10-05T15:05:27.210Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "人"
+    },
+    {
+      "id": 88,
+      "at": "2026-10-05T15:05:27.210Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "像"
+    },
+    {
+      "id": 89,
+      "at": "2026-10-05T15:05:27.219Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "，"
+    },
+    {
+      "id": 90,
+      "at": "2026-10-05T15:05:27.254Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "半"
+    },
+    {
+      "id": 91,
+      "at": "2026-10-05T15:05:27.255Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "身"
+    },
+    {
+      "id": 92,
+      "at": "2026-10-05T15:05:27.255Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "特"
+    },
+    {
+      "id": 93,
+      "at": "2026-10-05T15:05:27.255Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "写"
+    },
+    {
+      "id": 94,
+      "at": "2026-10-05T15:05:27.255Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "、"
+    },
+    {
+      "id": 95,
+      "at": "2026-10-05T15:05:27.255Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "柔和"
+    },
+    {
+      "id": 96,
+      "at": "2026-10-05T15:05:27.255Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "黄昏"
+    },
+    {
+      "id": 97,
+      "at": "2026-10-05T15:05:27.266Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "暖"
+    },
+    {
+      "id": 98,
+      "at": "2026-10-05T15:05:27.308Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "光"
+    },
+    {
+      "id": 99,
+      "at": "2026-10-05T15:05:27.309Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "、"
+    },
+    {
+      "id": 100,
+      "at": "2026-10-05T15:05:27.309Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "背景"
+    },
+    {
+      "id": 101,
+      "at": "2026-10-05T15:05:27.309Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "虚"
+    },
+    {
+      "id": 102,
+      "at": "2026-10-05T15:05:27.309Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "化"
+    },
+    {
+      "id": 103,
+      "at": "2026-10-05T15:05:27.309Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "，"
+    },
+    {
+      "id": 104,
+      "at": "2026-10-05T15:05:27.309Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "整体"
+    },
+    {
+      "id": 105,
+      "at": "2026-10-05T15:05:27.309Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "清新"
+    },
+    {
+      "id": 106,
+      "at": "2026-10-05T15:05:27.321Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "唯"
+    },
+    {
+      "id": 107,
+      "at": "2026-10-05T15:05:27.322Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "美"
+    },
+    {
+      "id": 108,
+      "at": "2026-10-05T15:05:27.323Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "\n\n"
+    },
+    {
+      "id": 109,
+      "at": "2026-10-05T15:05:27.324Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "如需"
+    },
+    {
+      "id": 110,
+      "at": "2026-10-05T15:05:27.324Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "调整"
+    },
+    {
+      "id": 111,
+      "at": "2026-10-05T15:05:27.338Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "风格"
+    },
+    {
+      "id": 112,
+      "at": "2026-10-05T15:05:27.338Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "（"
+    },
+    {
+      "id": 113,
+      "at": "2026-10-05T15:05:27.351Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "如"
+    },
+    {
+      "id": 114,
+      "at": "2026-10-05T15:05:27.352Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "古"
+    },
+    {
+      "id": 115,
+      "at": "2026-10-05T15:05:27.366Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "风"
+    },
+    {
+      "id": 116,
+      "at": "2026-10-05T15:05:27.368Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "、"
+    },
+    {
+      "id": 117,
+      "at": "2026-10-05T15:05:27.368Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "纯"
+    },
+    {
+      "id": 118,
+      "at": "2026-10-05T15:05:27.368Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "欲"
+    },
+    {
+      "id": 119,
+      "at": "2026-10-05T15:05:27.379Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "风"
+    },
+    {
+      "id": 120,
+      "at": "2026-10-05T15:05:27.411Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "、"
+    },
+    {
+      "id": 121,
+      "at": "2026-10-05T15:05:27.413Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "职业"
+    },
+    {
+      "id": 122,
+      "at": "2026-10-05T15:05:27.413Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "装"
+    },
+    {
+      "id": 123,
+      "at": "2026-10-05T15:05:27.413Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "等"
+    },
+    {
+      "id": 124,
+      "at": "2026-10-05T15:05:27.413Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "）"
+    },
+    {
+      "id": 125,
+      "at": "2026-10-05T15:05:27.413Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "或"
+    },
+    {
+      "id": 126,
+      "at": "2026-10-05T15:05:27.427Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "改为"
+    },
+    {
+      "id": 127,
+      "at": "2026-10-05T15:05:27.523Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "生成"
+    },
+    {
+      "id": 128,
+      "at": "2026-10-05T15:05:27.536Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "视频"
+    },
+    {
+      "id": 129,
+      "at": "2026-10-05T15:05:27.536Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "，"
+    },
+    {
+      "id": 130,
+      "at": "2026-10-05T15:05:27.536Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "告诉我"
+    },
+    {
+      "id": 131,
+      "at": "2026-10-05T15:05:27.536Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "即可"
+    },
+    {
+      "id": 132,
+      "at": "2026-10-05T15:05:27.536Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "text",
+      "detail": "。"
+    },
+    {
+      "id": 133,
+      "at": "2026-10-05T15:05:28.154Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "usage",
+      "label": "本次会话累计 Credits",
+      "credits": 0.09915124302857142
+    },
+    {
+      "id": 134,
+      "at": "2026-10-05T15:05:28.154Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "diagnostic",
+      "label": "实际使用模型",
+      "detail": "auto"
+    },
+    {
+      "id": 135,
+      "at": "2026-10-05T15:05:28.154Z",
+      "turnId": "240cce2a-4a98-4866-bcea-cf93356e7000",
+      "type": "turn_end",
+      "label": "本轮完成，可继续对话"
+    }
+  ],
+  "pending": [],
+  "sessionAllowedTools": [],
+  "sessionAllowedCategories": [],
+  "lastEventId": 135,
+  "demoArchive": true
+}
