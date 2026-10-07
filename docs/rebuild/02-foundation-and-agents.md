@@ -65,7 +65,7 @@ HTTP 层只接收与返回 `AgentConfig`，磁盘层把 `persona` 拆入 `person
 
 每步完成后至少运行相关类型检查；FND-T3 和 FND-T4 还应做“保存→重启→读取”的 API 验证。最后把实际文件清单与 [09-file-map.md](09-file-map.md) 对齐。
 
-## 可直接复制的复建提示词
+## 可直接复制的构建提示词
 
 > 已确定架构见“总提示词”。现在完成阶段 1：建立 TypeScript + Express + React + Vite 的本地工程，锁定 Qoder SDK 版本，服务只监听 127.0.0.1。实现共享 AgentConfig 类型、文件型 Agent 存储与原子写入、每 Agent 独立 persona.md／AGENTS.md／memory/INDEX.md、配置清单再生成。提供 GET /api/bootstrap、Agent CRUD、规则和记忆读取／保存接口；页面可创建、编辑、选择主 Agent 与一层子 Agent，配置模型、最大轮数、工具、Skill、MCP、权限。默认逐次审批和仅工作目录访问。先提供仓库协调主 Agent、代码审查子 Agent及隔离的 calculator.ts 示例仓库。校验非法引用、循环、空工具集和最大轮数；保存后重新读取显示结果。完成类型检查、构建和 API 持久化验证，列出实际新增文件与未接入的 SDK 执行功能。
 

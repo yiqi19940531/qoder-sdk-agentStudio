@@ -1,6 +1,6 @@
 # 09 · 公开工程逐文件索引
 
-本索引以公开 ZIP／仓库的白名单内容为准。列出每个源码、脚本和配置文件的职责；会话、媒体及截图列在末尾按类型说明。文件名是复建时的建议边界，不要求不同实现逐字复制源码。原工作目录里的秘密文件、临时探针、缓存和未发布文档不属于公开工程。
+本索引以公开 ZIP／仓库的白名单内容为准。列出每个源码、脚本和配置文件的职责；会话、媒体及截图列在末尾按类型说明。文件名是构建时的建议边界，不要求不同实现逐字复制源码。原工作目录里的秘密文件、临时探针、缓存和未发布文档不属于公开工程。
 
 ## 根目录与启动
 
@@ -118,7 +118,7 @@
 - `data/conversations/*.json`：34 条脱敏只读会话，包含成功及失败的消息、轮次、事件与创建时配置；按同一 `Conversation` 契约保存，无需为每条写不同实现说明。
 - `data/generated/*.json` 与同目录媒体：生成任务状态及 2 张图片、2 段视频；成功媒体经产物 API 打开。失败记录没有对应成功媒体是正常状态。
 - `data/example-repo/*.png`、`artifacts/*`、`data/mcp-ui*.png`：示例页面及配置界面的安全截图，只作演示材料，不参与 SDK 执行。
-- `docs/rebuild/README.md`、`00-history-and-goals.md`、`01-architecture-contract.md`、`02-foundation-and-agents.md`、`03-runtime-and-conversations.md`、`04-mcp-and-browser.md`、`05-skills.md`、`06-aigc-and-media.md`、`07-interface-and-flow.md`、`08-public-demo.md`、本文件、`10-verification.md` 与 `11-spec-coding-workflow.md`：复建路线、阶段规范、Spec Coding 工作法、逐文件索引与验收；08。
+- `docs/rebuild/README.md`、`00-history-and-goals.md`、`01-architecture-contract.md`、`02-foundation-and-agents.md`、`03-runtime-and-conversations.md`、`04-mcp-and-browser.md`、`05-skills.md`、`06-aigc-and-media.md`、`07-interface-and-flow.md`、`08-public-demo.md`、本文件、`10-verification.md` 与 `11-spec-coding-workflow.md`：构建路线、阶段规范、Spec Coding 工作法、逐文件索引与验收；08。
 - `downloads/qoder-agent-workbench-demo.zip` 只在公开 GitHub 仓库中作为下载物存在；它不是 ZIP 自身的输入。
 
 接收者运行后产生的 `data/config-catalog.json`、`data/mcp-secrets.json`、`data/mcp-session-config/` 和新会话／新媒体属于本机状态，不在初始公开包中。任何凭据文件只用占位说明，不提供示例真值。

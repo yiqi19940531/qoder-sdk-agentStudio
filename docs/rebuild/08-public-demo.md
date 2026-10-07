@@ -44,7 +44,7 @@
 
 压缩前和压缩后逐条扫描密钥模式、认证头、私人路径、禁止文件及已知原始密钥；发现问题删除输出 ZIP。图片、视频和截图还需人工查看可见画面。`DEMO-MANIFEST.json` 保存预期数量供核对。`scripts/quickstart.mjs` 做 Node/Qoder 环境检查、必要时安装依赖、构建并启动；`start.sh` 和 `start.cmd` 调用同一入口。
 
-`README.md`、`README.demo.md`、中英文 QUICKSTART 说明运行与可选凭据；`VALIDATION.md` 分清真实 macOS 验证、模拟服务验证和未做实机测试的 Linux／Windows x64。公开仓库首页及 ZIP 均须包含本复建目录。
+`README.md`、`README.demo.md`、中英文 QUICKSTART 说明运行与可选凭据；`VALIDATION.md` 分清真实 macOS 验证、模拟服务验证和未做实机测试的 Linux／Windows x64。公开仓库首页及 ZIP 均须包含本构建指南目录。
 
 ## 关键文件和接口
 
@@ -67,7 +67,7 @@
 6. **PUB-T6 · 一键启动与说明**：共用 Node 脚本校验版本和 Qoder 登录，必要时执行 `npm ci`、构建并启动；macOS/Linux 与 Windows x64 包装脚本只负责调用它。README 说明内置模型、可选 Token、可选百炼、演示存档及安装步骤。
 7. **PUB-T7 · 公开仓库同步**：从通过扫描的 ZIP 同步公开内容，根 README 加指南和下载入口；在公开仓库自身重新打包，对比 ZIP 条目，提交后核对 GitHub 文件与下载包哈希。
 
-## 可直接复制的复建提示词
+## 可直接复制的构建提示词
 
 > 请把当前本地 Agent 工程制作成可分享的演示仓库和单个 ZIP。打包脚本必须使用源码／数据白名单，保留 6 个 Agent、3 个 Skill、34 条已脱敏只读会话、4 个成功媒体和安全截图；禁止发布原作者百炼 Key、Apify Token、Qoder 登录状态、私有 MCP 快照、原始本机路径。历史存档可查看但 API 不可直接续接；历史页提问用接收者账号创建新会话。公开默认使用可用的 Qoder 内置 auto／efficient、逐次审批和工作目录访问，Apify 只保留空凭据定义且不装配。提供跨 macOS、Linux、Windows x64 的共用 Node 快速启动逻辑与中英指南；可选服务由接收者自己填 Key。压缩前后扫描所有文件和 ZIP 条目，媒体画面人工检查。先在全新目录解压并完成安装、构建、服务 API 和模拟 MCP／AIGC 测试，再同步公开仓库、README 与下载包；如实列出哪些系统实际测试过。
 
@@ -85,4 +85,4 @@
 | PUB-05 | 清空依赖目录，在全新位置执行快启 | 自动安装、构建、服务启动；错误依赖给可理解提示 |
 | PUB-06 | 检查发布 README 和 `VALIDATION.md` | 明确区分 macOS 真机、模拟服务和 Linux／Windows 未实机项 |
 
-公开仓库与 ZIP 的文档字节内容要一致；可允许仓库根 README 与 ZIP README 为不同入口文案，但两者必须指向同一复建指南。
+公开仓库与 ZIP 的文档字节内容要一致；可允许仓库根 README 与 ZIP README 为不同入口文案，但两者必须指向同一构建指南。
