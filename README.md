@@ -2,7 +2,7 @@
 
 一个基于 **Qoder Agent SDK** 的本地多 Agent 工作台。项目内提供 6 个 Agent、3 个 Skill、无需 API Key 的浏览器与示例仓库 MCP，以及 34 条经过脱敏的历史对话和已生成的图片、视频。克隆仓库或下载演示 ZIP 后，只需使用自己的 Qoder 账号登录，即可在本机体验。
 
-**快速入口：** [下载完整演示 ZIP](downloads/qoder-agent-workbench-demo.zip) · [中文详细指南](QUICKSTART.zh-CN.md) · [English guide](QUICKSTART.en.md) · [实际验证记录](VALIDATION.md)
+**快速入口：** [直接下载完整演示 ZIP](https://raw.githubusercontent.com/yiqi19940531/qoder-sdk-agentStudio/main/downloads/qoder-agent-workbench-demo.zip) · [中文详细指南](QUICKSTART.zh-CN.md) · [English guide](QUICKSTART.en.md) · [实际验证记录](VALIDATION.md)
 
 > ZIP 与仓库源码都不包含原作者的百炼 Key、Apify Token、Qoder 登录状态或可复用的认证文件。需要联网模型时，请使用你自己的 Qoder 账号。
 
@@ -76,4 +76,4 @@ Key: <你自己的百炼 Key>
 
 ---
 
-**English:** Download the [complete demo ZIP](downloads/qoder-agent-workbench-demo.zip) or clone this repository, sign in with your own Qoder CLI account, then run `node scripts/quickstart.mjs`. The project includes six Agents, three Skills, 34 sanitized read-only conversations, and four media files. Apify and Bailian credentials are optional and must be supplied by each user. See the [English quick start](QUICKSTART.en.md) for setup details.
+**English:** [Download the complete demo ZIP](https://raw.githubusercontent.com/yiqi19940531/qoder-sdk-agentStudio/main/downloads/qoder-agent-workbench-demo.zip) or clone this repository, sign in with your own Qoder CLI account, then run `node scripts/quickstart.mjs`. The project includes six Agents, three Skills, 34 sanitized read-only conversations, and four media files. Apify and Bailian credentials are optional and must be supplied by each user. See the [English quick start](QUICKSTART.en.md) for setup details.
