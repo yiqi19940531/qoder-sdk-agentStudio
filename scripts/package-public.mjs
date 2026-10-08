@@ -96,6 +96,8 @@ try {
   for (const tree of ['src', 'server', 'shared', 'scripts', 'public', 'plugins/workbench']) await copyTree(tree, (name, entry) => !entry.name.startsWith('.') && !/\.(log|tmp)$/.test(name));
   await copy('plugins/workbench/.qoder-plugin/plugin.json');
   await copyTree('docs/rebuild');
+  await copy('docs/index.html');
+  await copy('docs/.nojekyll');
   const agents = JSON.parse(await readFile(path.join(root, 'data/agents.json'), 'utf8'));
   if (agents.length !== 6) throw new Error(`Expected 6 Agents, found ${agents.length}`);
   for (const agent of agents) {
@@ -149,6 +151,7 @@ try {
   for (const name of promoNames) {
     await copy(`artifacts/promo-videos/${name}.mp4`);
     await copy(`artifacts/promo-videos/${name}-poster.png`);
+    await copy(`artifacts/promo-videos/${name}-preview.gif`);
   }
   for (const name of ['mcp-ui.png', 'mcp-ui-light.png']) await copy(`data/${name}`);
   await addJson('DEMO-MANIFEST.json', { agents: agents.length, skills: 3, conversations: conversationFiles.length, successfulMedia: generatedFiles.filter((name) => /\.(png|mp4)$/i.test(name)).length, promoVideos: promoNames.length, archivePolicy: 'read-only; new questions create new account sessions' });

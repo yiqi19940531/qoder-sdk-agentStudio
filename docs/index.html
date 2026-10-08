@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <title>Agent Hub · 功能演示</title>
+  <style>
+    :root { color-scheme: dark; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: #eef1ff; background: radial-gradient(circle at 80% -10%, #25335d, transparent 32%), #0b1020; }
+    a { color: #b6b1ff; }
+    .wrap { width: min(1160px, calc(100% - 36px)); margin: 0 auto; }
+    header { padding: 70px 0 42px; }
+    .eyebrow { margin: 0 0 12px; color: #a9a3ff; font-size: 13px; font-weight: 700; letter-spacing: .15em; }
+    h1 { margin: 0; font-size: clamp(34px, 5vw, 62px); line-height: 1.12; }
+    .lead { color: #b1bdd4; max-width: 720px; font-size: 18px; line-height: 1.7; }
+    .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+    .links a, .download { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 9px 16px; border: 1px solid #545d8c; border-radius: 10px; text-decoration: none; color: #f5f5ff; background: #252b4d; font-weight: 600; }
+    .links a:hover, .download:hover { background: #353d6a; }
+    main { padding-bottom: 70px; }
+    .clip { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(240px, .8fr); gap: 26px; align-items: center; min-height: 480px; margin: 24px 0; padding: 26px; border: 1px solid #394561; border-radius: 20px; background: linear-gradient(135deg, #171f36, #111a2a); box-shadow: 0 18px 50px #0003; scroll-margin-top: 18px; }
+    .video-wrap { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #080d17; border: 1px solid #455376; border-radius: 14px; overflow: hidden; }
+    video { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .play-fallback { position: absolute; inset: auto 20px 20px auto; padding: 9px 13px; border: 1px solid #ada8ff; border-radius: 9px; background: #252b4de8; color: white; cursor: pointer; font: inherit; }
+    .play-fallback[hidden] { display: none; }
+    .clip-copy small { color: #aaa3ff; font-weight: 700; letter-spacing: .12em; }
+    .clip-copy h2 { margin: 14px 0; font-size: clamp(24px, 3vw, 34px); line-height: 1.25; }
+    .clip-copy p { color: #bac5da; font-size: 16px; line-height: 1.8; }
+    .state { display: inline-block; margin: 9px 0 20px; padding: 6px 10px; border: 1px solid #526080; border-radius: 999px; color: #9bdcc9; font-size: 12px; }
+    .download { min-height: 38px; font-size: 13px; }
+    footer { padding: 20px 0 50px; color: #8997b4; border-top: 1px solid #2e3952; font-size: 13px; }
+    @media (max-width: 820px) {
+      header { padding-top: 44px; }
+      .clip { display: block; min-height: 0; padding: 14px; margin: 16px 0 30px; }
+      .clip-copy { padding: 16px 5px 5px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <p class="eyebrow">QODER AGENT WORKBENCH</p>
+    <h1>六段功能演示</h1>
+    <p class="lead">向下滚动，当前视频会自动播放；离开画面后暂停。点击视频可以查看播放控件。</p>
+    <nav class="links" aria-label="项目链接">
+      <a href="https://github.com/yiqi19940531/qoder-sdk-agentStudio">查看项目源码</a>
+      <a href="https://github.com/yiqi19940531/qoder-sdk-agentStudio/raw/refs/heads/main/downloads/qoder-agent-workbench-demo.zip">下载演示包</a>
+    </nav>
+  </header>
+  <main class="wrap">
+    <section class="clip" id="clip-01" data-name="01-overview">
+      <div class="video-wrap"><video muted playsinline loop controls preload="none" aria-label="六个 Agent 与装配概览"></video><button class="play-fallback" hidden type="button">播放视频</button></div>
+      <div class="clip-copy"><small>01 / AGENT ASSEMBLY</small><h2>Agent 装配总览</h2><p>浏览六个 Agent，查看主 Agent 与子 Agent 的模型、工具、Skill 和 MCP 如何组合。</p><span class="state" aria-live="polite">等待进入视口</span><br><a class="download" data-download href="#">打开原视频</a></div>
+    </section>
+    <section class="clip" id="clip-02" data-name="02-repo-delegation">
+      <div class="video-wrap"><video muted playsinline loop controls preload="none" aria-label="主 Agent 委派子 Agent"></video><button class="play-fallback" hidden type="button">播放视频</button></div>
+      <div class="clip-copy"><small>02 / DELEGATION</small><h2>主子 Agent 委派</h2><p>查看仓库协调 Agent 将任务交给代码审查子 Agent，并在流程图中查看双方执行动作。</p><span class="state" aria-live="polite">等待进入视口</span><br><a class="download" data-download href="#">打开原视频</a></div>
+    </section>
+    <section class="clip" id="clip-03" data-name="03-aigc-flow">
+      <div class="video-wrap"><video muted playsinline loop controls preload="none" aria-label="图片与视频子 Agent"></video><button class="play-fallback" hidden type="button">播放视频</button></div>
+      <div class="clip-copy"><small>03 / MULTI AGENT</small><h2>图片与视频协作</h2><p>查看编排 Agent 分别委派图片、视频子 Agent，并回看已生成的媒体示例。</p><span class="state" aria-live="polite">等待进入视口</span><br><a class="download" data-download href="#">打开原视频</a></div>
+    </section>
+    <section class="clip" id="clip-04" data-name="04-mcp-config">
+      <div class="video-wrap"><video muted playsinline loop controls preload="none" aria-label="MCP 服务配置"></video><button class="play-fallback" hidden type="button">播放视频</button></div>
+      <div class="clip-copy"><small>04 / MCP</small><h2>MCP 服务配置</h2><p>校验服务连接、查看实际发现的工具，再把 MCP 装配给需要的 Agent。</p><span class="state" aria-live="polite">等待进入视口</span><br><a class="download" data-download href="#">打开原视频</a></div>
+    </section>
+    <section class="clip" id="clip-05" data-name="05-skills">
+      <div class="video-wrap"><video muted playsinline loop controls preload="none" aria-label="Skill 管理"></video><button class="play-fallback" hidden type="button">播放视频</button></div>
+      <div class="clip-copy"><small>05 / SKILLS</small><h2>Skill 管理</h2><p>查看 Skill 的目录和脚本，编辑草稿，并校验格式及 SDK 发现结果。</p><span class="state" aria-live="polite">等待进入视口</span><br><a class="download" data-download href="#">打开原视频</a></div>
+    </section>
+    <section class="clip" id="clip-06" data-name="06-permissions">
+      <div class="video-wrap"><video muted playsinline loop controls preload="none" aria-label="权限控制"></video><button class="play-fallback" hidden type="button">播放视频</button></div>
+      <div class="clip-copy"><small>06 / PERMISSIONS</small><h2>权限控制</h2><p>查看全局工具授权、Agent 默认审批策略和本地路径访问范围。</p><span class="state" aria-live="polite">等待进入视口</span><br><a class="download" data-download href="#">打开原视频</a></div>
+    </section>
+  </main>
+  <footer class="wrap">Agent Hub · 六段功能演示</footer>
+  <script>
+    (() => {
+      const local = location.protocol === 'file:';
+      const base = local ? '../artifacts/promo-videos/' : 'https://raw.githubusercontent.com/yiqi19940531/qoder-sdk-agentStudio/main/artifacts/promo-videos/';
+      const cards = [...document.querySelectorAll('.clip')];
+      const ratios = new Map(cards.map((card) => [card, 0]));
+      const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+      let active = null;
+
+      function pause(card) {
+        if (!card) return;
+        const video = card.querySelector('video');
+        video.pause();
+        if (video.readyState > 0) video.currentTime = 0;
+        card.querySelector('.state').textContent = '进入视口时播放';
+      }
+
+      function reconcile() {
+        const next = document.hidden || reduceMotion.matches ? null :
+          cards.filter((card) => ratios.get(card) >= .55).sort((a, b) => ratios.get(b) - ratios.get(a))[0] ?? null;
+        if (next === active) return;
+        pause(active);
+        active = next;
+        if (!active) return;
+        const card = active;
+        const video = card.querySelector('video');
+        const fallback = card.querySelector('.play-fallback');
+        if (!video.src) video.src = video.dataset.src;
+        if (video.readyState > 0) video.currentTime = 0;
+        video.play().then(() => {
+          if (active !== card) { video.pause(); return; }
+          card.querySelector('.state').textContent = '播放中';
+          fallback.hidden = true;
+        }).catch(() => {
+          if (active !== card) return;
+          card.querySelector('.state').textContent = '点击播放';
+          fallback.hidden = false;
+        });
+      }
+
+      for (const card of cards) {
+        const name = card.dataset.name;
+        const video = card.querySelector('video');
+        video.dataset.src = base + name + '.mp4';
+        video.poster = base + name + '-poster.png';
+        card.querySelector('[data-download]').href = video.dataset.src;
+        card.querySelector('.play-fallback').addEventListener('click', () => {
+          video.play().then(() => {
+            card.querySelector('.state').textContent = '播放中';
+            card.querySelector('.play-fallback').hidden = true;
+          });
+        });
+      }
+
+      const observer = new IntersectionObserver((entries) => {
+        for (const entry of entries) ratios.set(entry.target, entry.intersectionRatio);
+        reconcile();
+      }, { threshold: [0, .2, .4, .55, .7, 1] });
+      for (const card of cards) observer.observe(card);
+      document.addEventListener('visibilitychange', reconcile);
+      reduceMotion.addEventListener?.('change', reconcile);
+    })();
+  </script>
+</body>
+</html>

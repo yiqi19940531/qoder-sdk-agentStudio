@@ -20,7 +20,7 @@
 | 历史语义 | `shared/types.ts`、`server/conversations.ts`、`src/main.tsx` | `demoArchive` 标识、服务端拒绝续接、前端重新起聊 |
 | 模型兼容 | `shared/model-selection.ts`、`data/agents.json` | 内置默认模型及当前账号回退 |
 | 启动 | `scripts/quickstart.mjs`、`start.sh`、`start.cmd` | Node／CLI 检查、安装、构建、本地服务 |
-| 交付文档 | 根 README、两份 QUICKSTART、`VALIDATION.md`、本目录 | 下载、配置、效果与验证边界 |
+| 交付文档 | 根 README、两份 QUICKSTART、`VALIDATION.md`、`docs/index.html`、本目录 | 下载、配置、功能展示与验证边界 |
 | 演示数据 | `DEMO-MANIFEST.json`、`data/conversations/`、`data/generated/`、`artifacts/promo-videos/` | 数量自检、只读历史、媒体及浏览器操作短片 |
 
 公开仓库是扫描通过的演示版本；打包器必须可以在公开仓库自身重新生成同结构 ZIP。ZIP 的根目录名固定，接收者解压后进入该目录运行统一 Node 快启入口。
@@ -65,7 +65,7 @@
 4. **PUB-T4 · 白名单与脱敏**：复制源码、锁文件、插件清单、活动配置、文档和经检查的数据；按字符串和常见格式去除密钥、认证头、敏感 URL 参数与私人绝对路径。禁止文件路径必须在复制前拒绝。
 5. **PUB-T5 · 压缩后复检**：逐条解压 ZIP 到内存扫描，不只扫描生成的压缩字节；核对条目集合、演示数量、媒体实际存在及文档入口。任一失败删除输出 ZIP。
 6. **PUB-T6 · 一键启动与说明**：共用 Node 脚本校验版本和 Qoder 登录，必要时执行 `npm ci`、构建并启动；macOS/Linux 与 Windows x64 包装脚本只负责调用它。README 说明内置模型、可选 Token、可选百炼、演示存档及安装步骤。
-7. **PUB-T7 · 公开仓库同步**：从通过扫描的 ZIP 同步公开内容，根 README 加指南和下载入口；在公开仓库自身重新打包，对比 ZIP 条目，提交后核对 GitHub 文件与下载包哈希。
+7. **PUB-T7 · 公开仓库同步**：从通过扫描的 ZIP 同步公开内容，根 README 加指南、动态预览和下载入口；滚动播放展示页只在视频进入视口时启动并在离开时暂停。在公开仓库自身重新打包，对比 ZIP 条目，提交后核对 GitHub 文件与下载包哈希。
 
 ## 可直接复制的构建提示词
 

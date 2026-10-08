@@ -22,11 +22,45 @@
 
 Node.js 最低支持版本为 20.19，推荐 22.12+。SDK 固定为 **1.0.50**，内置 **1.1.64** 运行时；系统 CLI 用于登录和管理模型，不需要与 SDK 运行时版本完全一致。[Qoder SDK 说明](https://docs.qoder.com/cli/sdk/overview)
 
-## 六段浏览器演示短片
+## 六段功能演示
 
-[![图片与视频子 Agent 的运行流程](artifacts/promo-videos/03-aigc-flow-poster.png)](artifacts/promo-videos/03-aigc-flow.mp4)
+向下浏览动态预览；[打开完整展示页](https://yiqi19940531.github.io/qoder-sdk-agentStudio/)后，视频进入画面时会自动播放，离开时暂停。
 
-用 Chrome 录制的每段短片均不足 20 秒，约 1.5 倍速播放，并在关键区域加了高亮框：[Agent 装配](artifacts/promo-videos/01-overview.mp4) · [主子 Agent 委派](artifacts/promo-videos/02-repo-delegation.mp4) · [图片／视频双子 Agent](artifacts/promo-videos/03-aigc-flow.mp4) · [MCP 连接与工具](artifacts/promo-videos/04-mcp-config.mp4) · [Skill 管理](artifacts/promo-videos/05-skills.mp4) · [权限控制](artifacts/promo-videos/06-permissions.mp4)。[查看六段封面与说明](artifacts/promo-videos/README.md)。主子 Agent 和媒体片段使用只读演示存档；拍摄时没有重新调用百炼生成。
+### 1. Agent 装配
+
+[![Agent 装配动态预览](artifacts/promo-videos/01-overview-preview.gif)](https://yiqi19940531.github.io/qoder-sdk-agentStudio/#clip-01)
+
+浏览六个 Agent，查看主 Agent 与子 Agent 的模型、工具、Skill 和 MCP 如何组合。
+
+### 2. 主子 Agent 委派
+
+[![主子 Agent 委派动态预览](artifacts/promo-videos/02-repo-delegation-preview.gif)](https://yiqi19940531.github.io/qoder-sdk-agentStudio/#clip-02)
+
+查看仓库协调 Agent 将任务交给代码审查子 Agent，并在流程图中查看双方的执行动作。
+
+### 3. 图片与视频协作
+
+[![图片与视频协作动态预览](artifacts/promo-videos/03-aigc-flow-preview.gif)](https://yiqi19940531.github.io/qoder-sdk-agentStudio/#clip-03)
+
+查看编排 Agent 分配图片、视频任务，并回看已生成的媒体示例。
+
+### 4. MCP 服务配置
+
+[![MCP 服务动态预览](artifacts/promo-videos/04-mcp-config-preview.gif)](https://yiqi19940531.github.io/qoder-sdk-agentStudio/#clip-04)
+
+校验 MCP 连接、查看实际发现的工具，再将服务装配给需要的 Agent。
+
+### 5. Skill 管理
+
+[![Skill 管理动态预览](artifacts/promo-videos/05-skills-preview.gif)](https://yiqi19940531.github.io/qoder-sdk-agentStudio/#clip-05)
+
+查看 Skill 目录和脚本，编辑草稿并校验格式与 SDK 发现结果。
+
+### 6. 权限控制
+
+[![权限控制动态预览](artifacts/promo-videos/06-permissions-preview.gif)](https://yiqi19940531.github.io/qoder-sdk-agentStudio/#clip-06)
+
+查看全局工具授权、Agent 默认审批策略和本地路径范围。
 
 ## 启动后能看到什么
 
