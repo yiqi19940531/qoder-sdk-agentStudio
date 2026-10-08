@@ -144,8 +144,14 @@ try {
   }
   // These screenshots have been visually checked. Screenshots with a visible local home path are excluded.
   for (const name of ['skills-editor.jpg', 'global-tool-permissions.png', 'chrome-devtools-home.png', 'aliyun-minisite-check.png', 'playwright-skills-tab.png']) await copy(`artifacts/${name}`);
+  const promoNames = ['01-overview', '02-repo-delegation', '03-aigc-flow', '04-mcp-config', '05-skills', '06-permissions'];
+  await copy('artifacts/promo-videos/README.md');
+  for (const name of promoNames) {
+    await copy(`artifacts/promo-videos/${name}.mp4`);
+    await copy(`artifacts/promo-videos/${name}-poster.png`);
+  }
   for (const name of ['mcp-ui.png', 'mcp-ui-light.png']) await copy(`data/${name}`);
-  await addJson('DEMO-MANIFEST.json', { agents: agents.length, skills: 3, conversations: conversationFiles.length, successfulMedia: generatedFiles.filter((name) => /\.(png|mp4)$/i.test(name)).length, archivePolicy: 'read-only; new questions create new account sessions' });
+  await addJson('DEMO-MANIFEST.json', { agents: agents.length, skills: 3, conversations: conversationFiles.length, successfulMedia: generatedFiles.filter((name) => /\.(png|mp4)$/i.test(name)).length, promoVideos: promoNames.length, archivePolicy: 'read-only; new questions create new account sessions' });
   if (conversationFiles.length !== 34 || generatedFiles.filter((name) => /\.(png|mp4)$/i.test(name)).length !== 4) throw new Error('Demo inventory changed; inspect before publishing');
 
   for (const relative of [...files].sort()) await audit(relative, await readFile(path.join(stage, relative)));

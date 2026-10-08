@@ -4,6 +4,10 @@
 
 要理解工程的构建过程并从空目录构建，请阅读 [Agent Hub 构建指南](docs/rebuild/README.md)：每阶段都给出目标、技术栈、模块文件架构、实施任务、可复制提示词及校验逻辑。
 
+另有 [六段浏览器操作演示短片](artifacts/promo-videos/README.md)，分别介绍主子 Agent、MCP、Skill 与权限控制。
+
 Start with the [Chinese guide](QUICKSTART.zh-CN.md) or [English guide](QUICKSTART.en.md). The archive includes six Agents, three Skills, keyless MCP definitions, 34 read-only conversations, and generated media. New questions use your own Qoder account in a new session.
 
 For a staged spec-driven build with architecture constraints, file ownership, implementation tasks and copyable prompts, see the [build guide](docs/rebuild/README.md) (Chinese, with English navigation).
+
+Watch the [six short browser walkthroughs](artifacts/promo-videos/README.md) for Agent delegation, MCP, Skills, and permissions.

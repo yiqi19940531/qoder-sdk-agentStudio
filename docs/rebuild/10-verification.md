@@ -12,7 +12,7 @@
 | SKL-01–05 | 已发布 Skill、草稿、插件发现 | `test:skills` | 页面目录树、Agent 装配后的实际 `Skill` 调用 |
 | AIGC-01–05 | 编排 Agent、媒体服务、Python 脚本 | `test:aigc` | 真实付费调用可选；无 Key 时核心功能仍工作 |
 | UI-01–06 | `src/main.tsx`、`shared/agent-flow.ts`、流程组件 | `test:flow`、构建 | 动态连线、弹窗、主题、语言与窄屏布局 |
-| PUB-01–06 | 打包器、存档策略、快启、README | `package:public`、ZIP 条目扫描 | 媒体画面、干净目录启动、远端仓库和 ZIP 哈希 |
+| PUB-01–06 | 打包器、存档策略、快启、README | `package:public`、ZIP 条目扫描 | 媒体与六段浏览器短片画面、干净目录启动、远端仓库和 ZIP 哈希 |
 
 一条需求只有在“代码位置、预期、实际证据”三项齐全时才标记完成。例如 `MCP-03` 的模拟服务调用计数应为零；仅看到连接状态为 `connected`，不足以证明校验没有执行工具。真实服务未调用时，结果填写“未实测”，不能用模拟测试替代。
 

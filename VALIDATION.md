@@ -9,3 +9,7 @@
 发布打包器会对所有白名单文件及生成后的 ZIP 条目逐项扫描；最终 ZIP 在加入用户名和业务空间地址脱敏规则后重建并复检。`npm install` 最终报告 0 个已知漏洞；使用 `shell-quote` 1.11.0+ 的覆盖配置修复了开发依赖链中此前的告警。
 
 English: Tested on macOS arm64 with Node 24.13.1, npm 11.8.0, and Qoder CLI 1.1.65. Clean extraction passed install, typecheck, build, model/flow tests, MCP/Skill/AIGC mock tests, API archive checks, and a live built-in `auto` response. Linux and Windows x64 have shared launch logic and guides but were not run on those operating systems. No real paid Apify or Bailian call was made during validation.
+
+## 浏览器演示短片
+
+在 macOS 的 Google Chrome 中操作公开演示包页面，录制了六段 1600 × 900、约 1.5 倍速、单段不足 20 秒的无声短片。画面裁剪为工作台页面，未包含 Chrome 标签栏、书签和账号信息；逐段检查封面与时间轴。主子 Agent 与媒体展示来自脱敏只读历史，拍摄期间未发起新的百炼付费生成。拍摄时发现“工具授权”标签页缺少主体渲染，已恢复工具分组、逐项全局授权控件与反馈，并在隔离演示副本的 Chrome 页面验证。

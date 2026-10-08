@@ -2,7 +2,7 @@
 
 ## 目标与交付结果
 
-接收者克隆仓库或解压一个 ZIP，使用自己的 Qoder 账号登录并启动，就能看到 6 个 Agent、3 个 Skill、无密钥 MCP、34 条历史存档及 4 个成功媒体文件；可选 Apify／百炼功能由其自行配置。公开内容不含原作者的可复用凭据。
+接收者克隆仓库或解压一个 ZIP，使用自己的 Qoder 账号登录并启动，就能看到 6 个 Agent、3 个 Skill、无密钥 MCP、34 条历史存档、4 个成功媒体文件及 6 段 Chrome 页面演示短片；可选 Apify／百炼功能由其自行配置。公开内容不含原作者的可复用凭据。
 
 ## 前置模块
 
@@ -21,7 +21,7 @@
 | 模型兼容 | `shared/model-selection.ts`、`data/agents.json` | 内置默认模型及当前账号回退 |
 | 启动 | `scripts/quickstart.mjs`、`start.sh`、`start.cmd` | Node／CLI 检查、安装、构建、本地服务 |
 | 交付文档 | 根 README、两份 QUICKSTART、`VALIDATION.md`、本目录 | 下载、配置、效果与验证边界 |
-| 演示数据 | `DEMO-MANIFEST.json`、`data/conversations/`、`data/generated/` | 数量自检、只读历史、成功及失败媒体 |
+| 演示数据 | `DEMO-MANIFEST.json`、`data/conversations/`、`data/generated/`、`artifacts/promo-videos/` | 数量自检、只读历史、媒体及浏览器操作短片 |
 
 公开仓库是扫描通过的演示版本；打包器必须可以在公开仓库自身重新生成同结构 ZIP。ZIP 的根目录名固定，接收者解压后进入该目录运行统一 Node 快启入口。
 
@@ -73,7 +73,7 @@
 
 ## 验收方法
 
-运行 `npm run package:public`；确认失败时不留下发布 ZIP。全新临时目录解压后运行 `node scripts/quickstart.mjs`、类型检查、构建、模型／流程／MCP／Skill／AIGC 测试；服务返回 6 个 Agent、3 个 Skill、34 条存档及 4 个成功媒体。存档直接续接返回冲突，新提问创建新会话；检查所有文档链接、ZIP 内的 `docs/rebuild/` 和公开仓库同版内容。任何系统未实机执行的项目，在发布说明中保持“未验证”。
+运行 `npm run package:public`；确认失败时不留下发布 ZIP。全新临时目录解压后运行 `node scripts/quickstart.mjs`、类型检查、构建、模型／流程／MCP／Skill／AIGC 测试；服务返回 6 个 Agent、3 个 Skill、34 条存档及 4 个成功媒体，ZIP 内另有 6 段可播放宣传视频。存档直接续接返回冲突，新提问创建新会话；检查所有文档链接、ZIP 内的 `docs/rebuild/` 和公开仓库同版内容。任何系统未实机执行的项目，在发布说明中保持“未验证”。
 
 ## 实现后的校验逻辑
 

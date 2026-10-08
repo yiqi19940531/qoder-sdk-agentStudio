@@ -19,15 +19,17 @@ function editableAigc(value: AigcSettingsResponse): AigcSettings {
 type AgentFiles = { instructions: string; memory: string; instructionPath: string; memoryPath: string; loaded: boolean; loading: boolean; instructionsDirty: boolean; memoryDirty: boolean; error?: string };
 type ConversationListItem = Pick<Conversation, 'id' | 'agentId' | 'agentName' | 'status' | 'createdAt' | 'updatedAt'> & { firstMessage: string };
 const defaultAllowed = new Set<string>(DEFAULT_ALLOWED_TOOLS);
+const configurablePermissions = new Set<string>(CONFIGURABLE_PERMISSION_TOOLS);
 const defaultTask = {
   zh: '请先用 repository_facts 工具了解示例仓库，再委派代码审查 Agent 检查 calculator.ts，并汇总有证据的问题。',
   en: 'First inspect the example repository with repository_facts, then delegate a review of calculator.ts to the code review Agent and summarize findings with evidence.',
 };
 const permissionGroups = [
+  { label: '文件与命令', tools: ['Write', 'Edit', 'Bash'] },
   { label: 'Chrome DevTools', tools: MCP_TOOL_NAMES['chrome-devtools'].map((name) => `mcp__chrome-devtools__${name}`) },
   { label: 'Playwright', tools: MCP_TOOL_NAMES.playwright.map((name) => `mcp__playwright__${name}`) },
-  { label: '文件与命令', tools: ['Write', 'Edit', 'Bash'] },
-].map((group) => ({ ...group, tools: group.tools.filter((name) => !defaultAllowed.has(name)) }));
+  { label: '媒体生成 MCP', tools: ['mcp__bailian-image__generate_image', 'mcp__bailian-video__generate_video'] },
+].map((group) => ({ ...group, tools: group.tools.filter((name) => !defaultAllowed.has(name) && configurablePermissions.has(name)) }));
 
 async function api<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${path}`, {
@@ -494,6 +496,22 @@ function App() {
       </div></>}
 
       {section === 'skills' && <SkillManager language={language} skills={bootstrap?.skills ?? []} discovered={bootstrap?.skillNames ?? []} agents={bootstrap?.agents ?? []} currentAgent={draft && !draft.id.startsWith('draft-') ? draft : undefined} onReload={refreshSkills} onAssign={(name) => { if (!draft) return; change({ skills: draft.skills.includes(name) ? draft.skills : [...draft.skills, name] }); setSection('assembly'); setBanner(l('已加入当前 Agent 草稿，请保存 Agent 配置')); }} />}
+
+      {section === 'permissions' && <section className="panel wide">
+        <div className="panel-title"><span className="step">AU</span><div><h2>{l('全局工具授权')}</h2><p>{l('勾选后，所有 Agent 的当前和未来会话调用该工具时默认允许；设置保存在本地，可随时取消。')}</p></div></div>
+        <p className="permission-note">{l('授权按完整工具名生效，包含该工具后续的不同参数、网址和文件路径。Agent 仍需先装配对应工具或 MCP；这里不会增加工具能力。结构化提问及被禁用的浏览器任意代码执行不受此设置影响。')}</p>
+        <p className="permission-note">{l('基础预授权工具由运行时管理；这里控制额外的全局允许项。')}</p>
+        {!permissionSettings ? <p className="empty-text">{l('正在读取全局授权…')}</p> : allPermissionGroups.filter((group) => group.tools.length > 0).map((group) => (
+          <details className="permission-group" key={group.label} open={group.label === '文件与命令' ? true : undefined}>
+            <summary>{l(group.label)}<span>{group.tools.filter((name) => permissionSettings.alwaysAllowTools.includes(name)).length}/{group.tools.length} {l('已允许')}</span></summary>
+            <div className="permission-grid">{group.tools.map((name) => <label className="check-item" key={name}>
+              <input type="checkbox" checked={permissionSettings.alwaysAllowTools.includes(name)} disabled={busy} onChange={(event) => void toggleGlobalTool(name, event.target.checked)} />
+              <span>{name}</span>
+            </label>)}</div>
+          </details>
+        ))}
+        {saveNotice?.target === 'permissions' && <p className={`save-feedback ${saveNotice.ok ? 'ok' : 'error'}`}>{saveNotice.message}</p>}
+      </section>}
 
       {section === 'aigc' && <section className="panel wide"><div className="panel-title"><span className="step">AI</span><div><h2>{l("百炼生成设置")}</h2><p>{l("此处控制媒体生成模型与规格；Qoder 对话模型在 Agent 装配中设置。")}</p></div></div><p>{l('凭据状态：')}{aigcSettings?.credentialStatus === 'available' ? l('可用') : l('配置错误或不可用')}{l('。凭据从本地 api-key.md 读取，不在页面展示。')}</p>{aigcDraft && <><div className="two-fields"><label>{l("图片模型")}<select value={aigcDraft.imageModel} onChange={(event) => setAigcDraft({ ...aigcDraft, imageModel: event.target.value as AigcSettings['imageModel'] })}><option value="qwen-image-3.0">qwen-image-3.0</option><option value="qwen-image-3.0-pro">qwen-image-3.0-pro</option><option value="qwen-image-2.1-pro">qwen-image-2.1-pro</option></select></label><label>{l("图片尺寸")}<select value={aigcDraft.imageSize} onChange={(event) => setAigcDraft({ ...aigcDraft, imageSize: event.target.value as AigcSettings['imageSize'] })}><option value="1024*1024">1024 × 1024</option><option value="1024*768">1024 × 768</option><option value="768*1024">768 × 1024</option></select></label></div><div className="two-fields"><label>{l("视频模型")}<select value={aigcDraft.videoModel} onChange={(event) => setAigcDraft({ ...aigcDraft, videoModel: event.target.value as AigcSettings['videoModel'] })}><option value="wan3.0-video">wan3.0-video</option><option value="wan3.0-video-prime">wan3.0-video-prime</option></select></label><label>{l("视频分辨率")}<select value={aigcDraft.videoResolution} onChange={(event) => setAigcDraft({ ...aigcDraft, videoResolution: event.target.value as AigcSettings['videoResolution'] })}><option value="480P">480P</option><option value="720P">720P</option></select></label></div><label>{l("视频时长（秒）")}<input type="number" min={2} max={15} value={aigcDraft.videoDuration} onChange={(event) => setAigcDraft({ ...aigcDraft, videoDuration: Number(event.target.value) })} /></label><div className="form-actions"><span>{l("默认每次生成 1 张图或 1 段视频；已创建的任务保留原模型。")}</span><button className="button primary" disabled={busy} onClick={() => void saveAigc()}>{l("保存生成设置")}</button></div>{saveNotice?.target === 'aigc' && <p className={`save-feedback ${saveNotice.ok ? 'ok' : 'error'}`}>{saveNotice.message}</p>}</>}</section>}
 

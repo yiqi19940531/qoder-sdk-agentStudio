@@ -22,6 +22,12 @@
 
 Node.js 最低支持版本为 20.19，推荐 22.12+。SDK 固定为 **1.0.50**，内置 **1.1.64** 运行时；系统 CLI 用于登录和管理模型，不需要与 SDK 运行时版本完全一致。[Qoder SDK 说明](https://docs.qoder.com/cli/sdk/overview)
 
+## 六段浏览器演示短片
+
+[![图片与视频子 Agent 的运行流程](artifacts/promo-videos/03-aigc-flow-poster.png)](artifacts/promo-videos/03-aigc-flow.mp4)
+
+用 Chrome 录制的每段短片均不足 20 秒，约 1.5 倍速播放，并在关键区域加了高亮框：[Agent 装配](artifacts/promo-videos/01-overview.mp4) · [主子 Agent 委派](artifacts/promo-videos/02-repo-delegation.mp4) · [图片／视频双子 Agent](artifacts/promo-videos/03-aigc-flow.mp4) · [MCP 连接与工具](artifacts/promo-videos/04-mcp-config.mp4) · [Skill 管理](artifacts/promo-videos/05-skills.mp4) · [权限控制](artifacts/promo-videos/06-permissions.mp4)。[查看六段封面与说明](artifacts/promo-videos/README.md)。主子 Agent 和媒体片段使用只读演示存档；拍摄时没有重新调用百炼生成。
+
 ## 启动后能看到什么
 
 | 内容 | 作用 |
@@ -44,7 +50,7 @@ Node.js 最低支持版本为 20.19，推荐 22.12+。SDK 固定为 **1.0.50**�
 - 安装 Google Chrome 后，选择“网页效果探索 Agent”：让它使用 Playwright 或 Chrome DevTools MCP 观察一个本地或公开网页。
 - 浏览 34 条历史对话、流程事件和已有媒体，不需要 Apify 或百炼 Key。
 
-所有 Agent 初始使用**逐次审批**和**仅工作目录访问**；全局始终允许工具列表为空。请在运行台按具体工具请求授权。
+所有 Agent 初始使用**按规则审批**和**仅工作目录访问**；基础安全读取工具预授权，其他操作按策略询问，全局始终允许工具列表为空。请在运行台按具体工具请求授权。
 
 ## 模型：无需 Token Plan
 
@@ -74,8 +80,8 @@ Key: <你自己的百炼 Key>
 - `scripts/quickstart.mjs` 是三系统共用的启动入口。`npm run typecheck`、`npm run build`、`npm run test:models`、`npm run test:flow` 可做基础验证。
 - `npm run package:public` 可重建 ZIP。打包器按白名单复制，并对压缩前后所有条目扫描密钥、认证头、私有路径及禁止文件；检测失败会删除输出包。
 
-发布包大小约 13 MB；在 macOS arm64 上已从全新目录验证自动安装、构建、启动、模型、MCP、Skill 和模拟 AIGC 测试。Linux 与 Windows x64 有共用启动逻辑和说明，但尚未在这两个系统上实机验证，详情见 [`VALIDATION.md`](VALIDATION.md)。
+发布包大小约 15 MB；在 macOS arm64 上已从全新目录验证自动安装、构建、启动、模型、MCP、Skill 和模拟 AIGC 测试。Linux 与 Windows x64 有共用启动逻辑和说明，但尚未在这两个系统上实机验证，详情见 [`VALIDATION.md`](VALIDATION.md)。
 
 ---
 
-**English:** [Download the complete demo ZIP](https://raw.githubusercontent.com/yiqi19940531/qoder-sdk-agentStudio/main/downloads/qoder-agent-workbench-demo.zip) or clone this repository, sign in with your own Qoder CLI account, then run `node scripts/quickstart.mjs`. The project includes six Agents, three Skills, 34 sanitized read-only conversations, and four media files. Apify and Bailian credentials are optional and must be supplied by each user. See the [English quick start](QUICKSTART.en.md) for setup details.
+**English:** [Download the complete demo ZIP](https://raw.githubusercontent.com/yiqi19940531/qoder-sdk-agentStudio/main/downloads/qoder-agent-workbench-demo.zip) or clone this repository, sign in with your own Qoder CLI account, then run `node scripts/quickstart.mjs`. The project includes six Agents, three Skills, 34 sanitized read-only conversations, four media files, and six short Chrome walkthroughs. Apify and Bailian credentials are optional and must be supplied by each user. See the [English quick start](QUICKSTART.en.md) for setup details.

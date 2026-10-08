@@ -20,7 +20,7 @@
 | `QUICKSTART.zh-CN.md` | 中文安装、配置和体验任务；08 |
 | `QUICKSTART.en.md` | 英文快速指南；08 |
 | `VALIDATION.md` | 实际测试平台、模拟测试与未验证平台边界；08 |
-| `DEMO-MANIFEST.json` | ZIP 中演示 Agent、Skill、存档和媒体的预期数量；08 |
+| `DEMO-MANIFEST.json` | ZIP 中演示 Agent、Skill、存档、媒体和宣传短片的预期数量；08 |
 | `public/favicon.svg` | Web 页标签图标；07 |
 
 ## 共享契约与前端
@@ -118,6 +118,7 @@
 - `data/conversations/*.json`：34 条脱敏只读会话，包含成功及失败的消息、轮次、事件与创建时配置；按同一 `Conversation` 契约保存，无需为每条写不同实现说明。
 - `data/generated/*.json` 与同目录媒体：生成任务状态及 2 张图片、2 段视频；成功媒体经产物 API 打开。失败记录没有对应成功媒体是正常状态。
 - `data/example-repo/*.png`、`artifacts/*`、`data/mcp-ui*.png`：示例页面及配置界面的安全截图，只作演示材料，不参与 SDK 执行。
+- `artifacts/promo-videos/README.md`、六段 `*.mp4` 与同名 `*-poster.png`：Chrome 页面操作短片、封面和使用说明；展示历史流程、MCP／Skill 管理及权限，不参与 SDK 执行。
 - `docs/rebuild/README.md`、`00-history-and-goals.md`、`01-architecture-contract.md`、`02-foundation-and-agents.md`、`03-runtime-and-conversations.md`、`04-mcp-and-browser.md`、`05-skills.md`、`06-aigc-and-media.md`、`07-interface-and-flow.md`、`08-public-demo.md`、本文件、`10-verification.md` 与 `11-spec-coding-workflow.md`：构建路线、阶段规范、Spec Coding 工作法、逐文件索引与验收；08。
 - `downloads/qoder-agent-workbench-demo.zip` 只在公开 GitHub 仓库中作为下载物存在；它不是 ZIP 自身的输入。
 
