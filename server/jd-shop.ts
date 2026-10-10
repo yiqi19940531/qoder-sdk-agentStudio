@@ -19,6 +19,15 @@ export type JdReviewObservation = {
 const taskDirectory = path.join(dataRoot, 'jd-tasks');
 const jdHost = (host: string) => host === 'jd.com' || host.endsWith('.jd.com');
 const challengeHost = (host: string) => host === 'passport.jd.com' || host === 'aq.jd.com' || host === 'cfe.m.jd.com';
+function currentHost(page: Page): string {
+  try { return new URL(page.url()).host; } catch { return ''; }
+}
+function searchHandoff(page: Page): JdSearchObservation | null {
+  const pageHost = currentHost(page);
+  return challengeHost(pageHost)
+    ? { status: 'needs-human', pageHost, sortApplied: false, products: [], note: '京东搜索已转到登录或人工风险验证页面。' }
+    : null;
+}
 const safeText = (value: string, length: number) => value.replace(/\s+/g, ' ').trim().slice(0, length);
 const reviewText = (value: string) => safeText(value, 500)
   .replace(/(?<!\d)1[3-9]\d{9}(?!\d)/g, '[PHONE]')
@@ -56,19 +65,28 @@ export async function searchJdProducts(page: Page, keyword: string, limit = 20):
   url.searchParams.set('keyword', term);
   url.searchParams.set('enc', 'utf-8');
   const current = (() => { try { return new URL(page.url()); } catch { return null; } })();
-  if (current && challengeHost(current.host)) {
-    return { status: 'needs-human', pageHost: current.host, sortApplied: false, products: [], note: '京东要求登录或人工风险验证。' };
-  }
+  const initialHandoff = searchHandoff(page);
+  if (initialHandoff) return initialHandoff;
   if (!current || current.host !== 'search.jd.com' || current.searchParams.get('keyword') !== term) {
     await page.goto(url.toString(), { waitUntil: 'domcontentloaded', timeout: 18_000 }).catch(() => {});
   }
-  let host: string;
-  try { host = new URL(page.url()).host; } catch { host = ''; }
-  if (challengeHost(host)) return { status: 'needs-human', pageHost: host, sortApplied: false, products: [], note: '京东要求登录或人工风险验证。' };
+  let host = currentHost(page);
+  const navigatedHandoff = searchHandoff(page);
+  if (navigatedHandoff) return navigatedHandoff;
   if (!jdHost(host) || host === 'corporate.jd.com' || host === 'global.jd.com') {
     return { status: 'unavailable', pageHost: host, sortApplied: false, products: [], note: '未进入中国区京东商城搜索结果。' };
   }
   await page.waitForSelector('#J_goodsList .gl-item, .gl-item', { timeout: 7_000 }).catch(() => {});
+  // JD may redirect from search.jd.com to cfe.m.jd.com after DOMContentLoaded.
+  // Check again after waiting; otherwise an empty risk page is misreported as no products.
+  const delayedHandoff = searchHandoff(page);
+  if (delayedHandoff) return delayedHandoff;
+  const emptyGate = await page.evaluate(() => {
+    const cards = document.querySelectorAll('#J_goodsList .gl-item, .gl-item').length;
+    const text = document.body?.innerText ?? '';
+    return cards === 0 && /请先登录|登录并领取|安全验证|滑块验证|请完成验证|访问过于频繁/.test(text);
+  }).catch(() => false);
+  if (emptyGate) return { status: 'needs-human', pageHost: currentHost(page), sortApplied: false, products: [], note: '京东搜索页显示人工登录或风险验证提示。' };
   const sortHref = await page.evaluate(() => {
     const links = [...document.querySelectorAll('.f-sort a, #J_filter a, a')];
     const sales = links.find((node) => node.textContent?.trim() === '销量');
@@ -84,9 +102,13 @@ export async function searchJdProducts(page: Page, keyword: string, limit = 20):
       }
     } catch { /* Site layout can change; report unsorted data rather than inventing a ranking. */ }
   }
+  const sortedHandoff = searchHandoff(page);
+  if (sortedHandoff) return sortedHandoff;
   const products: Omit<JdProduct, 'rank' | 'reviews'>[] = [];
   const seen = new Set<string>();
   for (let pageNumber = 0; pageNumber < 3 && products.length < limit; pageNumber++) {
+    const pageHandoff = searchHandoff(page);
+    if (pageHandoff) return pageHandoff;
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)).catch(() => {});
     await new Promise((resolve) => setTimeout(resolve, 850));
     const cards = await page.evaluate(() => [...document.querySelectorAll('#J_goodsList .gl-item, .gl-item')].map((card) => {
@@ -117,8 +139,12 @@ export async function searchJdProducts(page: Page, keyword: string, limit = 20):
     const next = new URL(nextHref, page.url());
     if (next.protocol !== 'https:' || next.hostname !== 'search.jd.com') break;
     await page.goto(next.toString(), { waitUntil: 'domcontentloaded', timeout: 15_000 }).catch(() => {});
-    if (new URL(page.url()).hostname !== 'search.jd.com') break;
+    const nextHandoff = searchHandoff(page);
+    if (nextHandoff) return nextHandoff;
+    if (currentHost(page) !== 'search.jd.com') break;
   }
+  const finalHandoff = searchHandoff(page);
+  if (finalHandoff) return finalHandoff;
   if (!products.length) return { status: 'unavailable', pageHost: host, sortApplied, products, note: '商城未返回可核实的商品卡片；可能需要人工验证或页面结构已变。' };
   return { status: 'results', pageHost: host, sortApplied, products,
     note: sortApplied ? undefined : '未能确认京东页面的销量排序；这些商品不能称为销量前 20。' };

@@ -97,7 +97,7 @@ const aigcSeeds: AgentConfig[] = [
 const jdSeeds: AgentConfig[] = [{
   id: 'jd-login', kind: 'main', name: '京东商城研究 Agent',
   description: '后台搜索中国区京东商城商品、促销与评论；仅在需要登录或风险验证时请用户接管。',
-  persona: '# 京东商城研究 Agent\n\n先调用 browser_search_products 后台搜索。只有工具返回 needs-human 才请用户在 Web 页面人工验证并停止当前轮。取得可核实的商品后，分批调用 browser_collect_reviews。销量排序未确认时不得声称销量前 20；不编造促销或评论。人工完成后读取 browser_task_status 并续接。不要读取手机号、验证码或 Cookie。',
+  persona: '# 京东商城研究 Agent\n\n直接调用 browser_search_products 后台搜索；它会自行创建或恢复浏览器，不要先调用 browser_open。只有工具返回 needs-human 才请用户在 Web 页面人工验证并停止当前轮。取得可核实的商品后，分批调用 browser_collect_reviews。销量排序未确认时不得声称销量前 20；不编造促销或评论。人工完成后读取 browser_task_status 并续接。不要读取手机号、验证码或 Cookie。',
   model: 'auto', maxTurns: 40, tools: [], skills: [], mcpServers: ['jd-browser'], subAgentIds: [], memoryEnabled: false,
   permissions: { ...DEFAULT_AGENT_PERMISSIONS },
 }];

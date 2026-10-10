@@ -188,11 +188,14 @@ export class BrowserService {
   private async mint(session: Session, interactable: boolean): Promise<void> {
     if (session.completionListener) session.cdp.off('Browserless.liveComplete', session.completionListener);
     if (session.liveTimer) clearTimeout(session.liveTimer);
+    // JD moves between search, risk and passport targets. A CDP session opened
+    // before those cross-origin navigations can stall on Browserless.liveURL.
+    session.cdp = await session.page.createCDPSession() as CDPSession as unknown as BrowserlessCDP;
     const config = this.endpoint();
     const remaining = Math.min(config.liveMs, session.deadline - Date.now());
     if (remaining < 1000) throw new Error('云浏览器会话已到期，请开启新对话。');
     const result = await session.cdp.send('Browserless.liveURL', {
-      interactable, showBrowserInterface: true, quality: 80, resizable: false,
+      interactable, showBrowserInterface: false, quality: 50, resizable: false,
       timeout: Math.floor(remaining),
     }) as { error?: string | null; liveURL?: string; liveURLId?: string; timeout?: number };
     if (result.error || !result.liveURL || !result.liveURLId) throw new Error(`Browserless 实时画面创建失败：${result.error || '未返回链接'}`);
@@ -336,7 +339,9 @@ export class BrowserService {
       if (session.state !== 'CREATED') throw new Error('云浏览器在打开京东页面时已结束。');
       await this.updatePage(session);
       session.state = 'AI_RUNNING';
-      session.message = profileStatus === 'restored' ? '正在中国区京东商城检查已保存的登录档案。' : '中国区京东商城已打开；请在页面右上角进入登录。';
+      session.message = targetUrl === 'about:blank'
+        ? '云浏览器已连接，正在准备京东官方验证页。'
+        : profileStatus === 'restored' ? '正在中国区京东商城检查已保存的登录档案。' : '中国区京东商城已打开；请在页面右上角进入登录。';
       if (session.state !== 'AI_RUNNING') throw new Error('云浏览器在显示登录页时已结束。');
       this.publish(session);
       return session;
@@ -348,10 +353,10 @@ export class BrowserService {
     }
   }
 
-  async handoff(conversationId: string): Promise<RemoteBrowserSummary> {
+  async handoff(conversationId: string, navigateAfterMint?: string): Promise<RemoteBrowserSummary> {
     const pending = this.handingOff.get(conversationId);
     if (pending) return pending;
-    const operation = this.startHandoff(conversationId);
+    const operation = this.startHandoff(conversationId, navigateAfterMint);
     this.handingOff.set(conversationId, operation);
     try { return await operation; }
     finally { this.handingOff.delete(conversationId); }
@@ -362,36 +367,67 @@ export class BrowserService {
     if (existing && activeStates.has(existing.state)) throw new Error('当前云浏览器仍在运行，请先完成或关闭本次操作。');
     if (existing) this.sessions.delete(conversationId);
     const task = await loadJdTask(conversationId);
-    const target = task?.status === 'needs-human'
+    const resumeTarget = task?.status === 'needs-human'
       ? task.products[task.nextReviewIndex]?.url ?? `https://search.jd.com/Search?keyword=${encodeURIComponent(task.keyword)}`
-      : JD_MALL_URL;
-    const opened = await this.open(conversationId, target);
+      : undefined;
+    // The task already proved a human gate is required. Open the official
+    // login page directly in a fresh Free-plan connection, preserving the
+    // search/product URL as the task to resume after the person finishes.
+    const hasSavedProfile = Boolean(await this.profileProvider?.load());
+    const fastLoginHandoff = task?.status === 'needs-human' && !task.products.length && !hasSavedProfile;
+    const openTarget = fastLoginHandoff ? 'about:blank' : resumeTarget ?? JD_MALL_URL;
+    const opened = await this.open(conversationId, openTarget);
     const current = this.require(conversationId);
     current.pendingTaskKeyword = task?.keyword;
-    current.pendingTaskUrl = task?.status === 'needs-human' ? target : undefined;
+    current.pendingTaskUrl = resumeTarget;
     if (opened.state === 'COMPLETED' && task?.status === 'needs-human') {
       if (task.products.length) await this.collectReviews(conversationId, 3);
       else await this.searchProducts(conversationId, task.keyword);
       return this.getState(conversationId);
     }
-    return this.handoff(conversationId);
+    return this.handoff(conversationId, fastLoginHandoff ? JD_LOGIN_URL : undefined);
   }
 
-  private async startHandoff(conversationId: string): Promise<RemoteBrowserSummary> {
+  private async startHandoff(conversationId: string, navigateAfterMint?: string): Promise<RemoteBrowserSummary> {
     const session = this.require(conversationId);
     if (session.state === 'COMPLETED') return this.summary(session);
     if (session.state === 'HUMAN_CONTROL') return this.summary(session);
     if (session.state !== 'AI_RUNNING') throw new Error('当前状态不能进入人工接管。');
-    if (session.pendingTaskUrl && !session.authenticated) await this.openDirectLogin(session);
+    if (session.pendingTaskUrl && !session.authenticated && !navigateAfterMint) await this.openDirectLogin(session);
     session.handoffOriginHost = (() => { try { return new URL(session.page.url()).hostname; } catch { return ''; } })();
     session.pageUrl = safePageUrl(session.page.url());
+    const earlyRenewalWindow = Math.min(45_000, this.endpoint().sessionMs * 0.375);
+    if (session.persistentConnect && this.endpoint().sessionMs > 120_000 && session.deadline - Date.now() < earlyRenewalWindow) {
+      // A JD redirect can consume most of a Free-plan connection. Reconnect
+      // before exposing the viewer, so the person does not receive a link that
+      // disappears almost immediately after they start typing.
+      session.state = 'HUMAN_CONTROL';
+      session.message = '京东验证页已出现；正在续接云浏览器后再交给你操作。';
+      this.publish(session);
+      await this.renewConnection(session);
+      return this.summary(session);
+    }
     await this.mint(session, true);
     if (session.state !== 'AI_RUNNING') throw new Error('云浏览器在切换人工接管时已结束。');
     session.state = 'HUMAN_CONTROL';
-    session.message = session.authenticated
+    session.message = navigateAfterMint
+      ? '交互画面已建立，正在同一云浏览器中加载京东官方登录页。'
+      : session.authenticated
       ? '京东账号已确认登录；当前商品页面另要求人工风险验证，请在下方处理。'
       : '京东页面要求人工操作；请在下方实时浏览器中完成登录、滑块或风险验证。';
     this.publish(session);
+    if (navigateAfterMint) {
+      await session.page.goto(navigateAfterMint, { waitUntil: 'domcontentloaded', timeout: 12_000 }).catch(() => {});
+      const host = (() => { try { return new URL(session.page.url()).hostname; } catch { return ''; } })();
+      if (session.state !== 'HUMAN_CONTROL') return this.summary(session);
+      if (host !== 'jd.com' && !host.endsWith('.jd.com')) {
+        await this.unverify(session, '交互画面已建立，但京东官方登录页未能打开；请在面板重试。');
+        return this.summary(session);
+      }
+      await this.updatePage(session);
+      session.message = '京东官方登录页已在同一可交互云浏览器中打开；请在画面内完成人工验证。';
+      this.publish(session);
+    }
     this.startMonitor(session);
     this.scheduleRenewal(session);
     return this.summary(session);
@@ -399,7 +435,10 @@ export class BrowserService {
 
   private scheduleRenewal(session: Session): void {
     if (session.renewalTimer) clearTimeout(session.renewalTimer);
-    if (!session.persistentConnect || session.state !== 'HUMAN_CONTROL') return;
+    // Free-plan connections have a two-minute absolute ceiling. Reconnecting
+    // during a person's login often interrupts inputs without extending that
+    // ceiling, so let the current Live URL remain stable until it expires.
+    if (!session.persistentConnect || session.state !== 'HUMAN_CONTROL' || this.endpoint().sessionMs <= 120_000) return;
     session.renewalTimer = setTimeout(() => void this.renewConnection(session), Math.max(1_000, session.deadline - Date.now() - 25_000));
   }
 
@@ -429,7 +468,22 @@ export class BrowserService {
       const startedAt = Date.now();
       const browser = await connect(session.persistentConnect);
       const pages = await browser.pages();
-      const page = pages.find((item) => item.url() === oldUrl) ?? pages.find((item) => item.url().startsWith('https://')) ?? await browser.newPage();
+      const page = pages.find((item) => item.url() === oldUrl) ?? pages.find((item) => item.url().startsWith('https://')) ?? pages[0] ?? await browser.newPage();
+      let reloadedAfterBlank = false;
+      if (page.url() === 'about:blank') {
+        // Browserless can reconnect the persistent profile with cookies intact
+        // but without its old tabs. A Live URL for about:blank is unusable.
+        const previous = (() => { try { return new URL(oldUrl); } catch { return null; } })();
+        const target = previous?.protocol === 'https:' && (previous.hostname === 'jd.com' || previous.hostname.endsWith('.jd.com'))
+          ? previous.toString() : JD_LOGIN_URL;
+        await page.goto(target, { waitUntil: 'domcontentloaded', timeout: 12_000 }).catch(() => {});
+        const reopened = (() => { try { return new URL(page.url()); } catch { return null; } })();
+        if (!reopened || reopened.protocol !== 'https:' || (reopened.hostname !== 'jd.com' && !reopened.hostname.endsWith('.jd.com'))) {
+          throw new Error('续接后只得到空白页，京东官方页面未能重新打开。');
+        }
+        reloadedAfterBlank = true;
+        session.authenticated = false;
+      }
       session.browser = browser;
       session.page = page;
       session.context = page.browserContext();
@@ -439,10 +493,12 @@ export class BrowserService {
         if (!session.replacing && session.browser === browser && activeStates.has(session.state)) void this.expire(session, 'Browserless 云浏览器连接已断开。');
       });
       session.deadlineTimer = setTimeout(() => void this.expire(session, 'Browserless 云浏览器会话已到期。'), Math.max(1_000, session.deadline - Date.now()));
-      session.replacing = false;
       await this.mint(session, true);
+      session.replacing = false;
       session.state = 'HUMAN_CONTROL';
-      session.message = '已续接同一云浏览器，请继续刚才的京东人工操作。';
+      session.message = reloadedAfterBlank
+        ? '续接后云端只保留空白标签页，已重新打开京东官方页面；先前未提交的输入可能需要重填。'
+        : '已续接同一云浏览器，请继续刚才的京东人工操作。';
       session.pageUrl = safePageUrl(page.url());
       this.publish(session);
       this.startMonitor(session);
@@ -617,6 +673,7 @@ export class BrowserService {
     const name = original.profileCandidateName!;
     let restored: Session | undefined;
     try {
+      original.cdp = await original.page.createCDPSession() as CDPSession as unknown as BrowserlessCDP;
       const saved = await original.cdp.send('Browserless.saveProfile', { name }) as { ok?: boolean; error?: string };
       if (saved.ok !== true) throw new Error('Browserless 未能保存当前浏览器的认证状态');
       await this.profileProvider!.remember(name, 'unverified');
@@ -709,6 +766,18 @@ export class BrowserService {
         if (session.authenticated) task.note = '京东账号已确认登录，但搜索页另要求人工风险验证。';
         else if (session.priorLoginVerified) task.note = '保存档案曾在商城首页确认登录；当前搜索页面再次要求登录。';
         await saveJdTask(task);
+        if (session.profileCandidateName && !session.authenticated && this.endpoint().sessionMs <= 120_000
+          && session.deadline - Date.now() < 80_000) {
+          // The background search has proved a human gate. On Free plans,
+          // spend a fresh connection on the person's login instead of giving
+          // them the few seconds left in the search browser.
+          session.state = 'CLOSED';
+          session.message = '搜索遇到人工关卡；正在开启新的云浏览器，为你保留完整的登录操作时间。';
+          this.publish(session);
+          await this.release(session);
+          if (this.sessions.get(conversationId) === session) this.sessions.delete(conversationId);
+          return { task, browser: await this.restartForHuman(conversationId) };
+        }
         session.message = session.authenticated
           ? `搜索“${task.keyword}”遇到额外风险验证；此前的登录已在商城首页确认，当前搜索访问仍需验证。`
           : `搜索“${task.keyword}”再次遇到登录或人工验证；请在远程浏览器中完成后继续。`;
@@ -728,13 +797,15 @@ export class BrowserService {
       }
       return { task, browser: this.summary(session) };
     } catch (error) {
-      task.status = 'partial';
-      task.note = session.state === 'EXPIRED' ? '云浏览器会话到期；可在新会话中继续。' : '商城搜索过程未完成。';
+      if (task.status !== 'needs-human') task.status = 'partial';
+      task.note = session.state === 'EXPIRED' ? '云浏览器会话到期；可在新会话中继续。'
+        : task.status === 'needs-human' ? '京东已要求人工验证，但交互画面未能建立；可在面板重试。' : '商城搜索过程未完成。';
       await saveJdTask(task);
       if (session.state === 'AI_RUNNING') {
-        session.state = 'COMPLETED';
+        session.state = task.status === 'needs-human' ? 'UNVERIFIED' : 'COMPLETED';
         session.message = task.note;
         this.publish(session);
+        if (session.state === 'UNVERIFIED') await this.release(session);
       }
       if (session.state !== 'EXPIRED') throw error;
       return { task, browser: this.summary(session) };

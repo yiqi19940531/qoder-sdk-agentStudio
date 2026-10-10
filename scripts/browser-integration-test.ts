@@ -6,7 +6,7 @@ import type { Browser, Page } from 'puppeteer-core';
 import { BrowserService } from '../server/browser-service.js';
 import { classifyJdEvidence, inspectCurrentJdPage, inspectJdBrowserPages, verifyJdLogin, type LoginEvidence } from '../server/jd-login.js';
 import { BrowserlessJdProfileProvider } from '../server/jd-profile.js';
-import { loadJdTask } from '../server/jd-shop.js';
+import { loadJdTask, searchJdProducts } from '../server/jd-shop.js';
 
 class FakeCdp extends EventEmitter {
   calls: Array<{ method: string; params?: Record<string, unknown> }> = [];
@@ -28,6 +28,7 @@ class FakeCdp extends EventEmitter {
 class FakePage {
   constructor(private readonly cdp: FakeCdp) {}
   currentUrl = 'about:blank';
+  cdpSessions = 0;
   async setViewport(size: { width: number; height: number }) { assert.deepEqual(size, { width: 1280, height: 800 }); }
   async setExtraHTTPHeaders(headers: Record<string, string>) { assert.match(headers['Accept-Language'], /zh-CN/); }
   async emulateTimezone(zone: string) { assert.equal(zone, 'Asia/Shanghai'); }
@@ -35,7 +36,7 @@ class FakePage {
   url() { return this.currentUrl; }
   async title() { return '京东-欢迎登录'; }
   browserContext() { return {}; }
-  async createCDPSession() { return this.cdp; }
+  async createCDPSession() { this.cdpSessions++; return this.cdp; }
 }
 
 const cdp = new FakeCdp();
@@ -83,6 +84,8 @@ const handoff = await service.handoff(id);
 assert.equal(handoff.state, 'HUMAN_CONTROL');
 assert.equal(service.view(id).session?.viewMode, 'interactive');
 assert.equal(cdp.calls.filter((call) => call.method === 'Browserless.liveURL').length, 1);
+assert.equal(page.cdpSessions, 2, 'The live view must use a fresh CDP session after JD navigation');
+assert.equal(cdp.calls.find((call) => call.method === 'Browserless.liveURL')?.params?.showBrowserInterface, false);
 assert.equal(Object.hasOwn(cdp.calls.find((call) => call.method === 'Browserless.liveURL')?.params ?? {}, 'instructions'), false, 'Browserless instructions must not cover the login page');
 assert.deepEqual(await service.handoff(id), handoff);
 await assert.rejects(service.close(id, 'agent'), /人工接管/);
@@ -135,6 +138,17 @@ const mainlandLoggedInPage = {
   ] }),
 } as unknown as Page;
 assert.equal((await inspectCurrentJdPage(mainlandLoggedInPage)).verdict.status, 'confirmed', 'JD mainland thor/pin signature should confirm login on the mall homepage');
+
+let delayedSearchUrl = 'https://www.jd.com/';
+const delayedChallengePage = {
+  url: () => delayedSearchUrl,
+  goto: async (url: string) => { delayedSearchUrl = url; },
+  waitForSelector: async () => { delayedSearchUrl = 'https://cfe.m.jd.com/privatedomain/risk_handler/03101900/'; },
+  evaluate: async () => { throw new Error('Delayed challenge must be detected before extracting search cards'); },
+} as unknown as Page;
+const delayedChallenge = await searchJdProducts(delayedChallengePage, '洗发水');
+assert.equal(delayedChallenge.status, 'needs-human', 'An asynchronous JD risk redirect must trigger human handoff');
+assert.equal(delayedChallenge.pageHost, 'cfe.m.jd.com');
 
 const corporatePage = {
   url: () => 'https://corporate.jd.com/home',
@@ -347,7 +361,38 @@ assert.equal(challenged.browser.state, 'HUMAN_CONTROL');
 assert.equal(new URL(challengePage.url()).hostname, 'passport.jd.com', 'Human handoff should open JD login directly');
 assert.ok(challengeService.view(challengeId).liveUrl, 'Only a challenge should mint an interactive Live URL');
 await challengeService.close(challengeId);
+const restartedChallenge = await challengeService.restartForHuman(challengeId);
+assert.equal(restartedChallenge.state, 'HUMAN_CONTROL', 'A saved needs-human task should reopen the interactive JD login page');
+assert.equal(new URL(challengePage.url()).hostname, 'passport.jd.com');
+assert.match(restartedChallenge.message ?? '', /同一可交互云浏览器/);
+await challengeService.close(challengeId);
 await rm(path.join(process.cwd(), 'data/jd-tasks', `${challengeId}.json`), { force: true });
+
+const firstFreshPage = new FakePage(new FakeCdp());
+const secondFreshPage = new FakePage(new FakeCdp());
+const freshBrowser = (target: FakePage) => Object.assign(new EventEmitter(), {
+  pages: async () => [target], close: async () => {}, disconnect: async () => {},
+}) as unknown as Browser;
+let freshConnections = 0;
+const freshHandoffService = new BrowserService({
+  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE', BROWSERLESS_SESSION_TIMEOUT_MS: '30000' },
+  profileProvider: {
+    load: async () => null,
+    create: async () => ({ name: 'qoder-jd-aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa', connect: 'wss://production-sfo.browserless.io/session/connect/fresh' }),
+    remember: async () => {},
+  },
+  connect: async () => ++freshConnections === 1 ? freshBrowser(firstFreshPage) : freshBrowser(secondFreshPage),
+  search: async () => (firstFreshPage.currentUrl = 'https://cfe.m.jd.com/privatedomain/risk_handler/03101900/',
+    { status: 'needs-human', pageHost: 'cfe.m.jd.com', sortApplied: false, products: [] }),
+});
+const freshId = '12121212-1212-4121-8121-121212121212';
+const freshResult = await freshHandoffService.searchProducts(freshId, '洗发水');
+assert.equal(freshConnections, 2, 'A near-expiry Free-plan search must open a fresh browser for the person');
+assert.equal(freshResult.browser.state, 'HUMAN_CONTROL');
+assert.equal(new URL(secondFreshPage.url()).hostname, 'passport.jd.com');
+assert.equal(freshResult.task.status, 'needs-human');
+await freshHandoffService.close(freshId);
+await rm(path.join(process.cwd(), 'data/jd-tasks', `${freshId}.json`), { force: true });
 
 const signedChallengeCdp = new FakeCdp();
 const signedChallengePage = new FakePage(signedChallengeCdp);
@@ -480,7 +525,7 @@ const renewBrowser = () => Object.assign(new EventEmitter(), {
 }) as unknown as Browser;
 let renewConnections = 0;
 const renewService = new BrowserService({
-  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE', BROWSERLESS_SESSION_TIMEOUT_MS: '30000' },
+  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE', BROWSERLESS_SESSION_TIMEOUT_MS: '150000' },
   profileProvider: {
     load: async () => null,
     create: async () => ({ name: 'qoder-jd-dddddddd-dddd-4ddd-dddd-dddddddddddd', connect: 'wss://production-sfo.browserless.io/session/connect/renew' }),
@@ -492,13 +537,65 @@ const renewId = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
 await renewService.open(renewId);
 await renewService.handoff(renewId);
 const originalRenewUrl = renewService.view(renewId).liveUrl;
-const renewalDeadline = Date.now() + 8_000;
-while (renewConnections < 2 && Date.now() < renewalDeadline) await new Promise((resolve) => setTimeout(resolve, 200));
-assert.equal(renewConnections, 2, 'Human control must reconnect before the short connection deadline');
+const renewInternals = renewService as unknown as { sessions: Map<string, unknown>; renewConnection: (session: unknown) => Promise<void> };
+await renewInternals.renewConnection(renewInternals.sessions.get(renewId));
+assert.equal(renewConnections, 2, 'A paid-plan session can reconnect when explicitly needed');
 assert.equal(renewService.getState(renewId).state, 'HUMAN_CONTROL');
 assert.notEqual(renewService.view(renewId).liveUrl, originalRenewUrl, 'A renewed connection must mint a fresh Live URL');
 assert.equal(renewPage.url(), 'https://www.jd.com/', 'The same page remains after reconnection');
 await renewService.close(renewId);
+
+const firstBlankCdp = new FakeCdp();
+const secondBlankCdp = new FakeCdp();
+const firstBlankPage = new FakePage(firstBlankCdp);
+const secondBlankPage = new FakePage(secondBlankCdp);
+const blankBrowser = (target: FakePage) => Object.assign(new EventEmitter(), {
+  pages: async () => [target],
+  disconnect: async function (this: EventEmitter) { this.emit('disconnected'); },
+  close: async () => {},
+}) as unknown as Browser;
+let blankConnections = 0;
+const blankRenewService = new BrowserService({
+  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE', BROWSERLESS_SESSION_TIMEOUT_MS: '150000' },
+  profileProvider: {
+    load: async () => null,
+    create: async () => ({ name: 'qoder-jd-dddddddd-dddd-4ddd-dddd-dddddddddddd', connect: 'wss://production-sfo.browserless.io/session/connect/blank' }),
+    remember: async () => {},
+  },
+  connect: async () => ++blankConnections === 1 ? blankBrowser(firstBlankPage) : blankBrowser(secondBlankPage),
+});
+const blankId = 'abababab-abab-4bab-8bab-abababababab';
+await blankRenewService.open(blankId);
+await blankRenewService.handoff(blankId);
+const blankInternals = blankRenewService as unknown as { sessions: Map<string, unknown>; renewConnection: (session: unknown) => Promise<void> };
+await blankInternals.renewConnection(blankInternals.sessions.get(blankId));
+assert.equal(blankConnections, 2);
+assert.equal(blankRenewService.getState(blankId).state, 'HUMAN_CONTROL', blankRenewService.getState(blankId).message);
+assert.equal(secondBlankPage.url(), 'https://www.jd.com/', 'A blank reconnected tab must reopen the prior JD page');
+assert.match(blankRenewService.getState(blankId).message ?? '', /重新打开京东官方页面/);
+await blankRenewService.close(blankId);
+
+const freeCdp = new FakeCdp();
+const freePage = new FakePage(freeCdp);
+const freeBrowser = Object.assign(new EventEmitter(), { pages: async () => [freePage], disconnect: async () => {}, close: async () => {} }) as unknown as Browser;
+let freeConnections = 0;
+const freeService = new BrowserService({
+  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE', BROWSERLESS_SESSION_TIMEOUT_MS: '120000' },
+  profileProvider: {
+    load: async () => null,
+    create: async () => ({ name: 'qoder-jd-dddddddd-dddd-4ddd-dddd-dddddddddddd', connect: 'wss://production-sfo.browserless.io/session/connect/free' }),
+    remember: async () => {},
+  },
+  connect: async () => { freeConnections++; return freeBrowser; },
+});
+const freeId = 'cdcdcdcd-cdcd-4dcd-8dcd-cdcdcdcdcdcd';
+await freeService.open(freeId);
+await freeService.handoff(freeId);
+assert.equal(freeConnections, 1, 'Free-plan handoff must not reconnect before exposing the viewer');
+assert.equal((freeService as unknown as { sessions: Map<string, { renewalTimer?: ReturnType<typeof setTimeout> }> }).sessions.get(freeId)?.renewalTimer, undefined,
+  'Free-plan human input must not be interrupted by automatic renewal');
+await freeService.close(freeId);
+
 const originalFetch = globalThis.fetch;
 try {
   globalThis.fetch = async () => new Response("You've reached the units usage limit allowed under our free plan", { status: 401 });
