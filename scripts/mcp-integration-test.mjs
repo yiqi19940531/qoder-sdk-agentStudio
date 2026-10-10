@@ -32,7 +32,7 @@ async function add(id, input) {
 async function check(id) { return api(`/mcp-servers/${id}/check`, 'POST'); }
 try {
   const builtins = await api('/mcp-servers');
-  for (const id of ['repo-facts', 'playwright', 'chrome-devtools', 'bailian-image', 'bailian-video']) assert(builtins.some((item) => item.id === id && item.source === 'builtin'));
+  for (const id of ['repo-facts', 'playwright', 'chrome-devtools', 'bailian-image', 'bailian-video', 'jd-browser']) assert(builtins.some((item) => item.id === id && item.source === 'builtin'));
   const [httpPort, ssePort, authPort, emptyPort, hangPort] = await Promise.all([
     mock('http'), mock('sse'), mock('http', { REQUIRE_TOKEN: '1' }), mock('http', { EMPTY_TOOLS: '1' }), mock('http', { HANG_MCP: '1' }),
   ]);
@@ -59,7 +59,7 @@ try {
   assert.equal((await check('fixture-mcp-fail')).status, 'failed');
   await add('fixture-mcp-timeout', { transport: 'http', auth: 'none', url: `http://127.0.0.1:${hangPort}/mcp`, timeoutMs: 1000 });
   assert.equal((await check('fixture-mcp-timeout')).status, 'failed');
-  console.log('MCP integration passed: five built-ins, stdio, HTTP, SSE, auth, redaction, empty tools, startup failure, timeout.');
+  console.log('MCP integration passed: six built-ins, stdio, HTTP, SSE, auth, redaction, empty tools, startup failure, timeout.');
 } finally {
   for (const id of ids.reverse()) await api(`/mcp-servers/${id}`, 'DELETE').catch(() => {});
   for (const child of children) child.kill('SIGTERM');

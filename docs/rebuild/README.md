@@ -17,6 +17,7 @@
 | 5 | [AIGC 与媒体](06-aigc-and-media.md) | 图片和视频子 Agent、工具及产物 |
 | 6 | [界面与流程图](07-interface-and-flow.md) | 装配页、运行台、流程图、语言和主题 |
 | 7 | [公开演示包](08-public-demo.md) | 演示存档、脱敏 ZIP、启动脚本 |
+| 8 | [Browserless 与京东人工登录](12-browserless-jd-login.md) | 可装配云浏览器、Web 实时接管、登录核验 |
 
 推荐顺序按代码依赖组织；[历史演进](00-history-and-goals.md)保留了实际需求出现的顺序。历史会话、图片和视频是演示数据，构建时可用自己的测试数据，不要求生成相同内容。
 
@@ -29,6 +30,6 @@
 ## 范围与语言
 
 - 目标是**本地单用户原型**：Web 界面负责装配与展示；后端负责 SDK 调用、MCP、审批、文件与凭据。不是现成的团队 SaaS。
-- 当前演示版包含 6 个 Agent、3 个 Skill、34 条只读历史会话和 4 个成功媒体文件。数量用于核对演示包，不是 SDK 固有限制。
+- 当前演示版包含 7 个 Agent、3 个 Skill、34 条只读历史会话和 4 个成功媒体文件。第 7 个京东登录 Agent 需要接收者自己的 Browserless Token；数量用于核对演示包，不是 SDK 固有限制。
 - 现有 [快速指南](../../QUICKSTART.zh-CN.md)说明如何运行；本目录说明如何重新构建。English navigation: foundation → runtime → MCP → Skills → AIGC → UI → public demo. API、CLI、MCP、Skill 等术语沿用代码中的英文名称。
 - 版本基线以 `package-lock.json` 为准。现有验证记录在 [VALIDATION.md](../../VALIDATION.md)；Linux 和 Windows x64 有启动脚本，但此前没有实机验证。

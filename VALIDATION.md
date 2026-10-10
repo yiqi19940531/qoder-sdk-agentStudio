@@ -1,5 +1,15 @@
 # 发布验证 / Release validation
 
+## Browserless 京东人工接管增量（2026-10-10）
+
+当前工程新增第 7 个“京东登录 Agent”、`jd-browser` 进程内 MCP 和运行台实时浏览器面板。新 ZIP 在全新临时目录执行 `npm ci`、`npm run typecheck`、`npm run build`、`npm run test:browser`、`npm run test:models`、`npm run test:flow` 均通过；运行服务读到 7 个 Agent、34 条演示会话和第 6 个内置 MCP。`npm run test:mcp`、`npm run test:skills`、`npm run test:aigc` 也在该隔离目录通过。`test:browser` 使用模拟 CDP，验证同一页面、单次交互链接、断开与完成信号、未确认时重新开始、人工期间拒绝 Agent 关闭、核验后保留浏览器以及事件中不含链接或 Token。没有 Browserless Token 时，Qoder 实际会话调用了 `browser_open` 并得到明确配置错误；工作台显示配置提示，未误报登录成功。此阶段尚未使用真实 Browserless Token；后续真实连接验证见下一段。下文保留原 6 个 Agent 演示包发布时的历史验证记录。
+
+随后使用使用者本机提供的 Browserless Token 验证：云端 Chromium 可打开公开测试页并生成 Live URL；京东登录 Agent 实际打开 `passport.jd.com`，本地 Web iframe 显示同一页面并进入可交互的 `HUMAN_CONTROL`。最初的 Playwright CDP 实现使用 `playwright-core 1.64.0`，接管时触发 `Duplicate target` 进程崩溃；按 Browserless [版本兼容清单](https://docs.browserless.io/baas/versions)改为 1.62.1 后仍在画面重连或会话后期复现。Browserless 会话层因此改用官方支持的 `puppeteer-core 25.4.0` CDP 接口，保留原有 Playwright MCP；真实 Live URL 在本地 iframe 成功加载，重连及会话到期后本地服务继续响应。随后在未登录状态提交“完成并继续”，后端实际访问京东账户页并判为 `FAILED`，Agent 明确回复登录未完成；没有把用户完成信号当作登录成功。当前 Browserless 套餐拒绝 5 分钟配置，最大会话时长为 **2 分钟**；测试会话在真人完成滑块和短信前到期，后端记录 `EXPIRED`，Agent 未报告登录成功。新增“准备好后重新开始登录”按钮，同一对话可按需创建新云会话。**真实滑块通过、短信核验和登录成功后的页面保留仍未完成验收。**
+
+最终公开 ZIP 在原工程已有 36 条本地会话的情况下，仍只按 `data/demo-archive-index.json` 收入原先 34 条演示存档；另外两条京东测试会话被排除。ZIP 共 188 个审计条目，未包含 `.env`、本机 Browserless Token 或 MCP/百炼凭据文件；全新解压目录的 `npm ci`、类型检查、构建和 BrowserService 模拟测试再次通过。
+
+## 原演示包发布记录
+
 实际测试环境：**macOS arm64**，Node.js **24.13.1**，npm **11.8.0**，Qoder CLI **1.1.65**。SDK 锁定 **1.0.50**，自带运行时 **1.1.64**。Linux 和 Windows x64 的启动脚本使用相同的 Node 入口，但**没有在这两个系统上实际执行**。
 
 从 ZIP 解压到全新临时目录后，`npm ci`、`npm run typecheck`、`npm run build`、`npm run test:models`、`npm run test:flow` 均通过。最终包又在第二个全新目录运行 `node scripts/quickstart.mjs`，完成自动安装、构建和本地启动。服务 API 读到 6 个 Agent、3 个 Skill、34 条只读演示会话和 4 个媒体文件；旧会话详情含事件和流程记录，直接续接返回 HTTP 409。使用同一 Agent 新建的会话采用内置 `auto` 并完成了 SDK 回复。

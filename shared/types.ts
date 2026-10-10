@@ -1,12 +1,13 @@
 export const TOOL_NAMES = ['Read', 'Grep', 'Glob', 'Agent', 'Write', 'Edit', 'Bash'] as const;
 export const MCP_NAME = 'repo-facts';
-export const MCP_NAMES = [MCP_NAME, 'playwright', 'chrome-devtools', 'bailian-image', 'bailian-video'] as const;
+export const MCP_NAMES = [MCP_NAME, 'playwright', 'chrome-devtools', 'bailian-image', 'bailian-video', 'jd-browser'] as const;
 export const MCP_TOOL_NAMES: Record<(typeof MCP_NAMES)[number], readonly string[]> = {
   'repo-facts': ['repository_facts'],
   playwright: ['browser_navigate', 'browser_snapshot', 'browser_click', 'browser_fill_form', 'browser_type', 'browser_press_key', 'browser_select_option', 'browser_take_screenshot', 'browser_console_messages', 'browser_network_requests', 'browser_resize', 'browser_tabs', 'browser_evaluate', 'browser_wait_for'],
   'chrome-devtools': ['new_page', 'navigate_page', 'take_snapshot', 'take_screenshot', 'list_console_messages', 'list_network_requests', 'get_network_request', 'get_css_styles', 'click', 'fill', 'fill_form', 'press_key', 'type_text', 'resize_page', 'list_pages', 'select_page', 'evaluate_script', 'wait_for'],
   'bailian-image': ['generate_image'],
   'bailian-video': ['generate_video'],
+  'jd-browser': ['browser_open', 'browser_get_state', 'browser_handoff', 'browser_check_login', 'browser_close'],
 };
 export const CONFIGURABLE_PERMISSION_TOOLS = [
   ...TOOL_NAMES,
@@ -63,6 +64,24 @@ export type MediaArtifact = {
 };
 
 export type AgentKind = 'main' | 'subagent';
+export type RemoteBrowserState = 'CREATED' | 'AI_RUNNING' | 'HUMAN_CONTROL' | 'VERIFYING' | 'COMPLETED' | 'FAILED' | 'EXPIRED' | 'CLOSED';
+export type RemoteBrowserSummary = {
+  conversationId: string;
+  sessionId: string;
+  state: RemoteBrowserState;
+  viewMode: 'none' | 'view-only' | 'interactive';
+  revision: number;
+  pageUrl?: string;
+  pageTitle?: string;
+  liveUrlExpiresAt?: string;
+  message?: string;
+};
+export type RemoteBrowserView = {
+  configured: boolean;
+  session: RemoteBrowserSummary | null;
+  /** Short-lived bearer URL. Never persist this field in a conversation or SSE event. */
+  liveUrl?: string;
+};
 export type ModelOption = {
   id: string;
   name: string;
@@ -178,7 +197,7 @@ export type ConversationTurn = {
 export type ConversationMessage = {
   id: string;
   turnId: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
   at: string;
 };

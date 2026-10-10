@@ -18,7 +18,7 @@ Alternatively use `sh start.sh` on macOS/Linux or `start.cmd` in Windows Command
 
 ## Explore
 
-The package contains six Agents, three Skills, keyless MCP definitions, 34 conversations with events and flow diagrams, success and failure records, and four generated media files. Old conversations are marked **Demo archive** and are read-only. Asking a question from an archive creates a **new** SDK conversation with your account and only your new question; old SDK context is not automatically carried over. Quote anything you need from the archive in your new prompt.
+The package contains seven Agents, three Skills, keyless MCP definitions, 34 conversations with events and flow diagrams, success and failure records, and four generated media files. Old conversations are marked **Demo archive** and are read-only. Asking a question from an archive creates a **new** SDK conversation with your account and only your new question; old SDK context is not automatically carried over. Quote anything you need from the archive in your new prompt.
 
 Suggested tasks without optional keys:
 
@@ -27,6 +27,7 @@ Suggested tasks without optional keys:
 - Web exploration Agent: “Use Playwright or Chrome DevTools MCP to inspect a local or public page and describe its structure.” Chrome is required.
 - AIGC director: inspect previous artifacts and plan image/video prompts. New generation requires Bailian credentials.
 - Image and video Sub-Agents: view prior output; configure Bailian before generating new media.
+- JD login Agent: configure your own Browserless token, then complete phone, slider and SMS steps yourself in the live browser.
 
 All Agents start with per-call approval and working-directory-only access. The global always-allow tool list is empty.
 
@@ -35,6 +36,8 @@ All Agents start with per-call approval and working-directory-only access. The g
 The public Agent definitions use Qoder built-in `auto` or `efficient`. The model list comes from your signed-in account. No Token Plan is required. If a later saved model is unavailable to your account, a new conversation temporarily uses available built-in `auto` and reports the actual model in its events, without changing the saved Agent. To use your own model, configure it through `/model` in Qoder CLI using the [custom model guide](https://docs.qoder.com/cli/custom-models), then select it in the workbench.
 
 **Apify:** In “Configuration → MCP services,” select the retained `apify` definition, enter your own Bearer Token, save, and check the connection. Once tools are discovered, attach it to the web exploration Agent. The token is stored locally in `data/mcp-secrets.json`; new sessions also create local connection snapshots. Neither is included in this release. Playwright, Chrome DevTools, and repository MCP remain available without Apify.
+
+**Browserless and JD login:** Copy `.env.example` to `.env` and set your own `BROWSERLESS_API_TOKEN`. Set `BROWSERLESS_WS_ENDPOINT` to a Browserless Chromium CDP WSS endpoint **without** a token, then restart the local server. Keep session and Live URL timeouts within your plan limits. Select **JD login Agent**, start a new conversation with “Log in to my JD account,” and approve its browser tools. The run view shows the same cloud browser the Agent opened when control switches to you. Then enter your phone number and SMS code and drag the slider inside the browser frame. Click **Done, continue**; the server checks the JD account page before reporting success and keeps the browser session until closed or expired. JD may block cloud browsers; a user click alone is never proof of login. Local Chrome is not needed for this Browserless feature. On the free plan, sessions last at most two minutes; if the link expires, use **Start a fresh login** in the same conversation when you are ready. Without a Browserless token, the other six Agents remain available. Keep `.env`, Live URLs and login state private.
 
 **Bailian:** Create `api-key.md` in the extracted root with exactly one of your own Bailian `sk-` keys and exactly one HTTPS Beijing workspace URL whose path begins `/compatible-mode/v1`. For example:
 

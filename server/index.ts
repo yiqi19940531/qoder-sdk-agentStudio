@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { existsSync } from 'node:fs';
 import { readFile, realpath, stat } from 'node:fs/promises';
 import path from 'node:path';
 import express from 'express';
@@ -15,6 +16,9 @@ import { artifactById, artifactFile, artifactsForConversation, credentialStatus,
 import { deleteCustomMcp, getMcpServer, initializeMcpRegistry, isAssignable, isRegistered, listMcpServers, redactMcpError, registeredNames, saveCustomMcp } from './mcp-registry.js';
 import { checkMcp, completeMcpOAuth, startMcpOAuth } from './mcp-check.js';
 import { SkillDraftError, changeDraftEntry, createDraft, deleteDraft, getDraft, importMarkdown, importZip, listDrafts, listPublishedFiles, publishDraft, readDraftFile, readPublishedFile, validateDraft, withDraftMutation, writeDraftFile } from './skill-drafts.js';
+import { browserService } from './browser-service.js';
+
+if (existsSync('.env')) process.loadEnvFile('.env');
 
 await initializeStorage();
 await initializeMcpRegistry();
@@ -25,6 +29,11 @@ await refreshConfigCatalog();
 const app = express();
 app.disable('x-powered-by');
 app.use(express.json({ limit: '1mb' }));
+app.use((_request, response, next) => {
+  response.setHeader('Referrer-Policy', 'no-referrer');
+  response.setHeader('Content-Security-Policy', `frame-src 'self' ${browserService.liveOrigin()}`);
+  next();
+});
 
 const agentInput = z.object({
   kind: z.enum(['main', 'subagent']),
@@ -538,6 +547,61 @@ app.post('/api/conversations/:id/interrupt', async (request, response) => {
     if (!await interruptConversation(request.params.id)) return response.status(409).json({ error: '当前会话没有正在执行的轮次' });
     response.json({ ok: true });
   } catch (error) { respondError(response, error); }
+});
+
+function browserConversation(id: string): boolean {
+  return getConversation(id)?.config.agent.mcpServers.includes('jd-browser') === true;
+}
+
+function browserApiError(error: unknown): string {
+  const token = process.env.BROWSERLESS_API_TOKEN?.trim();
+  const raw = error instanceof Error ? error.message : String(error);
+  return (token ? raw.replaceAll(token, '[REDACTED]') : raw).replace(/([?&]token=)[^\s&]+/gi, '$1[REDACTED]');
+}
+
+function localBrowserOrigin(request: express.Request): boolean {
+  const origin = request.get('origin');
+  if (!origin) return true;
+  try { return ['127.0.0.1', 'localhost'].includes(new URL(origin).hostname); }
+  catch { return false; }
+}
+
+app.get('/api/conversations/:id/browser', (request, response) => {
+  if (!browserConversation(request.params.id)) return response.status(404).json({ error: '京东浏览器会话不存在' });
+  response.setHeader('Cache-Control', 'no-store');
+  response.json(browserService.view(request.params.id));
+});
+
+app.get('/api/conversations/:id/browser/events', (request, response) => {
+  if (!browserConversation(request.params.id)) return response.status(404).json({ error: '京东浏览器会话不存在' });
+  browserService.subscribe(request.params.id, response);
+});
+
+app.post('/api/conversations/:id/browser/complete', async (request, response) => {
+  if (!browserConversation(request.params.id)) return response.status(404).json({ error: '京东浏览器会话不存在' });
+  if (!localBrowserOrigin(request)) return response.status(403).json({ error: '仅允许本机 Web 页面提交人工操作结果' });
+  try {
+    await browserService.complete(request.params.id);
+    response.setHeader('Cache-Control', 'no-store');
+    response.json(browserService.view(request.params.id));
+  } catch (error) { response.status(409).json({ error: browserApiError(error) }); }
+});
+
+app.post('/api/conversations/:id/browser/close', async (request, response) => {
+  if (!browserConversation(request.params.id)) return response.status(404).json({ error: '京东浏览器会话不存在' });
+  if (!localBrowserOrigin(request)) return response.status(403).json({ error: '仅允许本机 Web 页面关闭浏览器' });
+  try { response.json({ configured: browserService.configured(), session: await browserService.close(request.params.id) }); }
+  catch (error) { response.status(409).json({ error: browserApiError(error) }); }
+});
+
+app.post('/api/conversations/:id/browser/restart', async (request, response) => {
+  if (!browserConversation(request.params.id)) return response.status(404).json({ error: '京东浏览器会话不存在' });
+  if (!localBrowserOrigin(request)) return response.status(403).json({ error: '仅允许本机 Web 页面重新开始人工登录' });
+  try {
+    await browserService.restartForHuman(request.params.id);
+    response.setHeader('Cache-Control', 'no-store');
+    response.json(browserService.view(request.params.id));
+  } catch (error) { response.status(409).json({ error: browserApiError(error) }); }
 });
 
 app.post('/api/runs', async (request, response) => {

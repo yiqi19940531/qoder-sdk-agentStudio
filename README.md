@@ -1,12 +1,12 @@
 # Qoder Agent Workbench / Agent Studio Demo
 
-一个基于 **Qoder Agent SDK** 的本地多 Agent 工作台。项目内提供 6 个 Agent、3 个 Skill、无需 API Key 的浏览器与示例仓库 MCP，以及 34 条经过脱敏的历史对话和已生成的图片、视频。克隆仓库或下载演示 ZIP 后，只需使用自己的 Qoder 账号登录，即可在本机体验。
+一个基于 **Qoder Agent SDK** 的本地多 Agent 工作台。项目内提供 7 个 Agent、3 个 Skill、无需 API Key 的基础浏览器与示例仓库 MCP，以及 34 条经过脱敏的历史对话和已生成的图片、视频。京东登录 Agent 是可选的 Browserless 云浏览器体验，需要使用者自己的 Token；其他功能可直接用自己的 Qoder 账号在本机体验。
 
-**构建指南：** [按阶段构建 Agent Hub](docs/rebuild/README.md)，逐章说明目标、技术栈、模块文件架构、需求与接口、实现任务、可复制提示词及验收逻辑。
+**构建指南：** [按阶段构建 Agent Hub](docs/rebuild/README.md)，逐章说明目标、技术栈、模块文件架构、需求与接口、实现任务、可复制提示词及验收逻辑；[Browserless 与京东人工接管](docs/rebuild/12-browserless-jd-login.md)单独说明新增流程。
 
 **快速入口：** [直接下载完整演示 ZIP](https://raw.githubusercontent.com/yiqi19940531/qoder-sdk-agentStudio/main/downloads/qoder-agent-workbench-demo.zip) · [中文详细指南](QUICKSTART.zh-CN.md) · [English guide](QUICKSTART.en.md) · [实际验证记录](VALIDATION.md)
 
-> ZIP 与仓库源码都不包含原作者的百炼 Key、Apify Token、Qoder 登录状态或可复用的认证文件。需要联网模型时，请使用你自己的 Qoder 账号。
+> ZIP 与仓库源码都不包含原作者的百炼 Key、Apify Token、Browserless Token、Qoder 登录状态或可复用的认证文件。需要联网模型时，请使用你自己的 Qoder 账号。
 
 ## 三步运行
 
@@ -72,8 +72,9 @@ Node.js 最低支持版本为 20.19，推荐 22.12+。SDK 固定为 **1.0.50**�
 | AIGC 任务编排 Agent | 编排图片和视频生成任务 |
 | 图片生成 Sub-Agent | 使用 `bailian-image` Skill 与工具生成图片 |
 | 视频生成 Sub-Agent | 使用 `bailian-video` Skill 与工具生成视频 |
+| 京东登录 Agent | 把 Browserless 云端京东页面嵌入本地 Web，交给用户完成人工验证，再核实登录状态 |
 
-三个 Skill 的源码在 [`plugins/workbench/skills`](plugins/workbench/skills)。内置 MCP 包含 `repo-facts`、`playwright`、`chrome-devtools`、`bailian-image`、`bailian-video`。Apify 作为**未配置凭据、未装配**的服务定义保留，供接收者自行启用。
+三个 Skill 的源码在 [`plugins/workbench/skills`](plugins/workbench/skills)。内置 MCP 包含 `repo-facts`、`playwright`、`chrome-devtools`、`bailian-image`、`bailian-video`、`jd-browser`。Apify 作为**未配置凭据、未装配**的服务定义保留，供接收者自行启用。
 
 项目附带 **34 条演示存档会话**、成功与失败的生成记录、**2 张图片与 2 段视频**、示例仓库截图。可在“运行台”选择已有对话，查看消息、事件和 Agent 流程图；在原对话输入新问题会创建使用你自己账号的**新会话**，不会自动继承旧 SDK 上下文。直接通过 API 续接演示存档会被拒绝。图片与视频可在历史产物区域打开，原文件位于 [`data/generated`](data/generated)。
 
@@ -96,6 +97,12 @@ Node.js 最低支持版本为 20.19，推荐 22.12+。SDK 固定为 **1.0.50**�
 
 在“配置 → MCP 服务”打开现成的 `apify` 定义，输入**你自己的** Bearer Token，保存后点击“校验连接”。发现工具后，再点击“装配到当前 Agent”，建议用于网页效果探索 Agent。Token 只保存在你的本机 `data/mcp-secrets.json`；新会话连接快照保存在 `data/mcp-session-config/`。这些文件均未上传，且被 `.gitignore` 排除。无需 Apify 也可使用内置浏览器 MCP。
 
+### Browserless 与京东人工登录
+
+将 `.env.example` 复制为 `.env`，只在本机填入自己的 `BROWSERLESS_API_TOKEN`，重启服务。选择“京东登录 Agent”，输入“登录京东账号”；Agent 打开云端京东页面后，运行台的 iframe 会显示**同一个浏览器页面**。用户自行在画面中输入手机号、拖动滑块、填写短信验证码，再点击“完成并继续”。后端会用该浏览器访问京东账户页核验；点击完成本身不算登录成功。会话到期后，可在同一对话点击“准备好后重新开始登录”。[完整步骤](QUICKSTART.zh-CN.md#browserless-云浏览器与京东人工登录)
+
+此能力使用 Browserless 官方支持的 `puppeteer-core` CDP 连接。初版 Playwright CDP 在真实 Live URL 接管时出现 `Duplicate target` 进程崩溃，已有的 Playwright MCP 仍用于原网页探索 Agent。当前已验证真实云浏览器、Web 实时画面和**未登录时正确判失败**；京东真人滑块、短信与成功登录尚未完成验收。用户自己的 `.env`、Live URL 和新登录对话不会进入公开 ZIP；细节见 [验证记录](VALIDATION.md)。
+
 ### 百炼图片与视频
 
 只有**新生成**图片或视频时才需要配置。安装 Python 3（Windows x64 默认通过 `py -3` 调用），在工程根目录自行创建 `api-key.md`，写入**恰好一个**你自己的 `sk-` 百炼 Key，以及**恰好一个**北京地域业务空间的 HTTPS 地址，路径以 `/compatible-mode/v1` 开头，然后重启服务：
@@ -112,10 +119,10 @@ Key: <你自己的百炼 Key>
 - `src/` 是前端；`server/` 是本地 API 与 SDK 执行逻辑；`shared/` 放共享类型和模型选择逻辑。
 - `plugins/workbench/skills/` 是 3 个 Skill；`data/` 中提交的是经脱敏的演示配置、会话和产物。
 - `scripts/quickstart.mjs` 是三系统共用的启动入口。`npm run typecheck`、`npm run build`、`npm run test:models`、`npm run test:flow` 可做基础验证。
-- `npm run package:public` 可重建 ZIP。打包器按白名单复制，并对压缩前后所有条目扫描密钥、认证头、私有路径及禁止文件；检测失败会删除输出包。
+- `npm run package:public` 可重建 ZIP。打包器按白名单复制，并对压缩前后所有条目扫描密钥、认证头、私有路径及禁止文件；仅从固定演示索引收入 34 条存档，后来产生的私人登录会话不会被上传；检测失败会删除输出包。
 
 发布包大小约 15 MB；在 macOS arm64 上已从全新目录验证自动安装、构建、启动、模型、MCP、Skill 和模拟 AIGC 测试。Linux 与 Windows x64 有共用启动逻辑和说明，但尚未在这两个系统上实机验证，详情见 [`VALIDATION.md`](VALIDATION.md)。
 
 ---
 
-**English:** [Download the complete demo ZIP](https://raw.githubusercontent.com/yiqi19940531/qoder-sdk-agentStudio/main/downloads/qoder-agent-workbench-demo.zip) or clone this repository, sign in with your own Qoder CLI account, then run `node scripts/quickstart.mjs`. The project includes six Agents, three Skills, 34 sanitized read-only conversations, four media files, and six short Chrome walkthroughs. Apify and Bailian credentials are optional and must be supplied by each user. See the [English quick start](QUICKSTART.en.md) for setup details.
+**English:** [Download the complete demo ZIP](https://raw.githubusercontent.com/yiqi19940531/qoder-sdk-agentStudio/main/downloads/qoder-agent-workbench-demo.zip) or clone this repository, sign in with your own Qoder CLI account, then run `node scripts/quickstart.mjs`. The project includes seven Agents, three Skills, 34 sanitized read-only conversations, four media files, and six short walkthroughs. The optional JD login Agent needs your own Browserless token; Apify and Bailian credentials are also supplied by each user. See the [English quick start](QUICKSTART.en.md) for setup details.

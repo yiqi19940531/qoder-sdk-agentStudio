@@ -5,6 +5,7 @@ release/
 .DS_Store
 .env
 .env.*
+!.env.example
 api-key.md
 data/mcp-secrets.json
 data/mcp-session-config/

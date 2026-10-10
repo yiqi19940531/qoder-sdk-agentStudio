@@ -10,6 +10,7 @@ import { isGloballyAllowed } from './permissions.js';
 import { additionalDirectories, agentPermissions, callingAgent, isDirectoryApproval, shouldAutoAllowAgentTool } from './agent-policy.js';
 import { agentMemoryPath, fixtureRoot, loadAgentInstructions, loadAgentMemory, loadAgents, pluginRoot, projectRoot } from './storage.js';
 import { generate } from './aigc.js';
+import { browserService } from './browser-service.js';
 import { customMcpConfig, redactMcpError, redactMcpSecrets, toolNames } from './mcp-registry.js';
 
 type PendingApproval = {
@@ -123,6 +124,43 @@ export function configuredMcpServers(names: Set<string>, mediaContext?: { conver
       const result = await generate('video', mediaContext.conversationId, mediaContext.turnId(), prompt);
       return { isError: result.status !== 'succeeded', content: [{ type: 'text', text: JSON.stringify({ artifactId: result.id, status: result.status, model: result.model, taskId: result.taskId, error: result.error }) }] };
     })],
+  });
+  if (names.has('jd-browser')) servers['jd-browser'] = createSdkMcpServer({
+    name: 'jd-browser', version: '1.0.0', tools: [
+      tool('browser_open', 'Open the official JD login page in a dedicated Browserless cloud browser, visible in this conversation.', {}, async () => {
+        if (!mediaContext) return { isError: true, content: [{ type: 'text', text: '请在多轮运行台使用京东云浏览器。' }] };
+        try {
+          const state = await browserService.open(mediaContext.conversationId);
+          return { content: [{ type: 'text', text: JSON.stringify({ sessionId: state.sessionId, state: state.state, pageUrl: state.pageUrl }) }] };
+        } catch (error) { return { isError: true, content: [{ type: 'text', text: error instanceof Error ? error.message : String(error) }] }; }
+      }),
+      tool('browser_get_state', 'Read the current JD cloud browser state without operating its page.', {}, async () => {
+        if (!mediaContext) return { isError: true, content: [{ type: 'text', text: '没有会话上下文。' }] };
+        try { return { content: [{ type: 'text', text: JSON.stringify(browserService.getState(mediaContext.conversationId)) }] }; }
+        catch (error) { return { isError: true, content: [{ type: 'text', text: error instanceof Error ? error.message : String(error) }] }; }
+      }, { annotations: { readOnlyHint: true }, permissionPolicy: 'always_allow' }),
+      tool('browser_handoff', 'Give control of this exact browser page to the person in the Web workbench. Returns immediately; stop this turn and wait for the browser verification result.', {}, async () => {
+        if (!mediaContext) return { isError: true, content: [{ type: 'text', text: '没有会话上下文。' }] };
+        try {
+          const state = await browserService.handoff(mediaContext.conversationId);
+          return { content: [{ type: 'text', text: JSON.stringify({ sessionId: state.sessionId, state: state.state, instruction: '已交给用户；请停止本轮并等待系统核验结果，勿再次操作浏览器。' }) }] };
+        } catch (error) { return { isError: true, content: [{ type: 'text', text: error instanceof Error ? error.message : String(error) }] }; }
+      }),
+      tool('browser_check_login', 'Read the verified JD login result; user Done alone is not proof of login.', {}, async () => {
+        if (!mediaContext) return { isError: true, content: [{ type: 'text', text: '没有会话上下文。' }] };
+        try {
+          const state = browserService.getState(mediaContext.conversationId);
+          return { content: [{ type: 'text', text: JSON.stringify({ state: state.state, verified: state.state === 'COMPLETED', message: state.message }) }] };
+        } catch (error) { return { isError: true, content: [{ type: 'text', text: error instanceof Error ? error.message : String(error) }] }; }
+      }, { annotations: { readOnlyHint: true }, permissionPolicy: 'always_allow' }),
+      tool('browser_close', 'Close this conversation’s Browserless session only when the user asks to end it.', {}, async () => {
+        if (!mediaContext) return { isError: true, content: [{ type: 'text', text: '没有会话上下文。' }] };
+        try {
+          const state = await browserService.close(mediaContext.conversationId, 'agent');
+          return { content: [{ type: 'text', text: JSON.stringify({ state: state.state }) }] };
+        } catch (error) { return { isError: true, content: [{ type: 'text', text: error instanceof Error ? error.message : String(error) }] }; }
+      }),
+    ],
   });
   for (const name of names) {
     const custom = overrides[name] ?? customMcpConfig(name);

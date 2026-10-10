@@ -12,6 +12,7 @@ const output = path.join(root, 'release', 'qoder-agent-workbench-demo.zip');
 const stage = await mkdtemp(path.join(os.tmpdir(), 'qoder-demo-'));
 const files = new Set();
 const forbidden = /(^|\/)(api-key\.md|mcp-secrets\.json|mcp-session-config|config-catalog\.json|apify-verification\.json|node_modules|dist|dist-server|\.playwright-mcp|\.tmp[^/]*)($|\/)/i;
+const forbiddenPath = (relative) => forbidden.test(relative) || relative.split('/').some((name) => name === '.env' || (name.startsWith('.env.') && name !== '.env.example'));
 const secretPatterns = [
   ['API key', /\bsk-[A-Za-z0-9_-]{16,}\b/g],
   ['Apify token', /\bapify_api_[A-Za-z0-9_-]{12,}\b/gi],
@@ -23,7 +24,7 @@ const secretPatterns = [
 ];
 const knownSecrets = [];
 const privateOwner = root.match(/^\/Users\/([^/]+)/)?.[1] ?? root.match(/^\/home\/([^/]+)/)?.[1];
-for (const name of ['api-key.md', 'data/mcp-secrets.json']) {
+for (const name of ['api-key.md', 'data/mcp-secrets.json', '.env']) {
   try {
     const raw = await readFile(path.join(root, name), 'utf8');
     for (const match of raw.matchAll(/(?:sk-[A-Za-z0-9_-]{16,}|apify_api_[A-Za-z0-9_-]{12,})/g)) knownSecrets.push(match[0]);
@@ -35,6 +36,11 @@ for (const name of ['api-key.md', 'data/mcp-secrets.json']) {
         else if (value && typeof value === 'object') Object.values(value).forEach(collect);
       };
       collect(parsed);
+    }
+    if (name === '.env') {
+      const line = raw.split(/\r?\n/).find((item) => /^BROWSERLESS_API_TOKEN\s*=/.test(item));
+      const token = line?.slice(line.indexOf('=') + 1).trim().replace(/^['"]|['"]$/g, '');
+      if (token && token.length >= 8) knownSecrets.push(token);
     }
   } catch (error) { if (error.code !== 'ENOENT') throw error; }
 }
@@ -55,7 +61,7 @@ function sanitize(value) {
 }
 
 async function add(relative, bytes) {
-  if (forbidden.test(relative)) throw new Error(`Forbidden input: ${relative}`);
+  if (forbiddenPath(relative)) throw new Error(`Forbidden input: ${relative}`);
   const destination = path.join(stage, relative);
   await mkdir(path.dirname(destination), { recursive: true });
   await writeFile(destination, bytes);
@@ -73,7 +79,7 @@ async function copyTree(relative, predicate = () => true) {
 async function addJson(relative, object) { await add(relative, Buffer.from(`${JSON.stringify(sanitize(object), null, 2)}\n`)); }
 
 async function audit(relative, bytes) {
-  if (forbidden.test(relative)) throw new Error(`Forbidden entry: ${relative}`);
+  if (forbiddenPath(relative)) throw new Error(`Forbidden entry: ${relative}`);
   const latin = bytes.toString('latin1');
   const utf = bytes.toString('utf8');
   const utf16 = bytes.toString('utf16le');
@@ -88,7 +94,7 @@ async function audit(relative, bytes) {
 }
 
 try {
-  for (const name of ['package.json', 'package-lock.json', 'tsconfig.server.json', 'tsconfig.web.json', 'vite.config.ts', 'index.html', '.gitignore', 'QUICKSTART.zh-CN.md', 'QUICKSTART.en.md', 'VALIDATION.md', 'start.sh', 'start.cmd']) await copy(name);
+  for (const name of ['package.json', 'package-lock.json', 'tsconfig.server.json', 'tsconfig.web.json', 'vite.config.ts', 'index.html', '.gitignore', '.env.example', 'QUICKSTART.zh-CN.md', 'QUICKSTART.en.md', 'VALIDATION.md', 'start.sh', 'start.cmd']) await copy(name);
   let demoReadme;
   try { demoReadme = await readFile(path.join(root, 'README.demo.md')); }
   catch (error) { if (error.code !== 'ENOENT') throw error; demoReadme = await readFile(path.join(root, 'README.md')); }
@@ -99,7 +105,7 @@ try {
   await copy('docs/index.html');
   await copy('docs/.nojekyll');
   const agents = JSON.parse(await readFile(path.join(root, 'data/agents.json'), 'utf8'));
-  if (agents.length !== 6) throw new Error(`Expected 6 Agents, found ${agents.length}`);
+  if (agents.length !== 7) throw new Error(`Expected 7 Agents, found ${agents.length}`);
   for (const agent of agents) {
     if (agent.model !== 'auto' && agent.model !== 'efficient') agent.model = 'auto';
     agent.mcpServers = agent.mcpServers.filter((id) => id !== 'apify');
@@ -126,7 +132,13 @@ try {
     } catch (error) { if (error.code !== 'ENOENT') throw error; }
   }
   await copyTree('data/example-repo', (name, entry) => !entry.name.startsWith('.') && !name.includes('/.tmp'));
-  const conversationFiles = (await readdir(path.join(root, 'data/conversations'))).filter((name) => name.endsWith('.json')).sort();
+  const archiveIndex = JSON.parse(await readFile(path.join(root, 'data/demo-archive-index.json'), 'utf8'));
+  const archiveIds = archiveIndex.conversationIds;
+  if (!Array.isArray(archiveIds) || archiveIds.length !== 34 || new Set(archiveIds).size !== archiveIds.length || archiveIds.some((id) => typeof id !== 'string' || !/^[a-f0-9-]{36}$/.test(id))) throw new Error('Demo archive index is invalid');
+  const availableConversations = new Set((await readdir(path.join(root, 'data/conversations'))).filter((name) => name.endsWith('.json')));
+  const conversationFiles = archiveIds.map((id) => `${id}.json`).sort();
+  if (conversationFiles.some((name) => !availableConversations.has(name))) throw new Error('Demo archive file is missing');
+  await addJson('data/demo-archive-index.json', archiveIndex);
   for (const name of conversationFiles) {
     const item = JSON.parse(await readFile(path.join(root, 'data/conversations', name), 'utf8'));
     item.demoArchive = true;

@@ -26,6 +26,7 @@ function defaultInstructions(agent: AgentConfig): string {
   if (agent.id === 'aigc-director') return '# AIGC 任务编排 Agent · 规则\n\n- 判断用户要图片、视频，或两者都要；不明确时使用 AskUserQuestion。\n- 把可执行的具体创意简报分别交给图片或视频子 Agent。\n- 只根据工具返回的状态报告结果，不虚构已生成的媒体。\n';
   if (agent.id === 'aigc-image') return '# 图片生成 Agent · 规则\n\n- 仅处理文生图。提炼主体、场景、风格、构图和光线，调用一次图片生成工具。\n- 只在成功返回产物 ID 后报告图片完成。\n';
   if (agent.id === 'aigc-video') return '# 视频生成 Agent · 规则\n\n- 仅处理文生视频。提炼主体、动作、场景、镜头运动，调用一次视频生成工具。\n- 等待工具结果；失败时说明状态和错误，不虚构视频。\n';
+  if (agent.id === 'jd-login') return '# 京东登录 Agent · 规则\n\n- 仅使用 jd-browser 工具，不调用其他浏览器 MCP，也不读取手机号、验证码、密码或 Cookie。\n- 用户请求登录后先调用 browser_open，再调用 browser_handoff，然后结束当前轮等待人工操作。\n- 人工完成后，系统会在同一对话发送核验结果；仅当 browser_check_login 返回 verified=true 时报告登录成功。\n- 不自动识别、拖动或绕过滑块；不要在登录成功后主动关闭浏览器。\n';
   if (agent.id === 'repo-coordinator') return '# 仓库协调 Agent · 项目规则\n\n- 在示例仓库中先读取文件证据，再汇总结论。\n- 需要深入代码审查时可委派代码审查 Agent；明确区分自己的发现与子 Agent 的发现。\n- 仅在任务明确要求时修改文件。\n';
   if (agent.id === 'code-reviewer') return '# 代码审查 Agent · 项目规则\n\n- 审查示例仓库代码的正确性与边界情况，并标注具体文件和复现条件。\n- 不自行修改文件；把发现与建议交回主 Agent。\n';
   if (agent.name === '网页效果探索 Agent') return '# 网页效果探索 Agent · 项目规则\n\n- 给定网页时，使用已装配的浏览器工具查看实际渲染结果。\n- 说明可见内容、布局、样式和交互；区分观察结果与推断。\n- 页面加载失败或受到反爬限制时，如实说明。\n';
@@ -93,6 +94,14 @@ const aigcSeeds: AgentConfig[] = [
   },
 ];
 
+const jdSeeds: AgentConfig[] = [{
+  id: 'jd-login', kind: 'main', name: '京东登录 Agent',
+  description: '打开京东云浏览器，把手机号、滑块和短信验证交给用户，并核实登录结果。',
+  persona: '# 京东登录 Agent\n\n你只负责在 Browserless 云浏览器中启动京东官方登录，并将需要真实用户完成的步骤交给 Web 页面。收到“登录京东账号”后，调用 mcp__jd-browser__browser_open，再调用 mcp__jd-browser__browser_handoff，告诉用户在下方远程浏览器完成验证，然后停止本轮。不要读取用户输入、尝试自动滑块或调用其他浏览器 MCP。系统稍后会在同一对话发送实际核验结果；只有 browser_check_login 明确 verified=true 才能报告成功。云会话到期后提示用户在远程浏览器面板点击“准备好后重新开始登录”；除非用户要求，否则不要关闭已登录的云浏览器。',
+  model: 'auto', maxTurns: 12, tools: [], skills: [], mcpServers: ['jd-browser'], subAgentIds: [], memoryEnabled: false,
+  permissions: { ...DEFAULT_AGENT_PERMISSIONS },
+}];
+
 export async function initializeStorage(): Promise<void> {
   await mkdir(fixtureRoot, { recursive: true });
   await mkdir(dataRoot, { recursive: true });
@@ -119,7 +128,7 @@ export async function initializeStorage(): Promise<void> {
     await writeAtomic(instructionMigrationPath, 'Per-agent AGENTS.md files initialized.\n');
   }
   for (const agent of agents) await ensureAgentFiles(agent);
-  const additions = aigcSeeds.filter((agent) => !agents.some((existing) => existing.id === agent.id));
+  const additions = [...aigcSeeds, ...jdSeeds].filter((agent) => !agents.some((existing) => existing.id === agent.id));
   if (additions.length) await saveAgents([...agents, ...additions]);
 }
 

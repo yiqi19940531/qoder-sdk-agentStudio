@@ -18,7 +18,7 @@ node scripts/quickstart.mjs
 
 ## 3. 先看演示，再尝试自己的任务
 
-左侧可查看 6 个 Agent、3 个 Skill、34 条历史会话及事件/流程图、成功和失败的生成记录，以及 4 个成功媒体文件。历史会话标记为**演示存档**。它们只能阅读；在历史页输入新问题，会以所选 Agent、当前账号和这条新问题创建一个全新会话。旧 SDK 上下文**不会自动继承**。如需引用历史内容，请自行在新问题中摘录。
+左侧可查看 7 个 Agent、3 个 Skill、34 条历史会话及事件/流程图、成功和失败的生成记录，以及 4 个成功媒体文件。历史会话标记为**演示存档**。它们只能阅读；在历史页输入新问题，会以所选 Agent、当前账号和这条新问题创建一个全新会话。旧 SDK 上下文**不会自动继承**。如需引用历史内容，请自行在新问题中摘录。
 
 无需 Apify 或百炼 Key 即可尝试：
 
@@ -27,6 +27,7 @@ node scripts/quickstart.mjs
 - **网页效果探索 Agent**：使用已装配的 Playwright/Chrome DevTools MCP 查看本地页面或公开网页，并描述页面结构。需安装 Chrome。
 - **AIGC 导演 Agent**：查看已有生成记录，规划一段新的图片与视频提示词。新生成需要百炼 Key。
 - **图片生成 Sub-Agent / 视频生成 Sub-Agent**：浏览既有图片或视频；配置百炼后再请求新生成。
+- **京东登录 Agent**：配置自己的 Browserless Token 后，在运行台的云浏览器里亲自完成手机号、滑块和短信验证。
 
 默认所有 Agent 为“逐次审批 + 仅工作目录访问”，全局始终允许工具清单为空。演示时请在运行台根据具体工具请求作出决定。
 
@@ -37,6 +38,14 @@ node scripts/quickstart.mjs
 ### Apify
 
 在“配置 → MCP 服务”选择保留的 `apify` 定义，在 **Bearer Token** 输入你自己的 Apify Token，保存并“校验连接”。发现工具后点击“装配到当前 Agent”，建议装配到网页效果探索 Agent。配置会写入本机 `data/mcp-secrets.json`，新会话另存本机连接快照；这些文件不在发布包内。没有 Token 时，Playwright、Chrome DevTools 和示例仓库 MCP 仍可用。
+
+### Browserless 云浏览器与京东人工登录
+
+在项目根目录复制 `.env.example` 为 `.env`，填入**你自己的** `BROWSERLESS_API_TOKEN`；`BROWSERLESS_WS_ENDPOINT` 填不含 Token 的 Browserless Chromium CDP 地址。重启本地服务。`.env` 不会进入公开包。按账户套餐上限设置 `BROWSERLESS_SESSION_TIMEOUT_MS` 和 `BROWSERLESS_LIVE_TIMEOUT_MS`；免费套餐时长可能不足以完成短信验证。
+
+选择“京东登录 Agent”，在运行台新建对话并输入“登录京东账号”。批准工具调用后，下方“远程浏览器”在人工接管时直接显示可交互画面。**只在浏览器画面内**输入手机号和短信验证码、拖动滑块，然后点击“完成并继续”。系统使用同一个云浏览器访问京东账户页核验；只有核验通过才报告成功，并暂时保留该会话。也可以使用浏览器画面中的 Done。京东可能因云端 IP 或风控拒绝登录；此时显示实际状态，不会伪造成功。此功能无需本机安装 Chrome，浏览器运行在 Browserless 云端。
+
+Live URL 是可控制浏览器的临时链接，只在本机运行台显示；不要把它、Token、登录 Cookie 或验证码复制到公开文档与问题报告。免费套餐会话最多 2 分钟；若链接到期，可在同一对话的远程浏览器面板点击“准备好后重新开始登录”，点击时才创建新云会话。没有 Browserless Token 时，其他六个 Agent 仍可使用。
 
 ### 百炼图片与视频
 

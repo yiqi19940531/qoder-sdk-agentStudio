@@ -11,6 +11,7 @@ import { allowToolGlobally, approvalCategory, isConfigurableTool, isGloballyAllo
 import { additionalDirectories, agentPermissions, callingAgent, isDirectoryApproval, shouldAutoAllowAgentTool } from './agent-policy.js';
 import { refreshConfigCatalog } from './config-catalog.js';
 import { subscribeArtifactUpdates } from './aigc.js';
+import { browserService } from './browser-service.js';
 import { dataRoot, fixtureRoot, loadAgentInstructions, loadAgents, pluginRoot } from './storage.js';
 import { isAssignable, loadSessionMcp, redactMcpError, snapshotSessionMcp } from './mcp-registry.js';
 
@@ -82,8 +83,31 @@ const directory = path.join(dataRoot, 'conversations');
 const records = new Map<string, Conversation>();
 const liveSessions = new Map<string, LiveConversation>();
 const writes = new Map<string, Promise<void>>();
+const pendingBrowserOutcomes = new Map<string, { result: 'confirmed' | 'failed'; message: string }>();
 const IDLE_MS = 30 * 60_000;
 const MAX_EVENTS = 2000;
+
+browserService.onState((summary) => {
+  const record = records.get(summary.conversationId);
+  if (!record) return;
+  const event: ConversationEvent = {
+    id: ++record.lastEventId, turnId: record.turns.at(-1)?.id ?? '', at: new Date().toISOString(),
+    type: 'status', label: `远程浏览器：${summary.state}`, detail: summary.message ?? summary.pageUrl,
+    agentId: record.agentId,
+  };
+  record.events.push(event);
+  if (record.events.length > MAX_EVENTS) record.events.shift();
+  record.updatedAt = event.at;
+  const live = liveSessions.get(record.id);
+  if (live) {
+    for (const response of live.listeners) response.write(`id: ${event.id}\ndata: ${JSON.stringify(event)}\n\n`);
+    schedulePersist(live);
+  } else void persist(record).catch(() => {});
+});
+
+browserService.onOutcome((conversationId, result, message) => {
+  void deliverBrowserOutcome(conversationId, result, message).catch((error) => console.error('浏览器核验结果交接失败', error));
+});
 
 subscribeArtifactUpdates((artifact) => {
   const live = liveSessions.get(artifact.conversationId);
@@ -316,6 +340,11 @@ function digest(live: LiveConversation, message: unknown): boolean {
     live.interruptRequested = false;
     armIdle(live);
     void flush(live).catch((error) => console.error('保存会话失败', error));
+    const browserOutcome = pendingBrowserOutcomes.get(live.record.id);
+    if (browserOutcome) {
+      pendingBrowserOutcomes.delete(live.record.id);
+      queueMicrotask(() => void deliverBrowserOutcome(live.record.id, browserOutcome.result, browserOutcome.message).catch((error) => console.error('浏览器核验结果交接失败', error)));
+    }
     return true;
   }
   return false;
@@ -491,6 +520,36 @@ export async function sendMessage(id: string, content: string): Promise<Conversa
     live.queue.push(content);
   }
   return record;
+}
+
+async function deliverBrowserOutcome(id: string, result: 'confirmed' | 'failed', message: string): Promise<void> {
+  const record = records.get(id);
+  if (!record || record.demoArchive || !record.config.agent.mcpServers.includes('jd-browser')) return;
+  if (record.status === 'running' || record.status === 'waiting') {
+    pendingBrowserOutcomes.set(id, { result, message });
+    return;
+  }
+  const content = result === 'confirmed'
+    ? `【系统浏览器核验】同一 Browserless 会话已通过京东账户页检查：${message}。请调用 browser_check_login 确认状态，再向用户报告。不要关闭浏览器。`
+    : `【系统浏览器核验】京东登录流程未完成：${message}。请调用 browser_get_state 核对状态，并如实告知用户；不要声称登录成功。`;
+  const now = new Date().toISOString();
+  const turnId = randomUUID();
+  record.turns.push({ id: turnId, status: 'running', startedAt: now });
+  record.messages.push({ id: randomUUID(), turnId, role: 'system', content, at: now });
+  record.status = 'running';
+  record.updatedAt = now;
+  await persist(record);
+  let live = liveSessions.get(id);
+  if (!live || live.closed) {
+    live = makeLive(record);
+    live.queue.push(content);
+    emit(live, { type: 'status', label: '远程浏览器核验已交给 Agent', detail: message });
+    void execute(live, record.sdkEstablished === true);
+  } else {
+    if (live.idleTimer) clearTimeout(live.idleTimer);
+    live.queue.push(content);
+    emit(live, { type: 'status', label: '远程浏览器核验已交给 Agent', detail: message });
+  }
 }
 
 export function subscribeConversation(id: string, response: Response, after = 0): boolean {

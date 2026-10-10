@@ -5,6 +5,7 @@ import { CONFIGURABLE_PERMISSION_TOOLS, DEFAULT_AGENT_PERMISSIONS, DEFAULT_ALLOW
 import { AgentFlow } from './AgentFlow';
 import { McpManager } from './McpManager';
 import { SkillManager } from './SkillManager';
+import { RemoteBrowser } from './RemoteBrowser';
 import { displayStatus, eventLabel, t, type Language, type Theme } from './i18n';
 import './styles.css';
 import './light.css';
@@ -28,6 +29,7 @@ const permissionGroups = [
   { label: '文件与命令', tools: ['Write', 'Edit', 'Bash'] },
   { label: 'Chrome DevTools', tools: MCP_TOOL_NAMES['chrome-devtools'].map((name) => `mcp__chrome-devtools__${name}`) },
   { label: 'Playwright', tools: MCP_TOOL_NAMES.playwright.map((name) => `mcp__playwright__${name}`) },
+  { label: '京东云浏览器', tools: MCP_TOOL_NAMES['jd-browser'].map((name) => `mcp__jd-browser__${name}`) },
   { label: '媒体生成 MCP', tools: ['mcp__bailian-image__generate_image', 'mcp__bailian-video__generate_video'] },
 ].map((group) => ({ ...group, tools: group.tools.filter((name) => !defaultAllowed.has(name) && configurablePermissions.has(name)) }));
 
@@ -225,7 +227,7 @@ function App() {
       setTask('');
       localStorage.setItem(`qoder-conversation:${selectedId}`, choice.id);
       if (item.pending.length || item.status === 'interrupted') setSection('run');
-      if (item.status === 'running' || item.status === 'waiting') connectConversation(choice.id, item.lastEventId);
+      if (item.status === 'running' || item.status === 'waiting' || item.config.agent.mcpServers.includes('jd-browser')) connectConversation(choice.id, item.lastEventId, item.config.agent.mcpServers.includes('jd-browser'));
     }).catch((error) => { if (!cancelled) setBanner((error as Error).message); });
     return () => { cancelled = true; eventsRef.current?.close(); };
   }, [selectedId]);
@@ -331,7 +333,7 @@ function App() {
     setConfigCatalog(catalog);
   }
 
-  function connectConversation(id: string, after = 0) {
+  function connectConversation(id: string, after = 0, keepOpen = false) {
     eventsRef.current?.close();
     const source = new EventSource(`/api/conversations/${id}/events?after=${after}`);
     eventsRef.current = source;
@@ -351,17 +353,18 @@ function App() {
         if (event.type === 'interaction_resolved') next.status = 'running';
         return next;
       });
-      if (event.type === 'interaction' || event.type === 'interaction_resolved' || event.type === 'turn_end' || (event.type === 'status' && event.label?.startsWith('媒体'))) {
+      if (event.type === 'interaction' || event.type === 'interaction_resolved' || event.type === 'turn_end' || (event.type === 'status' && (event.label?.startsWith('媒体') || event.label?.startsWith('远程浏览器')))) {
         void api<Conversation>(`/conversations/${id}`).then((item) => {
           setConversation((current) => current?.id === id ? item : current);
         }).catch((error) => setBanner((error as Error).message));
       }
       if (event.type === 'turn_end') {
-        source.close();
+        if (!keepOpen) source.close();
         void api<ConversationListItem[]>(`/conversations?agentId=${encodeURIComponent(selectedId)}`).then(setConversationList);
       }
     };
-    source.onerror = () => { setBanner(language === 'en' ? 'Event stream disconnected temporarily; reconnecting…' : '事件流暂时断开，正在自动重连。'); };
+    source.onopen = () => { if (eventsRef.current === source) setBanner((current) => current === 'Event stream disconnected temporarily; reconnecting…' || current === '事件流暂时断开，正在自动重连。' ? '' : current); };
+    source.onerror = () => { if (eventsRef.current === source) setBanner(language === 'en' ? 'Event stream disconnected temporarily; reconnecting…' : '事件流暂时断开，正在自动重连。'); };
   }
 
   async function start(smoke = false) {
@@ -376,7 +379,7 @@ function App() {
       setTask('');
       localStorage.setItem(`qoder-conversation:${draft.id}`, item.id);
       setConversationList((current) => [{ id: item.id, agentId: item.agentId, agentName: item.agentName, status: item.status, createdAt: item.createdAt, updatedAt: item.updatedAt, firstMessage: content.slice(0, 100) }, ...current]);
-      connectConversation(item.id, item.lastEventId);
+      connectConversation(item.id, item.lastEventId, item.config.agent.mcpServers.includes('jd-browser'));
     } catch (error) { setBanner((error as Error).message); }
     finally { setBusy(false); }
   }
@@ -396,7 +399,7 @@ function App() {
         setConversationList((current) => [{ id: item.id, agentId: item.agentId, agentName: item.agentName, status: item.status, createdAt: item.createdAt, updatedAt: item.updatedAt, firstMessage: content.slice(0, 100) }, ...current]);
         setBanner(language === 'en' ? 'A new conversation started with your account. The imported history was not passed to the model.' : '已用你的账号开始新对话；旧演示记录未作为模型上下文传入。');
       }
-      connectConversation(item.id, item.lastEventId);
+      connectConversation(item.id, item.lastEventId, item.config.agent.mcpServers.includes('jd-browser'));
     } catch (error) { setBanner((error as Error).message); }
     finally { setBusy(false); }
   }
@@ -408,7 +411,7 @@ function App() {
       setConversation(item);
       localStorage.setItem(`qoder-conversation:${item.agentId}`, id);
       setDismissedInteractionId('');
-      if (item.status === 'running' || item.status === 'waiting') connectConversation(id, item.lastEventId);
+      if (item.status === 'running' || item.status === 'waiting' || item.config.agent.mcpServers.includes('jd-browser')) connectConversation(id, item.lastEventId, item.config.agent.mcpServers.includes('jd-browser'));
     } catch (error) { setBanner((error as Error).message); }
   }
 
@@ -479,7 +482,7 @@ function App() {
           <label>{l('人格文件 · persona.md')}<textarea className="code-editor" rows={9} value={draft.persona} onChange={(event) => change({ persona: event.target.value })} /></label>
         </section>
         <section className="panel"><div className="panel-title"><span className="step">02</span><div><h2>{l('执行参数')}</h2><p>{l('模型来自当前 Qoder 账号的实时列表。')}</p></div></div><div className="two-fields"><label>{l('模型')}<select value={draft.model} onChange={(event) => change({ model: event.target.value })}>{!bootstrap?.models.some((model) => model.id === draft.model) && <option value={draft.model}>{draft.model} · {l('当前不可用')}</option>}<optgroup label={l('Qoder 模型')}>{qoderModels.map((model) => <option key={model.id} value={model.id} disabled={!model.enabled}>{model.name} ({model.id})</option>)}</optgroup><optgroup label={l('已接入的自定义模型')}>{customModels.map((model) => <option key={model.id} value={model.id} disabled={!model.enabled}>{model.name} ({model.id})</option>)}</optgroup></select></label><label>{l('最大轮数')}<input type="number" min="1" max="1000" step="1" value={draft.maxTurns} onChange={(event) => change({ maxTurns: Number(event.target.value) })} /></label></div><p className="permission-hint">{l('SDK maxTurns 限制当前 Query 的模型与工具往返，范围 1–1000；持续对话会复用该 Query。保存后只对新对话生效；被委派的 Sub-Agent 的此值可能由 SDK 忽略。')}</p><div className="model-note"><span>{customModels.length ? (language === 'en' ? `${customModels.length} custom models connected. ` : `当前账号有 ${customModels.length} 个已接入模型。`) : l('当前账号没有返回已接入模型。')}{l('在 Qoder CLI 的 /model 中添加或更新，然后刷新列表。')}</span><button type="button" onClick={() => void refreshModels()} disabled={busy}>{l('刷新模型')}</button></div>{bootstrap?.modelDiscoveryError && <p className="field-error">{l('模型发现失败：')}{bootstrap.modelDiscoveryError}</p>}<label className="switch-row"><input type="checkbox" checked={draft.memoryEnabled} onChange={(event) => change({ memoryEnabled: event.target.checked })} /><span><strong>{l('启用 Agent 专属记忆')}</strong><small>{l('直接运行时尝试自动生成；被委派时读取已有记忆。')}</small></span></label></section></div>
-        <div className="column"><section className="panel"><div className="panel-title"><span className="step">03</span><div><h2>{l('工具与扩展')}</h2><p>{l('选择 Agent 能看见的工具、Skill 和 MCP；默认授权在下方单独设置。')}</p></div></div><h3>{l('可用工具')}</h3>{checkboxList(draft.tools, draft.kind === 'subagent' ? TOOL_NAMES.filter((name) => name !== 'Agent') : TOOL_NAMES, (values) => change({ tools: values }), { Read: l('Read · 读取文件'), Grep: l('Grep · 搜索内容'), Glob: l('Glob · 搜索文件'), Agent: l('Agent · 委派任务'), Write: l('Write · 创建文件'), Edit: l('Edit · 编辑文件'), Bash: l('Bash · 运行命令') })}<div className="section-divider" /><h3>Skills</h3>{checkboxList(draft.skills, bootstrap?.skillNames ?? [], (values) => change({ skills: values }))}<button className="inline-link" onClick={() => setSection('skills')}>{l('创建或编辑 Skill')} ↗</button><div className="section-divider" /><h3>{l('MCP Servers')}</h3>{checkboxList(draft.mcpServers, assignableMcpNames, (values) => change({ mcpServers: values }), { 'repo-facts': l('repo-facts · 示例仓库信息'), playwright: l('Playwright · 页面交互与截图'), 'chrome-devtools': l('Chrome DevTools · 页面调试') })}<button className="inline-link" onClick={() => setSection('mcp')}>{l('管理 MCP 服务')} ↗</button><p className="extension-note">{l('浏览器 MCP 使用独立的无痕浏览器；工具调用会显示在运行台。')}</p></section>
+        <div className="column"><section className="panel"><div className="panel-title"><span className="step">03</span><div><h2>{l('工具与扩展')}</h2><p>{l('选择 Agent 能看见的工具、Skill 和 MCP；默认授权在下方单独设置。')}</p></div></div><h3>{l('可用工具')}</h3>{checkboxList(draft.tools, draft.kind === 'subagent' ? TOOL_NAMES.filter((name) => name !== 'Agent') : TOOL_NAMES, (values) => change({ tools: values }), { Read: l('Read · 读取文件'), Grep: l('Grep · 搜索内容'), Glob: l('Glob · 搜索文件'), Agent: l('Agent · 委派任务'), Write: l('Write · 创建文件'), Edit: l('Edit · 编辑文件'), Bash: l('Bash · 运行命令') })}<div className="section-divider" /><h3>Skills</h3>{checkboxList(draft.skills, bootstrap?.skillNames ?? [], (values) => change({ skills: values }))}<button className="inline-link" onClick={() => setSection('skills')}>{l('创建或编辑 Skill')} ↗</button><div className="section-divider" /><h3>{l('MCP Servers')}</h3>{checkboxList(draft.mcpServers, assignableMcpNames, (values) => change({ mcpServers: values }), { 'repo-facts': l('repo-facts · 示例仓库信息'), playwright: l('Playwright · 页面交互与截图'), 'chrome-devtools': l('Chrome DevTools · 页面调试'), 'jd-browser': l('jd-browser · 云浏览器人工接管') })}<button className="inline-link" onClick={() => setSection('mcp')}>{l('管理 MCP 服务')} ↗</button><p className="extension-note">{l('Playwright 与 Chrome DevTools MCP 各自使用独立浏览器；jd-browser 与远程浏览器面板共用 Browserless 会话。')}</p></section>
           <section className="panel agent-permissions"><div className="panel-title"><span className="step">04</span><div><h2>{l('此 Agent 的默认授权')}</h2><p>{l('保存后用于新对话；已建立的会话继续使用创建时的配置。')}</p></div></div>
             <label>{l('工具调用')}<select value={draft.permissions.toolApproval} onChange={(event) => change({ permissions: { ...draft.permissions, toolApproval: event.target.value as AgentConfig['permissions']['toolApproval'] } })}><option value="ask">{l('按现有规则审批')}</option><option value="allow_all">{l('默认允许所有已装配工具')}</option></select></label>
             <p className="permission-hint">{l('只授权当前 Agent 已勾选的工具与 MCP；新增工具仍需先装配。Agent 提问依然需要你回答。')}</p>
@@ -521,7 +524,7 @@ function App() {
         {(conversation?.config.agent.kind === 'main' || (!conversation && draft?.kind === 'main')) && <AgentFlow root={conversation?.config.agent ?? draft!} children={conversation?.config.children ?? draft!.subAgentIds.map((id) => bootstrap?.agents.find((agent) => agent.id === id)).filter((agent): agent is AgentConfig => Boolean(agent))} conversation={conversation} mode="run" language={language} />}
         <section className="panel run-compose"><div className="panel-title"><span className="step">▶</span><div><h2>{l("多轮对话")}</h2><p>{l('工作目录：')}{bootstrap?.workspacePath}</p></div></div>
           <div className="conversation-picker"><label>{l("会话")}<select value={conversation?.id ?? ''} onChange={(event) => { if (event.target.value) void selectConversation(event.target.value); }}><option value="">{l("新对话")}</option>{conversationList.map((item) => <option key={item.id} value={item.id}>{item.firstMessage || item.id.slice(0, 8)} · {item.id.slice(0, 8)}</option>)}</select></label><button className="button ghost" onClick={() => { eventsRef.current?.close(); setConversation(null); setTask(''); setDismissedInteractionId(''); if (draft) localStorage.removeItem(`qoder-conversation:${draft.id}`); }}>{l("新对话")}</button></div>
-          <div className="conversation-messages">{conversation?.messages.length ? conversation.messages.map((message) => <div className={`chat-message chat-${message.role}`} key={message.id}><strong>{message.role === 'user' ? l('你') : conversation.agentName}</strong><div>{message.content || l('正在生成…')}</div></div>) : <p className="empty-text">{l("输入任务，开始与当前 Agent 对话。")}</p>}</div>
+          <div className="conversation-messages">{conversation?.messages.length ? conversation.messages.map((message) => <div className={`chat-message chat-${message.role}`} key={message.id}><strong>{message.role === 'user' ? l('你') : message.role === 'system' ? l('浏览器核验') : conversation.agentName}</strong><div>{message.content || l('正在生成…')}</div></div>) : <p className="empty-text">{l("输入任务，开始与当前 Agent 对话。")}</p>}</div>
           {conversation?.status === 'waiting' && <button className="button pending-banner" onClick={() => setDismissedInteractionId('')}>{l("等待你的决策 · 点击查看")}</button>}
           {conversation?.demoArchive && <p className="permission-hint">{language === 'en' ? 'Imported showcase history is read-only. Sending below starts a new conversation with your account; previous messages are not carried over.' : '这是只读演示存档。下方发送后会用你的账号开始新对话，旧消息不会自动成为新对话的上下文。'}</p>}
           {conversation?.status === 'interrupted' && <p className="field-error">{l("服务重启中断了上一轮。输入追问即可恢复同一会话。")}</p>}
@@ -529,6 +532,7 @@ function App() {
           <div className="editor-actions"><span>{l("审批与 Agent 提问会在弹窗中显示。")}</span><div className="composer-buttons">{(conversation?.status === 'running' || conversation?.status === 'waiting') && <button className="button ghost" onClick={() => void stop()}>{l("中断当前轮")}</button>}<button className="button primary" onClick={() => void (conversation ? followUp() : start())} disabled={busy || !draft || !task.trim() || conversation?.status === 'running' || conversation?.status === 'waiting'}>{conversation?.demoArchive ? (language === 'en' ? 'Start a new conversation' : '用此提问开启新对话') : conversation ? l('发送追问') : l('开始运行')}</button></div></div>
         </section>
         <section className="panel run-output"><div className="output-head"><div><h2>{l("会话状态")}</h2><p>{conversation ? `${displayStatus(language, conversation.status)} · ${conversation.id.slice(0, 8)}` : l('等待启动任务')}</p></div></div><div className="conversation-summary">{conversation ? <><p>{language === 'en' ? `${conversation.turns.filter((turn) => turn.status === 'done').length} completed turns · Current turn: ` : `已完成 ${conversation.turns.filter((turn) => turn.status === 'done').length} 轮 · 当前轮：`}{displayStatus(language, conversation.turns.at(-1)?.status ?? 'idle')}</p><p>{language === 'en' ? 'Conversation settings snapshot: ' : '本会话配置快照：'}{conversation.config.agent.model} · {l('最大轮数')} {conversation.config.agent.maxTurns}</p>{selected && selected.maxTurns !== conversation.config.agent.maxTurns && <p className="field-error">{language === 'en' ? `Saved configuration: ${selected.maxTurns} turns. This conversation keeps its original ${conversation.config.agent.maxTurns} turns. Start a new conversation to apply the change.` : `当前已保存配置是 ${selected.maxTurns} 轮；本会话继续使用创建时的 ${conversation.config.agent.maxTurns} 轮。开启新对话后生效。`}</p>}<p>{l("刷新页面后可继续；服务重启后从 SDK 会话恢复。")}</p>{(conversation.sessionAllowedTools?.length || conversation.sessionAllowedCategories?.length) ? <p className="session-grants">{language === 'en' ? 'Automatically allowed in this conversation: ' : '本会话自动允许：'}{[...(conversation.sessionAllowedTools ?? []), ...(conversation.sessionAllowedCategories ?? []).map((category) => language === 'en' ? `${category} category` : `${category} 类`) ].join(language === 'en' ? ', ' : '、')}</p> : null}</> : <p className="empty-text">{language === 'en' ? 'New conversations use saved settings: ' : '新对话将使用已保存配置：'}{selected?.model ?? '—'} · {l('最大轮数')} {selected?.maxTurns ?? '—'}{draftDirty && (language === 'en' ? '. There are unsaved changes.' : '。当前还有未保存修改。')}</p>}</div></section>
+        {conversation?.config.agent.mcpServers.includes('jd-browser') && <RemoteBrowser conversationId={conversation.id} conversationStatus={conversation.status} language={language} />}
         {!!conversation?.artifacts?.length && <section className="panel media-panel"><h2>{l("生成产物")}</h2><div className="media-grid">{conversation.artifacts.map((item) => <article className="media-card" key={item.id}><strong>{item.kind === 'image' ? l('图片') : l('视频')} · {displayStatus(language, item.status)}</strong><small>{item.model} · {item.id.slice(0, 8)}{item.taskId ? ` · ${l('任务 ')}${item.taskId}` : ''}</small>{item.status === 'succeeded' && item.url && (item.kind === 'image' ? <img src={item.url} alt={item.prompt} /> : <video controls preload="metadata" src={item.url} />)}{item.status === 'running' && <p>{l("正在生成；视频任务会持续查询百炼状态。")}</p>}{item.error && <p className="field-error">{item.error}</p>}{item.url && <a href={item.url} download>{l("下载本地产物")}</a>}<p>{item.prompt}</p></article>)}</div></section>}
         <section className="panel activity"><h2>{l("执行事件")}</h2><p>{l("每一轮的工具、决策、记忆与 Credits")}</p><div className="event-list">{activity.length ? activity.map((event) => <div className={`event event-${event.type}`} key={event.id}><div className="event-time">{new Date(event.at).toLocaleTimeString(language === 'en' ? 'en-US' : 'zh-CN')}</div><div className="event-body"><strong>{eventLabel(language, event.label ?? event.type)}</strong>{event.detail && <pre>{event.detail}</pre>}{event.credits !== undefined && <span>{event.credits} Credits</span>}</div></div>) : <div className="empty-text">{l("尚无事件。")}</div>}</div></section>
       </div>}

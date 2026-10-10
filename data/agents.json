@@ -145,5 +145,25 @@
       "pathAccess": "workspace",
       "additionalDirectories": []
     }
+  },
+  {
+    "id": "jd-login",
+    "kind": "main",
+    "name": "京东登录 Agent",
+    "description": "打开京东云浏览器，把手机号、滑块和短信验证交给用户，并核实登录结果。",
+    "model": "auto",
+    "maxTurns": 12,
+    "tools": [],
+    "skills": [],
+    "mcpServers": [
+      "jd-browser"
+    ],
+    "subAgentIds": [],
+    "memoryEnabled": false,
+    "permissions": {
+      "toolApproval": "ask",
+      "pathAccess": "workspace",
+      "additionalDirectories": []
+    }
   }
 ]

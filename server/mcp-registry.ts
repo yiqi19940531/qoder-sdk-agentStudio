@@ -18,7 +18,7 @@ let writes: Promise<unknown> = Promise.resolve();
 const emptyCheck = (): McpCheck => ({ status: 'untested', tools: [] });
 
 function builtinRecord(id: (typeof MCP_NAMES)[number]): Stored {
-  const transport = id === 'repo-facts' || id.startsWith('bailian-') ? 'sdk' : 'stdio';
+  const transport = id === 'repo-facts' || id === 'jd-browser' || id.startsWith('bailian-') ? 'sdk' : 'stdio';
   return { id, name: id, source: 'builtin', transport, auth: 'none', envNames: [], headerNames: [],
     check: builtinChecks.get(id) ?? { status: 'untested', tools: MCP_TOOL_NAMES[id].map((name) => ({ name })) } };
 }
