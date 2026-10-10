@@ -102,6 +102,7 @@ try {
   for (const tree of ['src', 'server', 'shared', 'scripts', 'public', 'plugins/workbench']) await copyTree(tree, (name, entry) => !entry.name.startsWith('.') && !/\.(log|tmp)$/.test(name));
   await copy('plugins/workbench/.qoder-plugin/plugin.json');
   await copyTree('docs/rebuild');
+  await copyTree('docs/cases');
   await copy('docs/index.html');
   await copy('docs/.nojekyll');
   const agents = JSON.parse(await readFile(path.join(root, 'data/agents.json'), 'utf8'));

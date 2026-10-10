@@ -99,9 +99,7 @@ Node.js 最低支持版本为 20.19，推荐 22.12+。SDK 固定为 **1.0.50**�
 
 ### Browserless 京东商城研究与人工接管
 
-将 `.env.example` 复制为 `.env`，只在本机填入自己的 `BROWSERLESS_API_TOKEN`，重启服务。选择“京东商城研究 Agent”，提问“后台搜索洗发水，尝试按销量排序，列出前 20 个商品的名称、价格、促销和高评分评论”。Agent 先在**隐藏的云浏览器**操作；京东要求登录、滑块或风险验证时，运行台才显示同一浏览器供你操作，并尽量直接打开带原搜索返回目标的官方登录页。完成人工步骤后点“完成并继续”。商品和评论按批次保存进度，并在 Web 页面显示；销量排序未核实时不会冒称“销量前 20”。[完整步骤](QUICKSTART.zh-CN.md#browserless-京东商城研究与人工接管)
-
-默认使用 Browserless 中国住宅出口访问 `www.jd.com` 商城，代理流量会消耗 Browserless 单位。最近一次真人操作后，保存的京东档案已在新云浏览器中恢复，并在商城首页确认登录；但洗发水搜索另触发京东风险／登录验证，尚未取得真实商品或评论。此后 Browserless 免费套餐用量达到上限，暂时无法继续云端验收。工作台现在区分“此前确认登录”“当前搜索需验证”和“账户额度不足”。私有 `.env`、登录档案、任务结果、Live URL 和新会话不进入公开 ZIP；详见 [验证记录](VALIDATION.md)。
+“京东商城研究 Agent”会在云浏览器后台搜索洗发水；京东要求登录、滑块或风险验证时，才在本地 Web 运行台展示同一个浏览器供用户操作。当前已实测登录档案在新浏览器恢复，但搜索仍遇到京东额外验证，尚无真实商品结果。阅读[完整案例、技术方法与界面截图](docs/cases/jd-shampoo-remote-browser.md)；配置自己的 Browserless Token 请看[快速指南](QUICKSTART.zh-CN.md#browserless-京东商城研究与人工接管)。
 
 ### 百炼图片与视频
 
@@ -125,4 +123,4 @@ Key: <你自己的百炼 Key>
 
 ---
 
-**English:** [Download the complete demo ZIP](https://raw.githubusercontent.com/yiqi19940531/qoder-sdk-agentStudio/main/downloads/qoder-agent-workbench-demo.zip) or clone this repository, sign in with your own Qoder CLI account, then run `node scripts/quickstart.mjs`. The project includes seven Agents, three Skills, 34 sanitized read-only conversations, four media files, and six short walkthroughs. The optional JD mall research Agent needs your own Browserless token and requests human control only when JD requires it; real product extraction remains unverified. See the [English quick start](QUICKSTART.en.md).
+**English:** [Download the complete demo ZIP](https://raw.githubusercontent.com/yiqi19940531/qoder-sdk-agentStudio/main/downloads/qoder-agent-workbench-demo.zip) or clone this repository, sign in with your own Qoder CLI account, then run `node scripts/quickstart.mjs`. The project includes seven Agents, three Skills, 34 sanitized read-only conversations, four media files, and six short walkthroughs. The optional JD mall research Agent needs your own Browserless token and requests human control only when JD requires it; real product extraction remains unverified. See the [English quick start](QUICKSTART.en.md) and the [JD shampoo case study](docs/cases/jd-shampoo-remote-browser.md).
