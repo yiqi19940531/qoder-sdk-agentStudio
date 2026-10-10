@@ -25,11 +25,11 @@
 
 `BrowserService` 用 `conversationId` 关联一个内部 `sessionId` 与 `browser/context/page/cdp`。当前项目没有认证用户 ID，所以只声明本机单用户所有权，不伪造多用户隔离。浏览器状态独立于 SDK 会话轮次：
 
-`CREATED → AI_RUNNING → HUMAN_CONTROL → VERIFYING → COMPLETED`，并处理 `FAILED / EXPIRED / CLOSED`。核验未通过且会话仍可用时回到 `HUMAN_CONTROL`。人工控制期间，Agent 的页面操作与关闭调用都必须被服务层拒绝。
+`CREATED → AI_RUNNING → HUMAN_CONTROL → VERIFYING → COMPLETED`，并处理 `FAILED / EXPIRED / CLOSED`。核验未通过时转为 `FAILED`、关闭该云会话，并允许用户准备好后在同一 Qoder 对话中新建浏览器尝试。人工控制期间，Agent 的页面操作与关闭调用都必须被服务层拒绝。
 
 接口：`GET /api/conversations/:id/browser` 返回浏览器状态和**仅供当前 iframe 使用**的临时 Live URL；`GET .../browser/events` 用 SSE 推送不含 URL 的状态摘要；`POST .../browser/complete` 接收用户完成信号并实际核验；`POST .../browser/close` 关闭云浏览器。完整 Live URL 不得写入会话 JSON、SSE 事件、Agent 工具返回或日志。Live URL 是持有者即可控制浏览器的临时凭据。[Browserless Live URL 安全说明](https://docs.browserless.io/baas/monitor-sessions/manage-live-url-over-rest)
 
-`browser_handoff` 立即返回等待人工状态，让 Qoder 当前轮自然结束，避免长时间 MCP 工具调用超时。后端完成核验后，以标为“浏览器核验”的系统来源消息在**同一对话**开启后续轮次；模型还须调用 `browser_check_login`，只有 `verified=true` 才能回复“京东登录成功”。服务重启后内存中的 Browserless 连接不保证恢复，页面应要求开始新的登录会话。
+`browser_handoff` 立即返回等待人工状态，让 Qoder 当前轮自然结束，避免长时间 MCP 工具调用超时。后端完成核验后，以标为“浏览器核验”的系统来源消息在**同一对话**开启后续轮次；模型还须调用 `browser_check_login`，只有 `verified=true` 才能回复“京东登录成功”。服务重启后内存中的 Browserless 连接不保证恢复，页面提供重新开始云浏览器登录的入口。
 
 ## 实现任务
 
@@ -41,7 +41,7 @@
 
 ## 可复制的复建提示词
 
-> 在现有 React + Express + Qoder Agent SDK 本地工作台中新增 Browserless 云浏览器人工接管。保留当前六个 Agent、会话 SSE、审批和文件存储。新增 `jd-browser` 进程内 MCP 与京东登录 Agent；用 `puppeteer-core` 的 `puppeteer.connect()` 连接使用者通过环境变量配置的 Browserless Chromium Endpoint。每个 Qoder 对话只使用一个云浏览器的同一个 Context、Page 和页面级 CDP Session。仅在人工接管时生成交互式 Live URL，避免同一页面反复生成链接，React 运行台 iframe 直接显示画面。Agent 进入 `HUMAN_CONTROL` 后停止页面操作；用户手动完成手机号、滑块和短信验证后，后端访问京东账户页核验，只有真实证据确认才让 Agent 报告成功。Live URL 和凭据只在后端内存及当前 iframe 请求中短暂存在，禁止写入会话、日志和公开包。处理断线、到期、关闭、重复提交及服务重启。先通过模拟 CDP 测试，再由真人在真实京东页面做端到端验收；若风控拒绝云浏览器，记录具体失败，不伪造成功。
+> 在现有 React + Express + Qoder Agent SDK 本地工作台中新增 Browserless 云浏览器人工接管。保留当前六个 Agent、会话 SSE、审批和文件存储。新增 `jd-browser` 进程内 MCP 与京东登录 Agent；用 `puppeteer-core` 的 `puppeteer.connect()` 连接使用者通过环境变量配置的 Browserless Chromium Endpoint。每次登录尝试只使用一个云浏览器的同一个 Context、Page 和页面级 CDP Session。仅在人工接管时生成交互式 Live URL，避免同一页面反复生成链接，React 运行台 iframe 直接显示画面。Agent 进入 `HUMAN_CONTROL` 后停止页面操作；用户手动完成手机号、滑块和短信验证后，后端访问京东账户页核验，只有真实证据确认才让 Agent 报告成功。Live URL 和凭据只在后端内存及当前 iframe 请求中短暂存在，禁止写入会话、日志和公开包。处理断线、到期、关闭、重复提交及服务重启。先通过模拟 CDP 测试，再由真人在真实京东页面做端到端验收；若风控拒绝云浏览器，记录具体失败，不伪造成功。
 
 ## 校验逻辑与已知边界
 
