@@ -149,10 +149,10 @@
   {
     "id": "jd-login",
     "kind": "main",
-    "name": "京东登录 Agent",
-    "description": "打开京东云浏览器，把手机号、滑块和短信验证交给用户，并核实登录结果。",
+    "name": "京东商城研究 Agent",
+    "description": "后台搜索中国区京东商城商品、促销与评论；仅在需要登录或风险验证时请用户接管。",
     "model": "auto",
-    "maxTurns": 12,
+    "maxTurns": 40,
     "tools": [],
     "skills": [],
     "mcpServers": [

@@ -1,8 +1,8 @@
 # Qoder Agent Workbench / Agent Studio Demo
 
-一个基于 **Qoder Agent SDK** 的本地多 Agent 工作台。项目内提供 7 个 Agent、3 个 Skill、无需 API Key 的基础浏览器与示例仓库 MCP，以及 34 条经过脱敏的历史对话和已生成的图片、视频。京东登录 Agent 是可选的 Browserless 云浏览器体验，需要使用者自己的 Token；其他功能可直接用自己的 Qoder 账号在本机体验。
+一个基于 **Qoder Agent SDK** 的本地多 Agent 工作台。项目内提供 7 个 Agent、3 个 Skill、无需 API Key 的基础浏览器与示例仓库 MCP，以及 34 条经过脱敏的历史对话和已生成的图片、视频。京东商城研究 Agent 是可选的 Browserless 云浏览器体验：先后台搜索商品，只有京东要求登录或风险验证时才显示可交互页面；需要使用者自己的 Token。其他功能可直接用自己的 Qoder 账号在本机体验。
 
-**构建指南：** [按阶段构建 Agent Hub](docs/rebuild/README.md)，逐章说明目标、技术栈、模块文件架构、需求与接口、实现任务、可复制提示词及验收逻辑；[Browserless 与京东人工接管](docs/rebuild/12-browserless-jd-login.md)单独说明新增流程。
+**构建指南：** [按阶段构建 Agent Hub](docs/rebuild/README.md)，逐章说明目标、技术栈、模块文件架构、需求与接口、实现任务、可复制提示词及验收逻辑；[Browserless 登录接管](docs/rebuild/12-browserless-jd-login.md)和[京东商城研究](docs/rebuild/13-jd-mall-research.md)分别说明演进与当前流程。
 
 **快速入口：** [直接下载完整演示 ZIP](https://raw.githubusercontent.com/yiqi19940531/qoder-sdk-agentStudio/main/downloads/qoder-agent-workbench-demo.zip) · [中文详细指南](QUICKSTART.zh-CN.md) · [English guide](QUICKSTART.en.md) · [实际验证记录](VALIDATION.md)
 
@@ -72,7 +72,7 @@ Node.js 最低支持版本为 20.19，推荐 22.12+。SDK 固定为 **1.0.50**�
 | AIGC 任务编排 Agent | 编排图片和视频生成任务 |
 | 图片生成 Sub-Agent | 使用 `bailian-image` Skill 与工具生成图片 |
 | 视频生成 Sub-Agent | 使用 `bailian-video` Skill 与工具生成视频 |
-| 京东登录 Agent | 把 Browserless 云端京东页面嵌入本地 Web，交给用户完成人工验证，再核实登录状态 |
+| 京东商城研究 Agent | 后台搜索中国区商品、促销和评论；遇到登录或风险验证才把同一云浏览器交给用户 |
 
 三个 Skill 的源码在 [`plugins/workbench/skills`](plugins/workbench/skills)。内置 MCP 包含 `repo-facts`、`playwright`、`chrome-devtools`、`bailian-image`、`bailian-video`、`jd-browser`。Apify 作为**未配置凭据、未装配**的服务定义保留，供接收者自行启用。
 
@@ -97,11 +97,11 @@ Node.js 最低支持版本为 20.19，推荐 22.12+。SDK 固定为 **1.0.50**�
 
 在“配置 → MCP 服务”打开现成的 `apify` 定义，输入**你自己的** Bearer Token，保存后点击“校验连接”。发现工具后，再点击“装配到当前 Agent”，建议用于网页效果探索 Agent。Token 只保存在你的本机 `data/mcp-secrets.json`；新会话连接快照保存在 `data/mcp-session-config/`。这些文件均未上传，且被 `.gitignore` 排除。无需 Apify 也可使用内置浏览器 MCP。
 
-### Browserless 与京东人工登录
+### Browserless 京东商城研究与人工接管
 
-将 `.env.example` 复制为 `.env`，只在本机填入自己的 `BROWSERLESS_API_TOKEN`，重启服务。选择“京东登录 Agent”，输入“登录京东账号”；Agent 打开云端京东页面后，运行台的 iframe 会显示**同一个浏览器页面**。用户自行在画面中输入手机号、拖动滑块、填写短信验证码，再点击“完成并继续”。后端会用该浏览器访问京东账户页核验；点击完成本身不算登录成功。会话到期后，可在同一对话点击“准备好后重新开始登录”。[完整步骤](QUICKSTART.zh-CN.md#browserless-云浏览器与京东人工登录)
+将 `.env.example` 复制为 `.env`，只在本机填入自己的 `BROWSERLESS_API_TOKEN`，重启服务。选择“京东商城研究 Agent”，提问“后台搜索洗发水，尝试按销量排序，列出前 20 个商品的名称、价格、促销和高评分评论”。Agent 先在**隐藏的云浏览器**操作；京东要求登录、滑块或风险验证时，运行台才显示同一浏览器供你操作，并尽量直接打开带原搜索返回目标的官方登录页。完成人工步骤后点“完成并继续”。商品和评论按批次保存进度，并在 Web 页面显示；销量排序未核实时不会冒称“销量前 20”。[完整步骤](QUICKSTART.zh-CN.md#browserless-京东商城研究与人工接管)
 
-此能力使用 Browserless 官方支持的 `puppeteer-core` CDP 连接。初版 Playwright CDP 在真实 Live URL 接管时出现 `Duplicate target` 进程崩溃，已有的 Playwright MCP 仍用于原网页探索 Agent。当前已验证真实云浏览器、Web 实时画面和**未登录时正确判失败**；京东真人滑块、短信与成功登录尚未完成验收。用户自己的 `.env`、Live URL 和新登录对话不会进入公开 ZIP；细节见 [验证记录](VALIDATION.md)。
+默认使用 Browserless 中国住宅出口访问 `www.jd.com` 商城，代理流量会消耗 Browserless 单位。真实测试已确认商城首页可达，洗发水搜索触发京东风险验证，Agent 按需显示同一浏览器；Browserless 测试 Cookie 的档案保存与新浏览器恢复也已通过。**真人验证未在免费套餐的两分钟内完成，因此真实前 20 商品、促销、评论及京东登录档案恢复尚未验收。** 私有 `.env`、档案、任务结果、Live URL 和新会话不进入公开 ZIP；详见 [验证记录](VALIDATION.md)。
 
 ### 百炼图片与视频
 
@@ -125,4 +125,4 @@ Key: <你自己的百炼 Key>
 
 ---
 
-**English:** [Download the complete demo ZIP](https://raw.githubusercontent.com/yiqi19940531/qoder-sdk-agentStudio/main/downloads/qoder-agent-workbench-demo.zip) or clone this repository, sign in with your own Qoder CLI account, then run `node scripts/quickstart.mjs`. The project includes seven Agents, three Skills, 34 sanitized read-only conversations, four media files, and six short walkthroughs. The optional JD login Agent needs your own Browserless token; Apify and Bailian credentials are also supplied by each user. See the [English quick start](QUICKSTART.en.md) for setup details.
+**English:** [Download the complete demo ZIP](https://raw.githubusercontent.com/yiqi19940531/qoder-sdk-agentStudio/main/downloads/qoder-agent-workbench-demo.zip) or clone this repository, sign in with your own Qoder CLI account, then run `node scripts/quickstart.mjs`. The project includes seven Agents, three Skills, 34 sanitized read-only conversations, four media files, and six short walkthroughs. The optional JD mall research Agent needs your own Browserless token and requests human control only when JD requires it; real product extraction remains unverified. See the [English quick start](QUICKSTART.en.md).

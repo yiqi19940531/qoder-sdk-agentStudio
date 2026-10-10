@@ -11,7 +11,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'release', 'qoder-agent-workbench-demo.zip');
 const stage = await mkdtemp(path.join(os.tmpdir(), 'qoder-demo-'));
 const files = new Set();
-const forbidden = /(^|\/)(api-key\.md|mcp-secrets\.json|mcp-session-config|config-catalog\.json|apify-verification\.json|node_modules|dist|dist-server|\.playwright-mcp|\.tmp[^/]*)($|\/)/i;
+const forbidden = /(^|\/)(api-key\.md|mcp-secrets\.json|mcp-session-config|jd-browser-profile\.json|jd-tasks|config-catalog\.json|apify-verification\.json|node_modules|dist|dist-server|\.playwright-mcp|\.tmp[^/]*)($|\/)/i;
 const forbiddenPath = (relative) => forbidden.test(relative) || relative.split('/').some((name) => name === '.env' || (name.startsWith('.env.') && name !== '.env.example'));
 const secretPatterns = [
   ['API key', /\bsk-[A-Za-z0-9_-]{16,}\b/g],

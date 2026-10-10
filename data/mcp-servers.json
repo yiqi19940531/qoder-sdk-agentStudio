@@ -65,6 +65,19 @@
     }
   },
   {
+    "id": "jd-browser",
+    "name": "jd-browser",
+    "source": "builtin",
+    "transport": "sdk",
+    "auth": "none",
+    "envNames": [],
+    "headerNames": [],
+    "check": {
+      "status": "untested",
+      "tools": []
+    }
+  },
+  {
     "id": "apify",
     "name": "Apify",
     "source": "custom",

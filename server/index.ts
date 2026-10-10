@@ -17,6 +17,7 @@ import { deleteCustomMcp, getMcpServer, initializeMcpRegistry, isAssignable, isR
 import { checkMcp, completeMcpOAuth, startMcpOAuth } from './mcp-check.js';
 import { SkillDraftError, changeDraftEntry, createDraft, deleteDraft, getDraft, importMarkdown, importZip, listDrafts, listPublishedFiles, publishDraft, readDraftFile, readPublishedFile, validateDraft, withDraftMutation, writeDraftFile } from './skill-drafts.js';
 import { browserService } from './browser-service.js';
+import { loadJdTask } from './jd-shop.js';
 
 if (existsSync('.env')) process.loadEnvFile('.env');
 
@@ -570,6 +571,13 @@ app.get('/api/conversations/:id/browser', (request, response) => {
   if (!browserConversation(request.params.id)) return response.status(404).json({ error: '京东浏览器会话不存在' });
   response.setHeader('Cache-Control', 'no-store');
   response.json(browserService.view(request.params.id));
+});
+
+app.get('/api/conversations/:id/jd-task', async (request, response) => {
+  if (!browserConversation(request.params.id)) return response.status(404).json({ error: '京东商品任务不存在' });
+  response.setHeader('Cache-Control', 'no-store');
+  try { response.json({ task: await loadJdTask(request.params.id) }); }
+  catch { response.status(500).json({ error: '京东商品任务读取失败' }); }
 });
 
 app.get('/api/conversations/:id/browser/events', (request, response) => {

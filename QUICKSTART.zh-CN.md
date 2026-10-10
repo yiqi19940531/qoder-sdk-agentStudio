@@ -27,7 +27,7 @@ node scripts/quickstart.mjs
 - **网页效果探索 Agent**：使用已装配的 Playwright/Chrome DevTools MCP 查看本地页面或公开网页，并描述页面结构。需安装 Chrome。
 - **AIGC 导演 Agent**：查看已有生成记录，规划一段新的图片与视频提示词。新生成需要百炼 Key。
 - **图片生成 Sub-Agent / 视频生成 Sub-Agent**：浏览既有图片或视频；配置百炼后再请求新生成。
-- **京东登录 Agent**：配置自己的 Browserless Token 后，在运行台的云浏览器里亲自完成手机号、滑块和短信验证。
+- **京东商城研究 Agent**：配置自己的 Browserless Token 后，先让 Agent 后台搜索商品；仅在京东要求登录或风险验证时接管云浏览器。
 
 默认所有 Agent 为“逐次审批 + 仅工作目录访问”，全局始终允许工具清单为空。演示时请在运行台根据具体工具请求作出决定。
 
@@ -39,13 +39,15 @@ node scripts/quickstart.mjs
 
 在“配置 → MCP 服务”选择保留的 `apify` 定义，在 **Bearer Token** 输入你自己的 Apify Token，保存并“校验连接”。发现工具后点击“装配到当前 Agent”，建议装配到网页效果探索 Agent。配置会写入本机 `data/mcp-secrets.json`，新会话另存本机连接快照；这些文件不在发布包内。没有 Token 时，Playwright、Chrome DevTools 和示例仓库 MCP 仍可用。
 
-### Browserless 云浏览器与京东人工登录
+### Browserless 京东商城研究与人工接管
 
 在项目根目录复制 `.env.example` 为 `.env`，填入**你自己的** `BROWSERLESS_API_TOKEN`；`BROWSERLESS_WS_ENDPOINT` 填不含 Token 的 Browserless Chromium CDP 地址。重启本地服务。`.env` 不会进入公开包。按账户套餐上限设置 `BROWSERLESS_SESSION_TIMEOUT_MS` 和 `BROWSERLESS_LIVE_TIMEOUT_MS`；免费套餐时长可能不足以完成短信验证。
 
-选择“京东登录 Agent”，在运行台新建对话并输入“登录京东账号”。批准工具调用后，下方“远程浏览器”在人工接管时直接显示可交互画面。**只在浏览器画面内**输入手机号和短信验证码、拖动滑块，然后点击“完成并继续”。系统使用同一个云浏览器访问京东账户页核验；只有核验通过才报告成功，并暂时保留该会话。也可以使用浏览器画面中的 Done。京东可能因云端 IP 或风控拒绝登录；此时显示实际状态，不会伪造成功。此功能无需本机安装 Chrome，浏览器运行在 Browserless 云端。
+选择“京东商城研究 Agent”，在新对话输入“后台搜索洗发水，尝试按销量排序，列出前 20 个商品的名称、价格、促销和高评分评论”。批准 `browser_search_products` 后，Agent 先在后台操作；只有京东要求登录、滑块或风险验证时，下方才出现可交互浏览器。可收起侧栏或全屏。**只在浏览器画面内**输入手机号和短信验证码、拖动滑块；完成人工步骤后尽快点击常驻的“完成并继续”。任务结果会显示在运行台商品表中。销量排序未核实时，不应把结果称为销量前 20；评论和促销只以页面实际读取内容为准。此功能无需本机安装 Chrome。
 
-Live URL 是可控制浏览器的临时链接，只在本机运行台显示；不要把它、Token、登录 Cookie 或验证码复制到公开文档与问题报告。免费套餐会话最多 2 分钟；若链接到期，可在同一对话的远程浏览器面板点击“准备好后重新开始登录”，点击时才创建新云会话。没有 Browserless Token 时，其他六个 Agent 仍可使用。
+Live URL 是可控制浏览器的临时链接，只在本机运行台显示；不要把它、Token、登录 Cookie 或验证码复制到公开文档与问题报告。Browserless 免费套餐单次会话最多 2 分钟，刷新或重新生成 Live URL 不能延长原会话；要使用更长会话，需更换支持更长时限的套餐或部署，再按上限修改 `.env` 中的两个超时值并重启服务。若链接到期，可在同一对话点击“重新打开京东验证”；商品任务与评论进度保存在本机，可继续。没有 Browserless Token 时，其他六个 Agent 仍可使用。
+
+默认使用 Browserless 中国住宅出口，代理流量会消耗 Browserless 单位；可在 `.env` 中调整 `BROWSERLESS_JD_PROXY_NETWORK` 和 `BROWSERLESS_JD_PROXY_COUNTRY`。人工完成后，服务尝试保存 Browserless Authenticated Profile，关闭原云浏览器，再开启加载档案的新浏览器核验：**已登录**和**商城可访问但登录未单独确认**会分别标记。本机只保存随机档案名称和任务进度，不保存 Cookie 值；云端档案本身属于敏感认证状态。之后新会话会尝试加载档案，但京东可能再次要求验证。若页面跳到 `cfe.m.jd.com` 风险页，请在画面中亲自完成；`corporate.jd.com` 不是中国区商城。
 
 ### 百炼图片与视频
 

@@ -96,6 +96,7 @@ function SunIcon() {
 function App() {
   const [language, setLanguage] = useState<Language>(() => localStorage.getItem('qoder-language') === 'en' ? 'en' : 'zh');
   const [theme, setTheme] = useState<Theme>(() => localStorage.getItem('qoder-theme') === 'light' ? 'light' : 'dark');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => localStorage.getItem('qoder-sidebar-collapsed') === '1');
   const l = (text: string) => t(language, text);
   const formatList = (items: string[]) => items.join(language === 'en' ? ', ' : '、');
   const formatPath = (value: string) => language === 'en' ? ({ workspace: 'working directory', selected: 'selected directories', all: 'all local paths' } as Record<string, string>)[value] ?? value : value;
@@ -364,7 +365,7 @@ function App() {
       }
     };
     source.onopen = () => { if (eventsRef.current === source) setBanner((current) => current === 'Event stream disconnected temporarily; reconnecting…' || current === '事件流暂时断开，正在自动重连。' ? '' : current); };
-    source.onerror = () => { if (eventsRef.current === source) setBanner(language === 'en' ? 'Event stream disconnected temporarily; reconnecting…' : '事件流暂时断开，正在自动重连。'); };
+    source.onerror = () => { if (eventsRef.current === source && !keepOpen) setBanner(language === 'en' ? 'Event stream disconnected temporarily; reconnecting…' : '事件流暂时断开，正在自动重连。'); };
   }
 
   async function start(smoke = false) {
@@ -454,8 +455,8 @@ function App() {
     return () => window.clearInterval(timer);
   }, [conversation?.id, conversation?.status, conversation?.artifacts?.map((item) => item.status).join(',')]);
 
-  return <div className="app-shell">
-    <aside className="sidebar">
+  return <div className={`app-shell${sidebarCollapsed ? ' sidebar-collapsed' : ''}`}>
+    <aside className="sidebar" id="agent-sidebar">
       <div className="brand"><span className="brand-mark">Q</span><div><strong>Agent Workbench</strong><small>Qoder SDK · {l('本地探索')}</small></div></div>
       <div className="side-heading">AGENTS <span>{bootstrap?.agents.length ?? 0}</span></div>
       <div className="agent-list">{bootstrap?.agents.map((agent) => <button className={`agent-item ${selectedId === agent.id ? 'active' : ''}`} key={agent.id} onClick={() => choose(agent)}>
@@ -467,7 +468,7 @@ function App() {
     </aside>
 
     <main className="main-area">
-      <header className="topbar"><div><div className="eyebrow">AGENT BUILDER / LOCAL PROTOTYPE</div><h1>{section === 'mcp' ? l('MCP 服务') : section === 'skills' ? 'Skills' : draft?.name ?? l('Agent 装配台')}</h1><p>{section === 'mcp' ? l('配置和校验 MCP，再把服务装配到需要的 Agent。') : section === 'skills' ? (language === 'en' ? 'Create, import, validate and assign Skills.' : '创建、导入、校验和装配 Skill。') : draft?.description || l('配置角色、能力与记忆，然后在示例仓库中运行任务。')}</p></div><div className="top-actions">{section !== 'mcp' && section !== 'skills' && <><button className="button ghost" onClick={() => void start(true)} disabled={busy || !bootstrap}>{l('SDK 冒烟验证')}</button><button className="button primary" onClick={() => setSection('run')} disabled={busy || !draft}>{l('打开运行台')} <span>↗</span></button></>}<div className="display-controls" role="group" aria-label={language === 'en' ? 'Display preferences' : '显示偏好'}><button type="button" className="display-toggle language-toggle" onClick={() => setLanguage((current) => current === 'zh' ? 'en' : 'zh')} aria-label={language === 'en' ? 'Switch to Chinese' : '切换为英文'} title={language === 'en' ? 'Switch to Chinese' : '切换为英文'}><LanguageIcon /></button><button type="button" className="display-toggle theme-toggle" onClick={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')} aria-label={language === 'en' ? (theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme') : (theme === 'dark' ? '切换为浅色主题' : '切换为深色主题')} title={language === 'en' ? (theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme') : (theme === 'dark' ? '切换为浅色主题' : '切换为深色主题')}><SunIcon /></button></div></div></header>
+      <header className="topbar"><div><div className="eyebrow">AGENT BUILDER / LOCAL PROTOTYPE</div><h1>{section === 'mcp' ? l('MCP 服务') : section === 'skills' ? 'Skills' : draft?.name ?? l('Agent 装配台')}</h1><p>{section === 'mcp' ? l('配置和校验 MCP，再把服务装配到需要的 Agent。') : section === 'skills' ? (language === 'en' ? 'Create, import, validate and assign Skills.' : '创建、导入、校验和装配 Skill。') : draft?.description || l('配置角色、能力与记忆，然后在示例仓库中运行任务。')}</p></div><div className="top-actions"><button type="button" className="button ghost sidebar-toggle" aria-controls="agent-sidebar" aria-expanded={!sidebarCollapsed} onClick={() => setSidebarCollapsed((current) => { localStorage.setItem('qoder-sidebar-collapsed', current ? '0' : '1'); return !current; })}>{sidebarCollapsed ? (language === 'en' ? '☰ Show sidebar' : '☰ 展开侧边栏') : (language === 'en' ? '◀ Hide sidebar' : '◀ 收起侧边栏')}</button>{section !== 'mcp' && section !== 'skills' && <><button className="button ghost" onClick={() => void start(true)} disabled={busy || !bootstrap}>{l('SDK 冒烟验证')}</button><button className="button primary" onClick={() => setSection('run')} disabled={busy || !draft}>{l('打开运行台')} <span>↗</span></button></>}<div className="display-controls" role="group" aria-label={language === 'en' ? 'Display preferences' : '显示偏好'}><button type="button" className="display-toggle language-toggle" onClick={() => setLanguage((current) => current === 'zh' ? 'en' : 'zh')} aria-label={language === 'en' ? 'Switch to Chinese' : '切换为英文'} title={language === 'en' ? 'Switch to Chinese' : '切换为英文'}><LanguageIcon /></button><button type="button" className="display-toggle theme-toggle" onClick={() => setTheme((current) => current === 'dark' ? 'light' : 'dark')} aria-label={language === 'en' ? (theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme') : (theme === 'dark' ? '切换为浅色主题' : '切换为深色主题')} title={language === 'en' ? (theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme') : (theme === 'dark' ? '切换为浅色主题' : '切换为深色主题')}><SunIcon /></button></div></div></header>
       {banner && <div className="banner" role="status">{banner}<button onClick={() => setBanner('')}>×</button></div>}
       {section !== 'mcp' && section !== 'skills' && <div className="tabs"><button className={section === 'assembly' ? 'active' : ''} onClick={() => setSection('assembly')}>{l('装配配置')}</button><button className={section === 'permissions' ? 'active' : ''} onClick={() => setSection('permissions')}>{l('工具授权')}</button><button className={section === 'instructions' ? 'active' : ''} onClick={() => setSection('instructions')}>{l('项目规则')}</button><button className={section === 'memory' ? 'active' : ''} onClick={() => setSection('memory')}>{l('Agent 记忆')}</button><button className={section === 'aigc' ? 'active' : ''} onClick={() => setSection('aigc')}>{l('AIGC 设置')}</button><button className={section === 'catalog' ? 'active' : ''} onClick={() => setSection('catalog')}>{l('配置清单')}</button><button className={section === 'run' ? 'active' : ''} onClick={() => setSection('run')}>{l('运行台')} {(conversation?.status === 'running' || conversation?.status === 'waiting') && <span className="running-dot" />}</button></div>}
 

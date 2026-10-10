@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
+import { rm } from 'node:fs/promises';
+import path from 'node:path';
 import type { Browser, Page } from 'puppeteer-core';
 import { BrowserService } from '../server/browser-service.js';
-import { classifyJdLogin } from '../server/jd-login.js';
+import { classifyJdEvidence, inspectJdBrowserPages, verifyJdLogin, type LoginEvidence } from '../server/jd-login.js';
+import { loadJdTask } from '../server/jd-shop.js';
 
 class FakeCdp extends EventEmitter {
   calls: Array<{ method: string; params?: Record<string, unknown> }> = [];
@@ -16,6 +19,7 @@ class FakeCdp extends EventEmitter {
       this.emit('Browserless.liveComplete', { liveURLId: 'viewer-id', reason: 'closed' });
       return { error: null };
     }
+    if (method === 'Browserless.saveProfile') return { ok: true, profileId: 'test-profile' };
     throw new Error(`Unexpected CDP method: ${method}`);
   }
 }
@@ -24,6 +28,8 @@ class FakePage {
   constructor(private readonly cdp: FakeCdp) {}
   currentUrl = 'about:blank';
   async setViewport(size: { width: number; height: number }) { assert.deepEqual(size, { width: 1280, height: 800 }); }
+  async setExtraHTTPHeaders(headers: Record<string, string>) { assert.match(headers['Accept-Language'], /zh-CN/); }
+  async emulateTimezone(zone: string) { assert.equal(zone, 'Asia/Shanghai'); }
   async goto(url: string) { this.currentUrl = url; }
   url() { return this.currentUrl; }
   async title() { return '京东-欢迎登录'; }
@@ -49,7 +55,7 @@ const service = new BrowserService({
   connect: async (url) => {
     connectCount++;
     assert.match(url, /^wss:\/\/production-sfo\.browserless\.io\/chromium\?/);
-    assert.ok(url.includes('token=TEST_BROWSERLESS_TOKEN_VALUE'));
+    assert.equal(new URL(url).searchParams.get('token'), 'TEST_BROWSERLESS_TOKEN_VALUE');
     return browser;
   },
   verify: async (target: Page) => {
@@ -76,6 +82,7 @@ const handoff = await service.handoff(id);
 assert.equal(handoff.state, 'HUMAN_CONTROL');
 assert.equal(service.view(id).session?.viewMode, 'interactive');
 assert.equal(cdp.calls.filter((call) => call.method === 'Browserless.liveURL').length, 1);
+assert.equal(Object.hasOwn(cdp.calls.find((call) => call.method === 'Browserless.liveURL')?.params ?? {}, 'instructions'), false, 'Browserless instructions must not cover the login page');
 assert.deepEqual(await service.handoff(id), handoff);
 await assert.rejects(service.close(id, 'agent'), /人工接管/);
 
@@ -89,9 +96,56 @@ await service.close(id);
 assert.equal(closed, true);
 assert.equal(service.view(id).session?.state, 'CLOSED');
 
-assert.equal(classifyJdLogin('https://passport.jd.com/new/login.aspx', '请输入手机号').status, 'not-confirmed');
-assert.equal(classifyJdLogin('https://home.jd.com/index.html', '我的订单 账户设置').status, 'confirmed');
-assert.equal(classifyJdLogin('https://home.jd.com/index.html', '服务器出错').status, 'unknown');
+const evidence = (change: Partial<LoginEvidence>): LoginEvidence => ({
+  host: 'passport.jd.com', path: '/new/login.aspx', authCookiePair: false,
+  loginFormVisible: true, loginPromptVisible: true, signedInControlVisible: false,
+  accountAreaVisible: false, successTextVisible: false, ...change,
+});
+assert.equal(classifyJdEvidence(evidence({})).status, 'not-confirmed');
+assert.equal(classifyJdEvidence(evidence({ host: 'home.jd.com', path: '/', authCookiePair: true, loginFormVisible: false, loginPromptVisible: false, accountAreaVisible: true })).status, 'confirmed');
+assert.equal(classifyJdEvidence(evidence({ host: 'www.jd.com', authCookiePair: true, loginFormVisible: false, loginPromptVisible: false, signedInControlVisible: true })).status, 'confirmed');
+assert.equal(classifyJdEvidence(evidence({ host: 'home.jd.com', loginFormVisible: false, loginPromptVisible: false, accountAreaVisible: false })).status, 'unknown');
+assert.equal(classifyJdEvidence(evidence({ host: 'corporate.jd.com', authCookiePair: true, loginFormVisible: false, signedInControlVisible: true })).status, 'unknown', 'Corporate site is not China mall login proof');
+
+let accountNavigations = 0;
+const signedInPage = {
+  url: () => 'https://www.jd.com/',
+  evaluate: async () => ({
+    loginFormVisible: false, loginPromptVisible: false, signedInControlVisible: true,
+    accountAreaVisible: true, successTextVisible: false,
+  }),
+  browserContext: () => ({ cookies: async () => [
+    { name: 'pt_key', domain: '.jd.com' }, { name: 'pt_pin', domain: '.jd.com' },
+  ] }),
+  goto: async () => { accountNavigations++; },
+} as unknown as Page;
+const observedVerdict = await verifyJdLogin(signedInPage, 5_000);
+assert.equal(observedVerdict.status, 'confirmed');
+assert.equal(observedVerdict.source, 'current-page');
+assert.equal(accountNavigations, 0, 'Current signed-in page must be checked before navigation');
+
+const corporatePage = {
+  url: () => 'https://corporate.jd.com/home',
+  evaluate: async () => ({ loginFormVisible: false, loginPromptVisible: false, signedInControlVisible: false, accountAreaVisible: false, successTextVisible: false }),
+  browserContext: () => ({ cookies: async () => [] }),
+} as unknown as Page;
+const multiplePages = { pages: async () => [corporatePage, signedInPage] } as unknown as Browser;
+const selected = await inspectJdBrowserPages(multiplePages, corporatePage);
+assert.equal(selected.page, signedInPage, 'An authenticated second tab must be checked');
+assert.equal(selected.verdict.status, 'confirmed');
+
+const ambiguousPage = {
+  url: () => 'https://passport.jd.com/new/login.aspx',
+  evaluate: async () => ({
+    loginFormVisible: false, loginPromptVisible: false, signedInControlVisible: false,
+    accountAreaVisible: false, successTextVisible: false,
+  }),
+  browserContext: () => ({ cookies: async () => { throw new Error('CDP cookie read unavailable'); } }),
+  goto: async () => { accountNavigations++; },
+} as unknown as Page;
+const nearDeadline = await verifyJdLogin(ambiguousPage, 5_000);
+assert.equal(nearDeadline.status, 'unknown');
+assert.equal(accountNavigations, 0, 'Near-expiry verification must not navigate away');
 
 const retryCdp = new FakeCdp();
 const retryPage = new FakePage(retryCdp);
@@ -123,6 +177,78 @@ assert.deepEqual(retryOutcomes, ['failed', 'confirmed']);
 assert.equal(retryService.getState(retryId).state, 'COMPLETED');
 const previousRetrySessionId = retryService.getState(retryId).sessionId;
 await retryService.close(retryId);
+
+const unknownCdp = new FakeCdp();
+const unknownPage = new FakePage(unknownCdp);
+const unknownBrowser = Object.assign(new EventEmitter(), { pages: async () => [unknownPage], close: async () => {} }) as unknown as Browser;
+const unknownService = new BrowserService({
+  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE' }, connect: async () => unknownBrowser,
+  verify: async () => ({ status: 'unknown', message: '核验时间不足，不能判断。' }),
+});
+const unknownOutcomes: string[] = [];
+unknownService.onOutcome((_id, result) => unknownOutcomes.push(result));
+const unknownId = '55555555-5555-4555-8555-555555555555';
+await unknownService.open(unknownId);
+await unknownService.handoff(unknownId);
+assert.equal((await unknownService.complete(unknownId)).state, 'UNVERIFIED');
+assert.deepEqual(unknownOutcomes, ['unverified']);
+assert.match(unknownService.getState(unknownId).message ?? '', /不能判定你没有登录/);
+
+class MonitoredPage extends FakePage {
+  signedIn = false;
+  async evaluate() {
+    return {
+      loginFormVisible: !this.signedIn, loginPromptVisible: !this.signedIn,
+      signedInControlVisible: this.signedIn, accountAreaVisible: this.signedIn,
+      successTextVisible: false,
+    };
+  }
+  override browserContext() {
+    return { cookies: async () => this.signedIn
+      ? [{ name: 'pt_key', domain: '.jd.com' }, { name: 'pt_pin', domain: '.jd.com' }]
+      : [] };
+  }
+}
+const monitoredCdp = new FakeCdp();
+const monitoredPage = new MonitoredPage(monitoredCdp);
+const monitoredBrowser = Object.assign(new EventEmitter(), { pages: async () => [monitoredPage], close: async () => {} }) as unknown as Browser;
+const monitoredService = new BrowserService({
+  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE' }, connect: async () => monitoredBrowser,
+  verify: async () => { throw new Error('Current-page evidence should bypass navigation probe'); },
+});
+let resolveMonitor!: (result: string) => void;
+const monitoredOutcome = new Promise<string>((resolve) => { resolveMonitor = resolve; });
+monitoredService.onOutcome((_id, result) => resolveMonitor(result));
+const monitoredId = '66666666-6666-4666-8666-666666666666';
+await monitoredService.open(monitoredId);
+await monitoredService.handoff(monitoredId);
+monitoredPage.signedIn = true;
+monitoredPage.currentUrl = 'https://www.jd.com/';
+assert.equal(await Promise.race([monitoredOutcome, new Promise<string>((_, reject) => setTimeout(() => reject(new Error('Login monitor did not confirm in time')), 4_000))]), 'confirmed');
+assert.equal(monitoredService.getState(monitoredId).state, 'COMPLETED');
+assert.equal(monitoredPage.url(), 'https://www.jd.com/', 'Monitor confirmation keeps the same current page');
+await monitoredService.close(monitoredId);
+
+const disconnectCdp = new FakeCdp();
+const disconnectPage = new FakePage(disconnectCdp);
+const disconnectEvents = new EventEmitter();
+const disconnectBrowser = Object.assign(disconnectEvents, { pages: async () => [disconnectPage], close: async () => {} }) as unknown as Browser;
+let finishSlowCheck!: (verdict: { status: 'not-confirmed'; message: string }) => void;
+const slowCheck = new Promise<{ status: 'not-confirmed'; message: string }>((resolve) => { finishSlowCheck = resolve; });
+const disconnectService = new BrowserService({
+  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE' }, connect: async () => disconnectBrowser,
+  verify: async () => slowCheck,
+});
+const disconnectOutcomes: string[] = [];
+disconnectService.onOutcome((_id, result) => disconnectOutcomes.push(result));
+const disconnectId = '77777777-7777-4777-8777-777777777777';
+await disconnectService.open(disconnectId);
+await disconnectService.handoff(disconnectId);
+const interruptedCheck = disconnectService.complete(disconnectId);
+disconnectEvents.emit('disconnected');
+finishSlowCheck({ status: 'not-confirmed', message: 'Late result must not overwrite disconnect status' });
+assert.equal((await interruptedCheck).state, 'UNVERIFIED');
+assert.deepEqual(disconnectOutcomes, ['unverified']);
 const restarted = await retryService.restartForHuman(retryId);
 assert.equal(restarted.state, 'HUMAN_CONTROL');
 assert.notEqual(restarted.sessionId, previousRetrySessionId);
@@ -139,5 +265,98 @@ await assert.rejects(failingService.open('33333333-3333-4333-8333-333333333333')
   assert.match(error.message, /\[REDACTED\]/);
   return true;
 });
+class SlowLoginPage extends FakePage {
+  override async goto(url: string) {
+    this.currentUrl = url;
+    throw new Error('Navigation timeout of 12000 ms exceeded');
+  }
+}
+const slowCdp = new FakeCdp();
+const slowPage = new SlowLoginPage(slowCdp);
+const slowBrowser = Object.assign(new EventEmitter(), { pages: async () => [slowPage], close: async () => {} }) as unknown as Browser;
+const slowService = new BrowserService({ env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE' }, connect: async () => slowBrowser });
+const slowId = '88888888-8888-4888-8888-888888888888';
+assert.equal((await slowService.open(slowId)).state, 'AI_RUNNING', 'A slow JD load should still expose a navigated page');
+await slowService.close(slowId);
+
+let storedProfile: { name: string; savedAt: string } | null = null;
+const profileBrowsers = [new FakeCdp(), new FakeCdp(), new FakeCdp()].map((profileCdp) => {
+  const profilePage = new FakePage(profileCdp);
+  return { profileCdp, profilePage, browser: Object.assign(new EventEmitter(), {
+    pages: async () => [profilePage], close: async () => {},
+  }) as unknown as Browser };
+});
+let profileConnections = 0;
+const profileService = new BrowserService({
+  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE' },
+  profileProvider: {
+    load: async () => storedProfile,
+    create: async () => {
+      const connect = new URL('wss://production-sfo.browserless.io/session/connect/test');
+      connect.searchParams.set('token', 'TEST_BROWSERLESS_TOKEN_VALUE');
+      return { name: 'qoder-jd-aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa', connect: connect.toString() };
+    },
+    remember: async (name) => { storedProfile = { name, savedAt: new Date().toISOString() }; },
+  },
+  connect: async (url) => {
+    const next = profileBrowsers[profileConnections++];
+    assert.ok(next);
+    if (profileConnections > 1) assert.match(url, /profile=qoder-jd-/);
+    return next.browser;
+  },
+  verify: async (target) => {
+    assert.notEqual(target, profileBrowsers[0].profilePage, 'Login is proved in a new browser');
+    return { status: 'confirmed', message: '已在新浏览器确认登录。' };
+  },
+});
+const profileId = '99999999-9999-4999-8999-999999999999';
+assert.equal((await profileService.open(profileId)).state, 'AI_RUNNING');
+await profileService.handoff(profileId);
+assert.equal((await profileService.complete(profileId)).state, 'COMPLETED');
+assert.equal(profileService.getState(profileId).profileStatus, 'saved');
+assert.equal(profileConnections, 2, 'Profile save must close the login browser and launch a new one');
+assert.equal((storedProfile as { name: string } | null)?.name, 'qoder-jd-aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa');
+await profileService.close(profileId);
+assert.equal((await profileService.restartForHuman(profileId)).state, 'COMPLETED', 'A later session should restore the saved profile without human login');
+assert.equal(profileConnections, 3);
+await profileService.close(profileId);
+
+const challengeCdp = new FakeCdp();
+const challengePage = new FakePage(challengeCdp);
+const challengeBrowser = Object.assign(new EventEmitter(), { pages: async () => [challengePage], close: async () => {} }) as unknown as Browser;
+const challengeService = new BrowserService({
+  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE' }, connect: async () => challengeBrowser,
+  search: async () => ({ status: 'needs-human', pageHost: 'cfe.m.jd.com', sortApplied: false, products: [], note: '需要人工验证。' }),
+});
+const challengeId = 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa';
+const challenged = await challengeService.searchProducts(challengeId, '洗发水');
+assert.equal(challenged.task.status, 'needs-human');
+assert.equal(challenged.browser.state, 'HUMAN_CONTROL');
+assert.equal(new URL(challengePage.url()).hostname, 'passport.jd.com', 'Human handoff should open JD login directly');
+assert.ok(challengeService.view(challengeId).liveUrl, 'Only a challenge should mint an interactive Live URL');
+await challengeService.close(challengeId);
+await rm(path.join(process.cwd(), 'data/jd-tasks', `${challengeId}.json`), { force: true });
+
+const researchCdp = new FakeCdp();
+const researchPage = new FakePage(researchCdp);
+const researchBrowser = Object.assign(new EventEmitter(), { pages: async () => [researchPage], close: async () => {} }) as unknown as Browser;
+const researchService = new BrowserService({
+  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE' }, connect: async () => researchBrowser,
+  search: async () => ({ status: 'results', pageHost: 'search.jd.com', sortApplied: true, products: [
+    { sku: '10001', name: '洗发水 A', price: '29.90', promotion: '满减', url: 'https://item.jd.com/10001.html' },
+    { sku: '10002', name: '洗发水 B', price: '39.90', url: 'https://item.jd.com/10002.html' },
+  ] }),
+  reviews: async () => ({ status: 'results', pageHost: 'item.jd.com', reviews: [{ text: '真实页面中可见的好评', helpful: 3 }] }),
+});
+const researchId = 'bbbbbbbb-bbbb-4bbb-bbbb-bbbbbbbbbbbb';
+const researched = await researchService.searchProducts(researchId, '洗发水');
+assert.equal(researched.task.products.length, 2);
+assert.equal(researched.task.sortApplied, true);
+assert.equal(researchService.view(researchId).liveUrl, undefined, 'No human challenge means the browser stays hidden');
+const reviewed = await researchService.collectReviews(researchId, 1);
+assert.equal(reviewed.task.nextReviewIndex, 1);
+assert.equal((await loadJdTask(researchId))?.products[0].reviews[0].text, '真实页面中可见的好评');
+await researchService.close(researchId);
+await rm(path.join(process.cwd(), 'data/jd-tasks', `${researchId}.json`), { force: true });
 await assert.rejects(new BrowserService({ env: {} }).open('44444444-4444-4444-8444-444444444444'), /BROWSERLESS_API_TOKEN/);
-console.log('BrowserService: same page, single-link handoff, verification, retry, session retention and secret-free events passed');
+console.log('BrowserService: hidden product search, challenge handoff, review checkpoints, profile restore, login monitoring and secret-free events passed');

@@ -11,6 +11,7 @@ import { additionalDirectories, agentPermissions, callingAgent, isDirectoryAppro
 import { agentMemoryPath, fixtureRoot, loadAgentInstructions, loadAgentMemory, loadAgents, pluginRoot, projectRoot } from './storage.js';
 import { generate } from './aigc.js';
 import { browserService } from './browser-service.js';
+import { loadJdTask } from './jd-shop.js';
 import { customMcpConfig, redactMcpError, redactMcpSecrets, toolNames } from './mcp-registry.js';
 
 type PendingApproval = {
@@ -127,11 +128,33 @@ export function configuredMcpServers(names: Set<string>, mediaContext?: { conver
   });
   if (names.has('jd-browser')) servers['jd-browser'] = createSdkMcpServer({
     name: 'jd-browser', version: '1.0.0', tools: [
-      tool('browser_open', 'Open the official JD login page in a dedicated Browserless cloud browser, visible in this conversation.', {}, async () => {
+      tool('browser_search_products', 'Search JD China mall in a hidden Browserless browser, request human handoff only if JD requires login or risk verification. Collect up to 20 product names, prices and promotions; report whether sales sorting was actually applied.', { keyword: z.string().trim().min(1).max(80) }, async ({ keyword }) => {
+        if (!mediaContext) return { isError: true, content: [{ type: 'text', text: '请在多轮运行台搜索京东商品。' }] };
+        try {
+          const { task, browser } = await browserService.searchProducts(mediaContext.conversationId, keyword);
+          return { content: [{ type: 'text', text: JSON.stringify({ taskId: task.id, status: task.status, browserState: browser.state,
+            loginVerified: browser.loginVerified, sortApplied: task.sortApplied, products: task.products.map(({ rank, sku, name, brand, price, promotion, commentCount, url }) => ({ rank, sku, name, brand, price, promotion, commentCount, url })), note: task.note }) }] };
+        } catch (error) { return { isError: true, content: [{ type: 'text', text: error instanceof Error ? error.message : String(error) }] }; }
+      }),
+      tool('browser_collect_reviews', 'Collect visible high-rating review excerpts for the next small batch of products in the saved JD search task. Progress survives cloud-browser timeouts.', { maxProducts: z.number().int().min(1).max(5).default(3) }, async ({ maxProducts }) => {
+        if (!mediaContext) return { isError: true, content: [{ type: 'text', text: '没有会话上下文。' }] };
+        try {
+          const { task, browser } = await browserService.collectReviews(mediaContext.conversationId, maxProducts);
+          return { content: [{ type: 'text', text: JSON.stringify({ taskId: task.id, status: task.status, browserState: browser.state,
+            nextReviewIndex: task.nextReviewIndex, total: task.products.length,
+            products: task.products.slice(Math.max(0, task.nextReviewIndex - maxProducts), task.nextReviewIndex).map(({ rank, name, url, reviews }) => ({ rank, name, url, reviews })), note: task.note }) }] };
+        } catch (error) { return { isError: true, content: [{ type: 'text', text: error instanceof Error ? error.message : String(error) }] }; }
+      }),
+      tool('browser_task_status', 'Read the saved JD product and review collection progress without controlling the browser.', {}, async () => {
+        if (!mediaContext) return { isError: true, content: [{ type: 'text', text: '没有会话上下文。' }] };
+        const task = await loadJdTask(mediaContext.conversationId);
+        return { content: [{ type: 'text', text: JSON.stringify(task ?? { status: 'not-started' }) }] };
+      }, { annotations: { readOnlyHint: true }, permissionPolicy: 'always_allow' }),
+      tool('browser_open', 'Open the JD China mall in a hidden Browserless cloud browser. Use browser_search_products for research; this tool alone does not hand control to the user.', {}, async () => {
         if (!mediaContext) return { isError: true, content: [{ type: 'text', text: '请在多轮运行台使用京东云浏览器。' }] };
         try {
           const state = await browserService.open(mediaContext.conversationId);
-          return { content: [{ type: 'text', text: JSON.stringify({ sessionId: state.sessionId, state: state.state, pageUrl: state.pageUrl }) }] };
+          return { content: [{ type: 'text', text: JSON.stringify({ sessionId: state.sessionId, state: state.state, pageUrl: state.pageUrl, profileStatus: state.profileStatus }) }] };
         } catch (error) { return { isError: true, content: [{ type: 'text', text: error instanceof Error ? error.message : String(error) }] }; }
       }),
       tool('browser_get_state', 'Read the current JD cloud browser state without operating its page.', {}, async () => {
@@ -139,18 +162,19 @@ export function configuredMcpServers(names: Set<string>, mediaContext?: { conver
         try { return { content: [{ type: 'text', text: JSON.stringify(browserService.getState(mediaContext.conversationId)) }] }; }
         catch (error) { return { isError: true, content: [{ type: 'text', text: error instanceof Error ? error.message : String(error) }] }; }
       }, { annotations: { readOnlyHint: true }, permissionPolicy: 'always_allow' }),
-      tool('browser_handoff', 'Give control of this exact browser page to the person in the Web workbench. Returns immediately; stop this turn and wait for the browser verification result.', {}, async () => {
+      tool('browser_handoff', 'Show the same cloud browser in the Web workbench only when JD has requested a human login, slider, or risk check. Returns immediately; stop this turn and wait.', {}, async () => {
         if (!mediaContext) return { isError: true, content: [{ type: 'text', text: '没有会话上下文。' }] };
         try {
           const state = await browserService.handoff(mediaContext.conversationId);
-          return { content: [{ type: 'text', text: JSON.stringify({ sessionId: state.sessionId, state: state.state, instruction: '已交给用户；请停止本轮并等待系统核验结果，勿再次操作浏览器。' }) }] };
+          return { content: [{ type: 'text', text: JSON.stringify({ sessionId: state.sessionId, state: state.state, instruction: state.state === 'COMPLETED' ? '已从保存档案恢复登录，无需人工接管。' : '已交给用户；请停止本轮并等待系统核验结果，勿再次操作浏览器。' }) }] };
         } catch (error) { return { isError: true, content: [{ type: 'text', text: error instanceof Error ? error.message : String(error) }] }; }
       }),
       tool('browser_check_login', 'Read the verified JD login result; user Done alone is not proof of login.', {}, async () => {
         if (!mediaContext) return { isError: true, content: [{ type: 'text', text: '没有会话上下文。' }] };
         try {
           const state = browserService.getState(mediaContext.conversationId);
-          return { content: [{ type: 'text', text: JSON.stringify({ state: state.state, verified: state.state === 'COMPLETED', message: state.message }) }] };
+          const conclusion = state.loginVerified ? 'confirmed' : state.state === 'FAILED' ? 'not-confirmed' : 'unverified';
+          return { content: [{ type: 'text', text: JSON.stringify({ state: state.state, conclusion, verified: state.loginVerified === true, message: state.message, verification: state.verification }) }] };
         } catch (error) { return { isError: true, content: [{ type: 'text', text: error instanceof Error ? error.message : String(error) }] }; }
       }, { annotations: { readOnlyHint: true }, permissionPolicy: 'always_allow' }),
       tool('browser_close', 'Close this conversation’s Browserless session only when the user asks to end it.', {}, async () => {

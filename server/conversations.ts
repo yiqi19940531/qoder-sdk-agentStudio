@@ -83,7 +83,7 @@ const directory = path.join(dataRoot, 'conversations');
 const records = new Map<string, Conversation>();
 const liveSessions = new Map<string, LiveConversation>();
 const writes = new Map<string, Promise<void>>();
-const pendingBrowserOutcomes = new Map<string, { result: 'confirmed' | 'failed'; message: string }>();
+const pendingBrowserOutcomes = new Map<string, { result: 'confirmed' | 'ready' | 'failed' | 'unverified'; message: string }>();
 const IDLE_MS = 30 * 60_000;
 const MAX_EVENTS = 2000;
 
@@ -522,7 +522,7 @@ export async function sendMessage(id: string, content: string): Promise<Conversa
   return record;
 }
 
-async function deliverBrowserOutcome(id: string, result: 'confirmed' | 'failed', message: string): Promise<void> {
+async function deliverBrowserOutcome(id: string, result: 'confirmed' | 'ready' | 'failed' | 'unverified', message: string): Promise<void> {
   const record = records.get(id);
   if (!record || record.demoArchive || !record.config.agent.mcpServers.includes('jd-browser')) return;
   if (record.status === 'running' || record.status === 'waiting') {
@@ -530,8 +530,12 @@ async function deliverBrowserOutcome(id: string, result: 'confirmed' | 'failed',
     return;
   }
   const content = result === 'confirmed'
-    ? `【系统浏览器核验】同一 Browserless 会话已通过京东账户页检查：${message}。请调用 browser_check_login 确认状态，再向用户报告。不要关闭浏览器。`
-    : `【系统浏览器核验】京东登录流程未完成：${message}。请调用 browser_get_state 核对状态，并如实告知用户；不要声称登录成功。`;
+    ? `【系统浏览器核验】新 Browserless 浏览器已恢复并确认京东登录：${message}。请调用 browser_check_login 确认状态；若有未完成的商品任务，继续采集。不要关闭浏览器。`
+    : result === 'ready'
+      ? `【系统浏览器核验】人工验证后，新浏览器已能访问商城商品：${message}。请调用 browser_task_status 查看结果与进度，继续采集评论。账号登录未单独确认，不得声称已经登录。`
+    : result === 'unverified'
+      ? `【系统浏览器核验】人工验证后未能取得足够证据：${message}。请调用 browser_get_state 和 browser_task_status 核对状态，不要声称已登录或已采集成功。`
+      : `【系统浏览器核验】京东人工验证未完成：${message}。请调用 browser_get_state 和 browser_task_status 核对状态，并如实告知用户。`;
   const now = new Date().toISOString();
   const turnId = randomUUID();
   record.turns.push({ id: turnId, status: 'running', startedAt: now });

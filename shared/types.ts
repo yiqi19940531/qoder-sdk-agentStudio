@@ -7,7 +7,7 @@ export const MCP_TOOL_NAMES: Record<(typeof MCP_NAMES)[number], readonly string[
   'chrome-devtools': ['new_page', 'navigate_page', 'take_snapshot', 'take_screenshot', 'list_console_messages', 'list_network_requests', 'get_network_request', 'get_css_styles', 'click', 'fill', 'fill_form', 'press_key', 'type_text', 'resize_page', 'list_pages', 'select_page', 'evaluate_script', 'wait_for'],
   'bailian-image': ['generate_image'],
   'bailian-video': ['generate_video'],
-  'jd-browser': ['browser_open', 'browser_get_state', 'browser_handoff', 'browser_check_login', 'browser_close'],
+  'jd-browser': ['browser_open', 'browser_search_products', 'browser_collect_reviews', 'browser_task_status', 'browser_get_state', 'browser_handoff', 'browser_check_login', 'browser_close'],
 };
 export const CONFIGURABLE_PERMISSION_TOOLS = [
   ...TOOL_NAMES,
@@ -64,7 +64,7 @@ export type MediaArtifact = {
 };
 
 export type AgentKind = 'main' | 'subagent';
-export type RemoteBrowserState = 'CREATED' | 'AI_RUNNING' | 'HUMAN_CONTROL' | 'VERIFYING' | 'COMPLETED' | 'FAILED' | 'EXPIRED' | 'CLOSED';
+export type RemoteBrowserState = 'CREATED' | 'AI_RUNNING' | 'HUMAN_CONTROL' | 'VERIFYING' | 'COMPLETED' | 'FAILED' | 'UNVERIFIED' | 'EXPIRED' | 'CLOSED';
 export type RemoteBrowserSummary = {
   conversationId: string;
   sessionId: string;
@@ -75,12 +75,25 @@ export type RemoteBrowserSummary = {
   pageTitle?: string;
   liveUrlExpiresAt?: string;
   message?: string;
+  profileStatus?: 'creating' | 'restored' | 'saved';
+  loginVerified?: boolean;
+  verification?: { source?: 'current-page' | 'account-probe'; host: string; authCookiePair: boolean | null; loginFormVisible: boolean; loginPromptVisible: boolean; signedInControlVisible: boolean; accountAreaVisible: boolean };
 };
 export type RemoteBrowserView = {
   configured: boolean;
   session: RemoteBrowserSummary | null;
   /** Short-lived bearer URL. Never persist this field in a conversation or SSE event. */
   liveUrl?: string;
+};
+export type JdProduct = {
+  rank: number; sku: string; name: string; brand?: string; price?: string;
+  promotion?: string; commentCount?: string; url: string;
+  reviews: Array<{ text: string; helpful?: number }>;
+};
+export type JdTask = {
+  id: string; conversationId: string; keyword: string; createdAt: string; updatedAt: string;
+  sortRequested: 'sales'; sortApplied: boolean; products: JdProduct[];
+  nextReviewIndex: number; status: 'collecting' | 'needs-human' | 'partial' | 'complete'; note?: string;
 };
 export type ModelOption = {
   id: string;

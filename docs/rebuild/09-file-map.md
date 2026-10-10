@@ -37,8 +37,8 @@
 | `src/AgentFlow.tsx` | 配置及运行流程图的节点、连线和详情交互；07 |
 | `src/McpManager.tsx` | MCP 列表、定义、校验、工具清单和装配界面；04 |
 | `src/SkillManager.tsx` | Skill 列表、草稿文件树、上传、校验和发布界面；05 |
-| `src/RemoteBrowser.tsx` | 京东云浏览器 iframe、人工接管按钮和状态 SSE；12 |
-| `src/remote-browser.css` | 远程浏览器面板布局、固定高度视口和响应式样式；12 |
+| `src/RemoteBrowser.tsx` | 京东云浏览器 iframe、人工接管按钮、倒计时和商品结果表；12、13 |
+| `src/remote-browser.css` | 远程浏览器面板、常驻接管控件与商品表样式；12、13 |
 | `src/i18n.ts` | 平台 UI 的中英文文案；07 |
 | `src/styles.css` | 主体布局、深色主题、运行台与装配样式；07 |
 | `src/light.css` | 浅色主题变量和覆盖样式；07 |
@@ -63,6 +63,8 @@
 | `server/aigc.ts` | 可选凭据状态、媒体任务、Python 调用、下载、持久化与恢复；06 |
 | `server/browser-service.ts` | Browserless CDP 会话、Live URL、控制权、超时和清理；12 |
 | `server/jd-login.ts` | 京东官方登录入口及保守的账户页核验规则；12 |
+| `server/jd-profile.ts` | Browserless 档案创建与本机随机名称保存；13 |
+| `server/jd-shop.ts` | 商城商品、促销、评论提取与私有任务断点；13 |
 
 ## 构建、探针和测试脚本
 
@@ -72,6 +74,7 @@
 | `scripts/package-public.mjs` | 白名单复制、脱敏、双重扫描和演示 ZIP 生成；08 |
 | `scripts/model-selection-test.ts` | 可用／不可用模型、无自定义模型及不改原配置测试；03、08 |
 | `scripts/browser-integration-test.ts` | 用模拟 CDP 验证同页接管、核验、保留会话与脱敏事件；12 |
+| `scripts/browserless-profile-smoke.ts` | 用测试 Cookie 实际验证 Browserless 档案保存与新浏览器恢复，随后清理测试档案；13 |
 | `scripts/agent-flow-test.ts` | 配置图和真实／历史事件归属测试；07 |
 | `scripts/mcp-integration-test.mjs` | MCP 传输、认证、超时、脱敏及装配测试；04 |
 | `scripts/mock-mcp.mjs` | MCP 集成测试的本地模拟服务；04 |

@@ -36,6 +36,7 @@ npm run typecheck
 npm run build
 npm run test:models
 npm run test:flow
+npm run test:browser
 ```
 
 在另一个终端运行 `npm start`，等待本地 API 就绪，再回到隔离副本执行以下集成测试；测试会调用该服务并写入临时数据。
@@ -69,3 +70,5 @@ npm run package:public
 原演示包在 macOS arm64 上完成干净目录安装、构建、启动、内置 `auto` 真实回复、无密钥 MCP 连接、Skill 发现，以及隔离环境中的 MCP／Skill／AIGC 模拟测试。Linux 和 Windows x64 的脚本存在，但此前未在这些系统实机运行；不要在新增文档中把“提供脚本”写成“已跨平台验证”。自动记忆写入只观察到 SDK 事件，没有稳定的成功写入证据。详见公开版 [VALIDATION.md](../../VALIDATION.md)。
 
 文档发布本身的完成条件还包括：所有内部链接可打开；[逐文件索引](09-file-map.md)覆盖公开源码／脚本／配置；原工程、GitHub 仓库和 ZIP 的文档内容一致；README 均有入口；公开包扫描通过。
+
+第 13 阶段新增的京东商城研究需要另核对：后台搜索期间无 Live URL；京东要求人工验证时才出现同一云浏览器；商品结果必须包含真实页面 URL，并显示排序是否核实；评论按批次保存进度。`npm run test:browserless-profile` 会调用真实 Browserless 并创建、清理测试档案，需使用者自己的 Token。真实京东登录、20 个商品和评论仍须真人完成并逐项核验，模拟测试不能替代。

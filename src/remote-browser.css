@@ -1,13 +1,31 @@
 .remote-browser-panel { grid-column: 1 / -1; min-width: 0; }
-.remote-browser-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.remote-browser-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; position: sticky; top: 0; z-index: 3; background: #151c2a; padding: 8px 0; }
+.remote-browser-countdown { color: #e9d6a8 !important; font-weight: 700; margin-top: 4px !important; }
+.remote-browser-countdown.urgent { color: #ff9ca4 !important; }
+html[data-theme='light'] .remote-browser-head { background: #fff; }
 .remote-browser-head h2 { margin: 0 0 5px; font-size: 15px; }
 .remote-browser-head p, .remote-browser-meta, .remote-browser-help { margin: 0; color: #91a1bc; font-size: 11px; line-height: 1.6; }
 .remote-browser-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 .remote-browser-note, .remote-browser-notice { color: #ced9ee; background: #1d2a42; border: 1px solid #35496c; padding: 9px 11px; border-radius: 8px; font-size: 12px; }
 .remote-browser-notice { color: #f1d7a0; background: #392c20; border-color: #6b5237; }
 .remote-browser-meta { margin: 12px 0 7px; }
-.remote-browser-frame { height: min(68vh, 760px); min-height: 470px; background: #0c1220; border: 1px solid #33415b; border-radius: 9px; overflow: hidden; margin-top: 14px; }
+.remote-browser-frame { height: min(92vh, 980px); min-height: 600px; background: #0c1220; border: 1px solid #33415b; border-radius: 9px; overflow: hidden; margin-top: 14px; }
 .remote-browser-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+.remote-browser-frame:fullscreen { height: 100vh; width: 100vw; min-height: 0; margin: 0; border: 0; border-radius: 0; background: #000; }
 .remote-browser-placeholder { min-height: 160px; display: grid; place-items: center; border: 1px dashed #39475e; border-radius: 9px; margin-top: 14px; color: #8090aa; font-size: 12px; }
 .remote-browser-help { margin-top: 10px; }
+.remote-browser-evidence { margin-top: 10px; color: #91a1bc; font-size: 11px; }
+.remote-browser-evidence summary { cursor: pointer; }
+.remote-browser-evidence p { line-height: 1.6; }
+.jd-task-results { margin-top: 20px; border-top: 1px solid #35415a; padding-top: 16px; }
+.jd-task-results h3 { margin: 0 0 8px; font-size: 15px; }
+.jd-task-results>p { margin: 5px 0; color: #aebbd0; font-size: 12px; }
+.jd-task-table-wrap { overflow-x: auto; margin-top: 12px; }
+.jd-task-results table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.jd-task-results th, .jd-task-results td { border-bottom: 1px solid #35415a; padding: 10px 8px; text-align: left; vertical-align: top; }
+.jd-task-results td:nth-child(2) { min-width: 230px; }
+.jd-task-results td:nth-child(5) { min-width: 220px; }
+.jd-task-results a { color: #aaa8ff; }
+.jd-task-results small { display: block; color: #91a1bc; margin-top: 4px; }
+.jd-task-results td p { margin: 0 0 6px; line-height: 1.5; }
 @media (max-width: 760px) { .remote-browser-head { flex-direction: column; } .remote-browser-actions { justify-content: flex-start; } .remote-browser-frame { min-height: 380px; } }

@@ -13,6 +13,7 @@
     "test:flow": "tsx scripts/agent-flow-test.ts",
     "test:models": "tsx scripts/model-selection-test.ts",
     "test:browser": "tsx scripts/browser-integration-test.ts",
+    "test:browserless-profile": "tsx scripts/browserless-profile-smoke.ts",
     "test:mcp": "node scripts/mcp-integration-test.mjs",
     "test:skills": "tsx scripts/skill-integration-test.ts",
     "verify:apify": "tsx scripts/apify-verification.ts",
