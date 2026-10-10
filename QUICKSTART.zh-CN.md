@@ -49,6 +49,8 @@ Live URL 是可控制浏览器的临时链接，只在本机运行台显示；�
 
 默认使用 Browserless 中国住宅出口，代理流量会消耗 Browserless 单位；可在 `.env` 中调整 `BROWSERLESS_JD_PROXY_NETWORK` 和 `BROWSERLESS_JD_PROXY_COUNTRY`。人工完成后，服务尝试保存 Browserless Authenticated Profile，关闭原云浏览器，再开启加载档案的新浏览器核验：**已登录**和**商城可访问但登录未单独确认**会分别标记。本机只保存随机档案名称和任务进度，不保存 Cookie 值；云端档案本身属于敏感认证状态。之后新会话会尝试加载档案，但京东可能再次要求验证。若页面跳到 `cfe.m.jd.com` 风险页，请在画面中亲自完成；`corporate.jd.com` 不是中国区商城。
 
+若提示“Browserless 免费套餐用量已达上限”，这是云服务账户额度限制：保留本机档案文件，待 Browserless 账户有可用额度后再启动。看到“此前确认登录”也不代表京东已允许搜索；若当前搜索页再次出现登录表单或风险页，仍需按页面提示完成验证。无需重复删除档案或重新输入原有 Token。
+
 ### 百炼图片与视频
 
 在解压目录根部自行创建 `api-key.md`，其中仅放**一个**以 `sk-` 开头的百炼 Key，及**一个**北京地域业务空间的 HTTPS 地址，路径以 `/compatible-mode/v1` 开头。示意格式：

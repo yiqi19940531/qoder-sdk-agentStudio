@@ -49,4 +49,4 @@
 | JD-A5 | 真实商品与评论 | 20 个商品的排名口径、价格、促销、评论和 URL 可逐项在页面核对；失败项留空且标注原因 |
 | JD-A6 | 公开包审计 | 无 `data/jd-browser-profile.json`、`data/jd-tasks/`、Token、Cookie、Live URL 或私人新会话 |
 
-当前已通过 JD-A1、JD-A2，以及 JD-A3 中“商城首页可打开、搜索触发风险页并按需接管”的部分。JD-A4／JD-A5 尚未通过真人完整验收；免费套餐单次浏览器连接最多两分钟，保存档案能跨连接复用但不能延长当前连接。[Browserless 档案](https://docs.browserless.io/baas/features/authenticated-profiles)、[持久化会话](https://docs.browserless.io/baas/session-management/persisting-state)。
+当前已通过 JD-A1、JD-A2，以及 JD-A3 中“商城首页可打开、搜索触发风险页并按需接管”的部分。真人登录后的档案已在另一个云浏览器的 `www.jd.com` 恢复并确认，验证了 JD-A4 的账号恢复部分；搜索页仍触发额外风险／登录验证，JD-A4 的搜索继续执行及 JD-A5 商品与评论仍未通过。最近一次续接失败后，Browserless 返回免费套餐单位用量已达上限；这是云服务额度限制，不能当成登录档案丢失。实现中分别记录此前登录证据、当前页面证据、连接状态和额度错误。免费套餐单次浏览器连接最多两分钟，保存档案能跨连接复用但不能保证搜索放行。[Browserless 档案](https://docs.browserless.io/baas/features/authenticated-profiles)、[持久化会话](https://docs.browserless.io/baas/session-management/persisting-state)。

@@ -9,10 +9,11 @@ const stateLabels: Record<NonNullable<RemoteBrowserView['session']>['state'], [s
   CREATED: ['正在创建云浏览器', 'Creating cloud browser'],
   AI_RUNNING: ['Agent 正在操作', 'Agent is operating'],
   HUMAN_CONTROL: ['等待你操作', 'Your turn to operate'],
+  RECONNECTING: ['正在续接同一浏览器', 'Reconnecting the same browser'],
   VERIFYING: ['正在核验登录', 'Verifying login'],
   COMPLETED: ['已确认登录', 'Login confirmed'],
   FAILED: ['操作失败', 'Session failed'],
-  UNVERIFIED: ['登录状态未确认', 'Login status unverified'],
+  UNVERIFIED: ['当前云浏览器状态未确认', 'Current cloud browser state unverified'],
   EXPIRED: ['会话已到期', 'Session expired'],
   CLOSED: ['会话已关闭', 'Session closed'],
 };
@@ -93,7 +94,11 @@ export function RemoteBrowser({ conversationId, conversationStatus, language }: 
     </div>
     {!view?.configured && <p className="remote-browser-notice">{en ? 'Set BROWSERLESS_API_TOKEN in .env, then restart the local server to use this Agent.' : '请在本机 .env 配置 BROWSERLESS_API_TOKEN，并重启服务后使用此 Agent。'}</p>}
     {session?.message && <p className="remote-browser-note">{session.message}</p>}
-    {session?.profileStatus === 'saved' && <p className="remote-browser-note">{session.loginVerified ? (en ? 'JD login was saved and verified in a new cloud browser.' : '京东登录已保存，并在新云浏览器中确认。') : (en ? 'Mall access state was saved and checked in a new browser; account login is not separately confirmed.' : '商城访问状态已保存并在新浏览器中检查；账号登录尚未单独确认。')}</p>}
+    {session?.profileStatus === 'saved' && <p className="remote-browser-note">{session.loginVerified
+      ? (en ? 'JD login was saved and verified in a new cloud browser.' : '京东登录已保存，并在新云浏览器中确认。')
+      : session.priorLoginVerified
+        ? (en ? 'A new browser previously confirmed the saved JD login. The current page or connection needs another check.' : '保存的京东登录曾在新浏览器中确认；当前页面或连接需要再次核验。')
+        : (en ? 'Mall access state was saved; account login is not separately confirmed.' : '商城访问状态已保存；账号登录尚未单独确认。')}</p>}
     {error && <p className="field-error" role="alert">{error}</p>}
     {session?.liveUrlExpiresAt && <p className="remote-browser-meta">{en ? 'Viewer link expires: ' : '画面链接有效至：'}{new Date(session.liveUrlExpiresAt).toLocaleTimeString(en ? 'en-US' : 'zh-CN')}</p>}
     {session?.pageUrl && <p className="remote-browser-meta">{en ? 'Current page: ' : '当前页面：'}{session.pageUrl}</p>}
@@ -107,7 +112,7 @@ export function RemoteBrowser({ conversationId, conversationStatus, language }: 
       sandbox="allow-same-origin allow-scripts"
       allow="clipboard-read; clipboard-write"
       referrerPolicy="no-referrer"
-    /></div> : <div className="remote-browser-placeholder">{session?.state === 'VERIFYING' ? (en ? 'Checking the same browser session…' : '正在检查同一浏览器会话…') : (en ? 'The live browser appears here when ready.' : '云浏览器准备好后会在这里实时显示。')}</div>}
+    /></div> : <div className="remote-browser-placeholder">{session?.state === 'RECONNECTING' ? (en ? 'Reconnecting the same cloud browser; your JD page is preserved…' : '正在续接同一云浏览器，京东页面会保留，请稍候…') : session?.state === 'VERIFYING' ? (en ? 'Checking the same browser session…' : '正在检查同一浏览器会话…') : (en ? 'The live browser appears here when ready.' : '云浏览器准备好后会在这里实时显示。')}</div>}
     {task && <div className="jd-task-results">
       <h3>{en ? `JD products · ${task.keyword}` : `京东商品 · ${task.keyword}`}</h3>
       <p>{en ? `Collected ${task.products.length}/20 products; reviews checked ${task.nextReviewIndex}/${task.products.length}.` : `已读取 ${task.products.length}/20 个商品；已检查 ${task.nextReviewIndex}/${task.products.length} 个商品的评论。`}</p>

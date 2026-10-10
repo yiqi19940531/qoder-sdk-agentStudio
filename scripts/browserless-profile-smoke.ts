@@ -36,6 +36,7 @@ try {
 } finally {
   await restored?.close().catch(() => {});
   await first?.close().catch(() => {});
+  if (creation.stop) await fetch(creation.stop, { method: 'DELETE' }).catch(() => {});
   const cleanup = new URL(`/profile/${encodeURIComponent(creation.name)}`, `https://${endpoint.host}`);
   cleanup.searchParams.set('token', token);
   const response = await fetch(cleanup, { method: 'DELETE' }).catch(() => undefined);

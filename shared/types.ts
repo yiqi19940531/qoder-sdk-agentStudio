@@ -64,7 +64,7 @@ export type MediaArtifact = {
 };
 
 export type AgentKind = 'main' | 'subagent';
-export type RemoteBrowserState = 'CREATED' | 'AI_RUNNING' | 'HUMAN_CONTROL' | 'VERIFYING' | 'COMPLETED' | 'FAILED' | 'UNVERIFIED' | 'EXPIRED' | 'CLOSED';
+export type RemoteBrowserState = 'CREATED' | 'AI_RUNNING' | 'HUMAN_CONTROL' | 'RECONNECTING' | 'VERIFYING' | 'COMPLETED' | 'FAILED' | 'UNVERIFIED' | 'EXPIRED' | 'CLOSED';
 export type RemoteBrowserSummary = {
   conversationId: string;
   sessionId: string;
@@ -77,6 +77,7 @@ export type RemoteBrowserSummary = {
   message?: string;
   profileStatus?: 'creating' | 'restored' | 'saved';
   loginVerified?: boolean;
+  priorLoginVerified?: boolean;
   verification?: { source?: 'current-page' | 'account-probe'; host: string; authCookiePair: boolean | null; loginFormVisible: boolean; loginPromptVisible: boolean; signedInControlVisible: boolean; accountAreaVisible: boolean };
 };
 export type RemoteBrowserView = {

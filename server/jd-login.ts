@@ -23,7 +23,7 @@ export function classifyJdEvidence(evidence: LoginEvidence): LoginVerdict {
   if (evidence.host === 'corporate.jd.com' || evidence.host === 'global.jd.com') return { status: 'unknown', message: '当前是京东集团或国际站，不是中国区商城登录结果。' };
   const loginPage = evidence.host === 'passport.jd.com';
   const noLoginPrompt = !evidence.loginFormVisible && !evidence.loginPromptVisible;
-  if (evidence.authCookiePair === true && noLoginPrompt && (evidence.host === 'home.jd.com' || evidence.signedInControlVisible || evidence.accountAreaVisible)) {
+  if (evidence.authCookiePair === true && noLoginPrompt && (evidence.host === 'home.jd.com' || evidence.host === 'www.jd.com' || evidence.signedInControlVisible || evidence.accountAreaVisible)) {
     return { status: 'confirmed', message: '已通过当前京东页面与登录凭据同时确认登录。' };
   }
   if (evidence.signedInControlVisible && noLoginPrompt && !loginPage) {
@@ -62,7 +62,7 @@ export async function inspectCurrentJdPage(page: Page): Promise<{ evidence: Logi
       [...document.querySelectorAll('#ttbar-login .nickname, .user-info .nickname, .user-name')].some(visible);
     return {
       loginFormVisible,
-      loginPromptVisible: /你好，请登录|请先登录/.test(text) || (loginFormVisible && /短信登录|密码登录/.test(text)),
+      loginPromptVisible: /你好，请登录|请先登录|登录并领取/.test(text) || (loginFormVisible && /短信登录|密码登录/.test(text)),
       signedInControlVisible,
       accountAreaVisible: /账户设置|个人中心|我的订单|我的京东/.test(text),
       successTextVisible: /登录成功|欢迎回来/.test(text),
@@ -76,7 +76,7 @@ export async function inspectCurrentJdPage(page: Page): Promise<{ evidence: Logi
     const names = new Set((await page.browserContext().cookies())
       .filter((cookie) => cookie.domain === 'jd.com' || cookie.domain.endsWith('.jd.com'))
       .map((cookie) => cookie.name));
-    authCookiePair = names.has('pt_key') && names.has('pt_pin');
+    authCookiePair = (names.has('pt_key') && names.has('pt_pin')) || (names.has('thor') && names.has('pin'));
   } catch { /* Unknown is different from logged out. */ }
   const evidence: LoginEvidence = {
     host: location.host, path: location.pathname, authCookiePair, ...dom,

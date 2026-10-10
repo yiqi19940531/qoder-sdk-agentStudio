@@ -4,7 +4,8 @@ import { rm } from 'node:fs/promises';
 import path from 'node:path';
 import type { Browser, Page } from 'puppeteer-core';
 import { BrowserService } from '../server/browser-service.js';
-import { classifyJdEvidence, inspectJdBrowserPages, verifyJdLogin, type LoginEvidence } from '../server/jd-login.js';
+import { classifyJdEvidence, inspectCurrentJdPage, inspectJdBrowserPages, verifyJdLogin, type LoginEvidence } from '../server/jd-login.js';
+import { BrowserlessJdProfileProvider } from '../server/jd-profile.js';
 import { loadJdTask } from '../server/jd-shop.js';
 
 class FakeCdp extends EventEmitter {
@@ -104,6 +105,7 @@ const evidence = (change: Partial<LoginEvidence>): LoginEvidence => ({
 assert.equal(classifyJdEvidence(evidence({})).status, 'not-confirmed');
 assert.equal(classifyJdEvidence(evidence({ host: 'home.jd.com', path: '/', authCookiePair: true, loginFormVisible: false, loginPromptVisible: false, accountAreaVisible: true })).status, 'confirmed');
 assert.equal(classifyJdEvidence(evidence({ host: 'www.jd.com', authCookiePair: true, loginFormVisible: false, loginPromptVisible: false, signedInControlVisible: true })).status, 'confirmed');
+assert.equal(classifyJdEvidence(evidence({ host: 'www.jd.com', authCookiePair: true, loginFormVisible: false, loginPromptVisible: false, signedInControlVisible: false })).status, 'confirmed');
 assert.equal(classifyJdEvidence(evidence({ host: 'home.jd.com', loginFormVisible: false, loginPromptVisible: false, accountAreaVisible: false })).status, 'unknown');
 assert.equal(classifyJdEvidence(evidence({ host: 'corporate.jd.com', authCookiePair: true, loginFormVisible: false, signedInControlVisible: true })).status, 'unknown', 'Corporate site is not China mall login proof');
 
@@ -123,6 +125,16 @@ const observedVerdict = await verifyJdLogin(signedInPage, 5_000);
 assert.equal(observedVerdict.status, 'confirmed');
 assert.equal(observedVerdict.source, 'current-page');
 assert.equal(accountNavigations, 0, 'Current signed-in page must be checked before navigation');
+
+const mainlandLoggedInPage = {
+  url: () => 'https://www.jd.com/',
+  evaluate: async () => ({ loginFormVisible: false, loginPromptVisible: false, signedInControlVisible: false,
+    accountAreaVisible: false, successTextVisible: false }),
+  browserContext: () => ({ cookies: async () => [
+    { name: 'thor', domain: '.jd.com' }, { name: 'pin', domain: '.jd.com' },
+  ] }),
+} as unknown as Page;
+assert.equal((await inspectCurrentJdPage(mainlandLoggedInPage)).verdict.status, 'confirmed', 'JD mainland thor/pin signature should confirm login on the mall homepage');
 
 const corporatePage = {
   url: () => 'https://corporate.jd.com/home',
@@ -337,6 +349,60 @@ assert.ok(challengeService.view(challengeId).liveUrl, 'Only a challenge should m
 await challengeService.close(challengeId);
 await rm(path.join(process.cwd(), 'data/jd-tasks', `${challengeId}.json`), { force: true });
 
+const signedChallengeCdp = new FakeCdp();
+const signedChallengePage = new FakePage(signedChallengeCdp);
+const signedChallengeBrowser = Object.assign(new EventEmitter(), { pages: async () => [signedChallengePage], close: async () => {} }) as unknown as Browser;
+let signedSearches = 0;
+const signedChallengeService = new BrowserService({
+  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE' }, connect: async () => signedChallengeBrowser,
+  profileProvider: {
+    load: async () => ({ name: 'qoder-jd-eeeeeeee-eeee-4eee-eeee-eeeeeeeeeeee', savedAt: new Date().toISOString(), mode: 'login' }),
+    create: async () => { throw new Error('A verified profile must not create a fresh login session'); },
+    remember: async () => {},
+  },
+  verify: async () => ({ status: 'confirmed', message: '已登录。' }),
+  search: async () => ++signedSearches === 1
+    ? (signedChallengePage.currentUrl = 'https://cfe.m.jd.com/privatedomain/risk_handler/03101900/',
+      { status: 'needs-human', pageHost: 'cfe.m.jd.com', sortApplied: false, products: [] })
+    : (signedChallengePage.currentUrl = 'https://search.jd.com/Search?keyword=%E6%B4%97%E5%8F%91%E6%B0%B4',
+      { status: 'results', pageHost: 'search.jd.com', sortApplied: true, products: [
+        { sku: '30001', name: '验证后可见商品', url: 'https://item.jd.com/30001.html' },
+      ] }),
+});
+const signedChallengeId = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
+const signedChallenge = await signedChallengeService.searchProducts(signedChallengeId, '洗发水');
+assert.equal(signedChallenge.browser.state, 'HUMAN_CONTROL');
+assert.equal(signedChallenge.browser.loginVerified, true);
+assert.equal(new URL(signedChallengePage.url()).hostname, 'cfe.m.jd.com', 'Authenticated risk checks must not reopen the login page');
+assert.equal((await signedChallengeService.complete(signedChallengeId)).state, 'COMPLETED');
+assert.equal((await loadJdTask(signedChallengeId))?.products.length, 1, 'Human completion should resume the pending product task');
+await signedChallengeService.close(signedChallengeId);
+assert.equal(signedChallengeService.getState(signedChallengeId).loginVerified, false, 'Closed sessions cannot claim current login');
+assert.equal(signedChallengeService.getState(signedChallengeId).priorLoginVerified, true, 'A prior confirmed login remains distinguishable');
+await rm(path.join(process.cwd(), 'data/jd-tasks', `${signedChallengeId}.json`), { force: true });
+
+const reauthCdp = new FakeCdp();
+const reauthPage = new FakePage(reauthCdp);
+const reauthBrowser = Object.assign(new EventEmitter(), { pages: async () => [reauthPage], close: async () => {} }) as unknown as Browser;
+const reauthService = new BrowserService({
+  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE' }, connect: async () => reauthBrowser,
+  profileProvider: {
+    load: async () => ({ name: 'qoder-jd-eeeeeeee-eeee-4eee-eeee-eeeeeeeeeeee', savedAt: new Date().toISOString(), mode: 'login' }),
+    create: async () => { throw new Error('Saved profile must be reused'); }, remember: async () => {},
+  },
+  verify: async () => ({ status: 'confirmed', message: '曾在商城首页确认登录。' }),
+  search: async () => (reauthPage.currentUrl = 'https://passport.jd.com/new/login.aspx',
+    { status: 'needs-human', pageHost: 'passport.jd.com', sortApplied: false, products: [] }),
+});
+const reauthId = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
+const reauth = await reauthService.searchProducts(reauthId, '洗发水');
+assert.equal(reauth.browser.state, 'HUMAN_CONTROL');
+assert.equal(reauth.browser.loginVerified, false, 'A JD re-login page supersedes earlier account evidence');
+assert.equal(reauth.browser.priorLoginVerified, true);
+assert.match(reauth.task.note ?? '', /再次要求登录/);
+await reauthService.close(reauthId);
+await rm(path.join(process.cwd(), 'data/jd-tasks', `${reauthId}.json`), { force: true });
+
 const researchCdp = new FakeCdp();
 const researchPage = new FakePage(researchCdp);
 const researchBrowser = Object.assign(new EventEmitter(), { pages: async () => [researchPage], close: async () => {} }) as unknown as Browser;
@@ -358,5 +424,98 @@ assert.equal(reviewed.task.nextReviewIndex, 1);
 assert.equal((await loadJdTask(researchId))?.products[0].reviews[0].text, '真实页面中可见的好评');
 await researchService.close(researchId);
 await rm(path.join(process.cwd(), 'data/jd-tasks', `${researchId}.json`), { force: true });
+
+class ReturningPage extends FakePage {
+  async evaluate() {
+    const login = this.currentUrl.includes('passport.jd.com');
+    return { loginFormVisible: login, loginPromptVisible: login, signedInControlVisible: false,
+      accountAreaVisible: false, successTextVisible: false };
+  }
+  override browserContext() { return { cookies: async () => [] }; }
+}
+const returnCdp = new FakeCdp();
+const returnPage = new ReturningPage(returnCdp);
+const restoreCdp = new FakeCdp();
+const restorePage = new ReturningPage(restoreCdp);
+const makeBrowser = (target: FakePage) => Object.assign(new EventEmitter(), { pages: async () => [target], close: async () => {} }) as unknown as Browser;
+let returnConnections = 0;
+let returnSearches = 0;
+let savedMode = '';
+const returnService = new BrowserService({
+  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE' },
+  profileProvider: {
+    load: async () => null,
+    create: async () => ({ name: 'qoder-jd-cccccccc-cccc-4ccc-cccc-cccccccccccc', connect: 'wss://production-sfo.browserless.io/session/connect/test' }),
+    remember: async (_name, mode) => { savedMode = mode ?? ''; },
+  },
+  connect: async () => ++returnConnections === 1 ? makeBrowser(returnPage) : makeBrowser(restorePage),
+  verify: async () => ({ status: 'unknown', message: '账号状态未单独确认。' }),
+  search: async () => ++returnSearches === 1
+    ? { status: 'needs-human', pageHost: 'passport.jd.com', sortApplied: false, products: [] }
+    : { status: 'results', pageHost: 'search.jd.com', sortApplied: true, products: [
+      { sku: '20001', name: '验证后可见的洗发水', url: 'https://item.jd.com/20001.html' },
+    ] },
+});
+let finishReturn!: (outcome: string) => void;
+const returnOutcome = new Promise<string>((resolve) => { finishReturn = resolve; });
+returnService.onOutcome((_id, result) => finishReturn(result));
+const returnId = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+await returnService.searchProducts(returnId, '洗发水');
+assert.equal(returnService.getState(returnId).state, 'HUMAN_CONTROL');
+returnPage.currentUrl = 'https://search.jd.com/Search?keyword=%E6%B4%97%E5%8F%91%E6%B0%B4';
+assert.equal(await Promise.race([returnOutcome, new Promise<string>((_, reject) => setTimeout(() => reject(new Error('Return redirect did not auto-save')), 5_000))]), 'ready');
+assert.equal(returnService.getState(returnId).state, 'COMPLETED');
+assert.equal(returnService.getState(returnId).loginVerified, false);
+assert.equal(savedMode, 'mall');
+assert.equal((await loadJdTask(returnId))?.products.length, 1);
+await returnService.close(returnId);
+await rm(path.join(process.cwd(), 'data/jd-tasks', `${returnId}.json`), { force: true });
+
+const renewCdp = new FakeCdp();
+const renewPage = new FakePage(renewCdp);
+const renewBrowser = () => Object.assign(new EventEmitter(), {
+  pages: async () => [renewPage],
+  disconnect: async function (this: EventEmitter) { this.emit('disconnected'); },
+  close: async () => {},
+}) as unknown as Browser;
+let renewConnections = 0;
+const renewService = new BrowserService({
+  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE', BROWSERLESS_SESSION_TIMEOUT_MS: '30000' },
+  profileProvider: {
+    load: async () => null,
+    create: async () => ({ name: 'qoder-jd-dddddddd-dddd-4ddd-dddd-dddddddddddd', connect: 'wss://production-sfo.browserless.io/session/connect/renew' }),
+    remember: async () => {},
+  },
+  connect: async () => { renewConnections++; return renewBrowser(); },
+});
+const renewId = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+await renewService.open(renewId);
+await renewService.handoff(renewId);
+const originalRenewUrl = renewService.view(renewId).liveUrl;
+const renewalDeadline = Date.now() + 8_000;
+while (renewConnections < 2 && Date.now() < renewalDeadline) await new Promise((resolve) => setTimeout(resolve, 200));
+assert.equal(renewConnections, 2, 'Human control must reconnect before the short connection deadline');
+assert.equal(renewService.getState(renewId).state, 'HUMAN_CONTROL');
+assert.notEqual(renewService.view(renewId).liveUrl, originalRenewUrl, 'A renewed connection must mint a fresh Live URL');
+assert.equal(renewPage.url(), 'https://www.jd.com/', 'The same page remains after reconnection');
+await renewService.close(renewId);
+const originalFetch = globalThis.fetch;
+try {
+  globalThis.fetch = async () => new Response("You've reached the units usage limit allowed under our free plan", { status: 401 });
+  const quotaProvider = new BrowserlessJdProfileProvider({ BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE' });
+  await assert.rejects(quotaProvider.create(120_000), /免费套餐用量已达上限/);
+} finally { globalThis.fetch = originalFetch; }
+let attemptedFreshProfile = false;
+const quotaService = new BrowserService({
+  env: { BROWSERLESS_API_TOKEN: 'TEST_BROWSERLESS_TOKEN_VALUE' }, connect: async () => { throw new Error('Should not connect'); },
+  profileProvider: {
+    load: async () => ({ name: 'qoder-jd-eeeeeeee-eeee-4eee-eeee-eeeeeeeeeeee', savedAt: new Date().toISOString(), mode: 'login' }),
+    reopen: async () => { throw new Error('Browserless 免费套餐用量已达上限'); },
+    create: async () => { attemptedFreshProfile = true; throw new Error('Should not create'); },
+    remember: async () => {},
+  },
+});
+await assert.rejects(quotaService.open('ffffffff-ffff-4fff-8fff-ffffffffffff'), /免费套餐用量已达上限/);
+assert.equal(attemptedFreshProfile, false, 'Quota errors must not trigger a blank browser fallback');
 await assert.rejects(new BrowserService({ env: {} }).open('44444444-4444-4444-8444-444444444444'), /BROWSERLESS_API_TOKEN/);
-console.log('BrowserService: hidden product search, challenge handoff, review checkpoints, profile restore, login monitoring and secret-free events passed');
+console.log('BrowserService: hidden search, challenge handoff, persistent browser renewal, profile restore, review checkpoints and secret-free events passed');
